@@ -31,12 +31,8 @@ class Tile {
     return this;
   }
 
-  display() {
-    return this.visible ? this.value : Tile.HIDDEN;
-  }
-
-  finalDisplay() {
-    return this.value;
+  display(done = false) {
+    return this.visible || done ? this.value : Tile.HIDDEN;
   }
 }
 
@@ -168,14 +164,9 @@ class Cactpot {
 
   private readonly board = Cactpot.randomBoard();
 
-  display(): ThreeByThree<ReturnType<Tile["display"]>> {
+  display(done = false): ThreeByThree<ReturnType<Tile["display"]>> {
     // @ts-ignore
-    return this.board.map((row) => row.map((tile) => tile.display()));
-  }
-
-  finalDisplay(): ThreeByThree<number> {
-    // @ts-ignore
-    return this.board.map((row) => row.map((tile) => tile.finalDisplay()));
+    return this.board.map((row) => row.map((tile) => tile.display(done)));
   }
 }
 
@@ -203,7 +194,7 @@ class CactpotGame {
     const turn = this.playSequence.next();
     // @ts-ignore
     turn.value?.(arg);
-    return turn.done ? this.cactpot.finalDisplay() : this.cactpot.display();
+    return this.cactpot.display(turn.done); // .done is on the generator result, so this is actually checking whether the playsequence is done
   }
 }
 
