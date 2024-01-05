@@ -171,36 +171,55 @@ class Cactpot {
 }
 
 class CactpotGame {
-  private static *playSequence(cactpot: Cactpot) {
-    yield (tile: TilePosition) => cactpot.getTile(tile).reveal();
-    yield (tile: TilePosition) => cactpot.getTile(tile).reveal();
-    yield (tile: TilePosition) => cactpot.getTile(tile).reveal();
-    return (row: BoardRow) =>
-      cactpot.getRow(row).forEach((tile) => tile.reveal());
-  }
-
   firstReveal?: TilePosition;
   secondReveal?: TilePosition;
   thirdReveal?: TilePosition;
   rowChoice?: BoardRow;
 
-  private playSequence: ReturnType<typeof CactpotGame.playSequence>;
+  private playSequence: ReturnType<CactpotGame["getPlaySequence"]>;
+
+  private firstTurn(pos: TilePosition) {
+    this.firstReveal = pos;
+    this.cactpot.getTile(pos).reveal();
+  }
+
+  private secondTurn(pos: TilePosition) {
+    this.secondReveal = pos;
+    this.cactpot.getTile(pos).reveal();
+  }
+
+  private thirdTurn(pos: TilePosition) {
+    this.thirdReveal = pos;
+    this.cactpot.getTile(pos).reveal();
+  }
+
+  private finalTurn(row: BoardRow) {
+    this.rowChoice = row;
+    this.cactpot.getRow(row).forEach((tile) => tile.reveal());
+  }
 
   constructor(private cactpot: Cactpot) {
-    this.playSequence = CactpotGame.playSequence(cactpot);
+    this.playSequence = this.getPlaySequence();
+  }
+
+  private *getPlaySequence() {
+    yield this.firstTurn;
+    yield this.secondTurn;
+    yield this.thirdTurn;
+    return this.finalTurn;
   }
 
   takeTurn(arg: TilePosition | BoardRow) {
     const turn = this.playSequence.next();
     // @ts-ignore
-    turn.value?.(arg);
+    turn.value.call(this, arg);
     return this.cactpot.display(turn.done); // .done is on the generator result, so this is actually checking whether the playsequence is done
   }
 }
 
-// const game = new CactpotGame(new Cactpot());
-// console.log(game.takeTurn(0));
-// console.log(game.takeTurn(1));
-// console.log(game.takeTurn(2));
-// console.log(game.takeTurn(BoardRow.ANTIDIAGONAL));
-// console.log("done");
+const game = new CactpotGame(new Cactpot());
+console.log(game.takeTurn(0));
+console.log(game.takeTurn(1));
+console.log(game.takeTurn(2));
+console.log(game.takeTurn(BoardRow.ANTIDIAGONAL));
+console.log("done");
