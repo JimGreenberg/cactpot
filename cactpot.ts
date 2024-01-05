@@ -10,7 +10,7 @@ const enum TilePosition {
   BOTTOM_RIGHT,
 }
 
-const enum BoardRow {
+enum BoardRow {
   TOP_ROW = "TOP_ROW",
   MIDDLE_ROW = "MIDDLE_ROW",
   BOTTOM_ROW = "BOTTOM_ROW",
@@ -24,7 +24,7 @@ const enum BoardRow {
 class Tile {
   static readonly HIDDEN: unique symbol = Symbol("hidden");
 
-  constructor(private value: number, private visible: boolean = false) {}
+  constructor(public value: number, public visible: boolean = false) {}
 
   reveal(): Tile {
     this.visible = true;
@@ -141,7 +141,7 @@ class Cactpot {
     return this.board[row][col];
   }
 
-  getRow(row: BoardRow) {
+  getRow(row: BoardRow): Tile[] {
     switch (row) {
       case BoardRow.TOP_ROW:
         return this.getTopRow();
@@ -162,6 +162,20 @@ class Cactpot {
     }
   }
 
+  getScore(row: BoardRow): number {
+    return Cactpot.scores[
+      this.getRow(row)
+        .map(({ value }) => value)
+        .reduce((a, c) => a + c, 0)
+    ];
+  }
+
+  getBestScore(): number {
+    return Math.max(
+      ...Object.values(BoardRow).map((row) => this.getScore(row))
+    );
+  }
+
   private readonly board = Cactpot.randomBoard();
 
   display(done = false): ThreeByThree<ReturnType<Tile["display"]>> {
@@ -178,17 +192,26 @@ class CactpotGame {
 
   private playSequence: ReturnType<CactpotGame["getPlaySequence"]>;
 
+  private checkPos(pos: TilePosition) {
+    if ([this.firstReveal, this.secondReveal, this.thirdReveal].includes(pos)) {
+      throw new Error("You already revealed that tile");
+    }
+  }
+
   private firstTurn(pos: TilePosition) {
+    this.checkPos(pos);
     this.firstReveal = pos;
     this.cactpot.getTile(pos).reveal();
   }
 
   private secondTurn(pos: TilePosition) {
+    this.checkPos(pos);
     this.secondReveal = pos;
     this.cactpot.getTile(pos).reveal();
   }
 
   private thirdTurn(pos: TilePosition) {
+    this.checkPos(pos);
     this.thirdReveal = pos;
     this.cactpot.getTile(pos).reveal();
   }
@@ -198,15 +221,15 @@ class CactpotGame {
     this.cactpot.getRow(row).forEach((tile) => tile.reveal());
   }
 
-  constructor(private cactpot: Cactpot) {
-    this.playSequence = this.getPlaySequence();
-  }
-
   private *getPlaySequence() {
     yield this.firstTurn;
     yield this.secondTurn;
     yield this.thirdTurn;
     return this.finalTurn;
+  }
+
+  constructor(private cactpot: Cactpot) {
+    this.playSequence = this.getPlaySequence();
   }
 
   takeTurn(arg: TilePosition | BoardRow) {
@@ -215,6 +238,16 @@ class CactpotGame {
     turn.value.call(this, arg);
     return this.cactpot.display(turn.done); // .done is on the generator result, so this is actually checking whether the playsequence is done
   }
+
+  getScore() {
+    if (!this.rowChoice) throw new Error("You aren't done yet!");
+    return this.cactpot.getScore(this.rowChoice);
+  }
+
+  getBestScore() {
+    if (!this.rowChoice) throw new Error("You aren't done yet!");
+    return this.cactpot.getBestScore();
+  }
 }
 
 const game = new CactpotGame(new Cactpot());
@@ -222,4 +255,6 @@ console.log(game.takeTurn(0));
 console.log(game.takeTurn(1));
 console.log(game.takeTurn(2));
 console.log(game.takeTurn(BoardRow.ANTIDIAGONAL));
+console.log(game.getScore());
+console.log(game.getBestScore());
 console.log("done");
