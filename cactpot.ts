@@ -11,10 +11,10 @@ export class Cactpot {
   }
 
   private cactpot: Board;
-  private playSequence: ReturnType<(typeof Cactpot)["getPlaySequence"]>;
+  private playSequence = Cactpot.getPlaySequence(this);
 
   constructor(
-    seedString: string = Board.randomSeedString(),
+    seedString?: string,
     public firstReveal?: TilePosition,
     public secondReveal?: TilePosition,
     public thirdReveal?: TilePosition,
@@ -27,7 +27,6 @@ export class Cactpot {
       lineChoice,
     ].filter(Boolean as unknown as (arg) => arg is TilePosition | BoardLine);
     this.cactpot = new Board(seedString, ...itemsToReveal);
-    this.playSequence = Cactpot.getPlaySequence(this);
   }
 
   private checkPos(pos: TilePosition) {
