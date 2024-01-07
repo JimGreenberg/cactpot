@@ -1,0 +1,9 @@
+{
+  "name": "cactpot",
+  "version": "1.0.0",
+  "description": "a cactpot slack app for the boys",
+  "main": "index.js",
+  "scripts": {},
+  "author": "jim",
+  "license": "ISC"
+}
