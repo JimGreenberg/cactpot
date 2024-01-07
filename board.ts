@@ -162,6 +162,10 @@ export class Board {
     }
   }
 
+  revealAll(): void {
+    this.tiles.flat().forEach((tile) => tile.reveal());
+  }
+
   getScore(line: BoardLine): number {
     return Board.scores[
       this.getLine(line)
@@ -174,6 +178,12 @@ export class Board {
     return Math.max(
       ...Object.values(BoardLine).map((line) => this.getScore(line))
     );
+  }
+
+  getRevealedCount(): number {
+    return this.tiles
+      .flat()
+      .reduce((acc, curr) => acc + Number(curr.visible), 0);
   }
 
   display(done = false): ThreeByThree<ReturnType<Tile["display"]>> {

@@ -2,18 +2,26 @@ import { Board, Tile } from "./board";
 import { Cactpot } from "./cactpot";
 import { TilePosition, BoardLine } from "./constants";
 
-function logDisplay(display: ReturnType<Board["display"]>) {
-  display.forEach((row) =>
+function logBoard(board: ReturnType<Board["display"]>) {
+  board.forEach((row) =>
     console.log(row.map((value) => (value === Tile.HIDDEN ? 0 : value)))
   );
   console.log("\n");
 }
 
 const game = new Cactpot();
-logDisplay(game.takeTurn(TilePosition.TOP_LEFT));
-logDisplay(game.takeTurn(TilePosition.BOTTOM_LEFT));
-logDisplay(game.takeTurn(TilePosition.TOP_RIGHT));
-logDisplay(game.takeTurn(BoardLine.ANTIDIAGONAL));
-console.log(game.getScore());
-console.log(game.getBestScore());
+logBoard(game.getSummary().board);
+
+const moves = [
+  TilePosition.TOP_LEFT,
+  TilePosition.BOTTOM_LEFT,
+  TilePosition.TOP_RIGHT,
+  BoardLine.ANTIDIAGONAL,
+];
+for (const move of moves) {
+  const { board, score, bestScore } = game.takeTurn(move);
+  logBoard(board);
+  score && console.log(score);
+  bestScore && console.log(bestScore);
+}
 console.log("done");

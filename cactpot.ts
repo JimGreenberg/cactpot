@@ -1,77 +1,73 @@
-import { Board } from "./board";
-import { TilePosition, BoardLine } from "./constants";
+import { Board, ThreeByThree } from "./board";
+import {
+  TilePosition,
+  BoardLine,
+  Turn,
+  isTilePosition,
+  isBoardLine,
+} from "./constants";
 import * as Errors from "./error";
 
+interface Summary {
+  board: ReturnType<Board["display"]>;
+  score: number;
+  bestScore: number;
+  turn: Turn;
+}
+
 export class Cactpot {
-  private static *getPlaySequence(game: Cactpot) {
-    if (!game.firstReveal) yield game.firstTurn;
-    if (!game.secondReveal) yield game.secondTurn;
-    if (!game.thirdReveal) yield game.thirdTurn;
-    return !game.lineChoice ? game.finalTurn : game.getScore; // getScore here is a failover
-  }
+  private lineChoice: BoardLine;
+  constructor(private board: Board = new Board()) {}
 
-  private cactpot: Board;
-  private playSequence = Cactpot.getPlaySequence(this);
-
-  constructor(
-    seedString?: string,
-    public firstReveal?: TilePosition,
-    public secondReveal?: TilePosition,
-    public thirdReveal?: TilePosition,
-    public lineChoice?: BoardLine
-  ) {
-    const itemsToReveal = [
-      firstReveal,
-      secondReveal,
-      thirdReveal,
-      lineChoice,
-    ].filter(Boolean as unknown as (arg) => arg is TilePosition | BoardLine);
-    this.cactpot = new Board(seedString, ...itemsToReveal);
-  }
-
-  private checkPos(pos: TilePosition) {
-    if ([this.firstReveal, this.secondReveal, this.thirdReveal].includes(pos)) {
-      throw new Errors.InvalidMove();
+  private getCurrentTurn(): Turn {
+    const revealed = this.board.getRevealedCount();
+    switch (revealed) {
+      case 1:
+        return Turn.INIT;
+      case 2:
+        return Turn.FIRST;
+      case 3:
+        return Turn.SECOND;
+      case 4:
+        return Turn.THIRD;
+      case 9:
+        return Turn.FINAL;
+      default:
+        throw new Errors.InvalidBoardState();
     }
   }
 
-  private firstTurn(pos: TilePosition) {
-    this.checkPos(pos);
-    this.firstReveal = pos;
-    this.cactpot.getTile(pos).reveal();
+  private revealTile(pos: TilePosition) {
+    const tile = this.board.getTile(pos);
+    if (tile.visible) throw new Errors.InvalidMove();
+    tile.reveal();
   }
 
-  private secondTurn(pos: TilePosition) {
-    this.checkPos(pos);
-    this.secondReveal = pos;
-    this.cactpot.getTile(pos).reveal();
+  getSummary(): Summary {
+    const turn = this.getCurrentTurn();
+    const isDone = turn === Turn.FINAL;
+    return {
+      board: this.board.display(isDone),
+      score: isDone ? this.board.getScore(this.lineChoice) : 0,
+      bestScore: isDone ? this.board.getBestScore() : 0,
+      turn,
+    };
   }
 
-  private thirdTurn(pos: TilePosition) {
-    this.checkPos(pos);
-    this.thirdReveal = pos;
-    this.cactpot.getTile(pos).reveal();
-  }
-
-  private finalTurn(line: BoardLine) {
-    this.lineChoice = line;
-    this.cactpot.getLine(line).forEach((tile) => tile.reveal());
-  }
-
-  takeTurn(arg: TilePosition | BoardLine) {
-    const { value: turnFn, done } = this.playSequence.next();
-    // @ts-ignore
-    turnFn.call(this, arg);
-    return this.cactpot.display(done);
-  }
-
-  getScore() {
-    if (!this.lineChoice) throw new Errors.NotDone();
-    return this.cactpot.getScore(this.lineChoice);
-  }
-
-  getBestScore() {
-    if (!this.lineChoice) throw new Errors.NotDone();
-    return this.cactpot.getBestScore();
+  takeTurn(arg: TilePosition | BoardLine): Summary {
+    const turn = this.getCurrentTurn();
+    switch (turn) {
+      case Turn.INIT:
+      case Turn.FIRST:
+      case Turn.SECOND:
+        if (!isTilePosition(arg)) throw new Errors.InvalidInput();
+        this.revealTile(arg);
+        break;
+      case Turn.THIRD:
+        if (!isBoardLine(arg)) throw new Errors.InvalidInput();
+        this.lineChoice = arg;
+        break;
+    }
+    return this.getSummary();
   }
 }
