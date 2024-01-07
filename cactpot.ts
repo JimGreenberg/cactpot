@@ -1,5 +1,6 @@
 import { Board } from "./board";
 import { TilePosition, BoardLine } from "./constants";
+import * as Errors from "./error";
 
 export class Cactpot {
   private static *getPlaySequence(game: Cactpot) {
@@ -31,7 +32,7 @@ export class Cactpot {
 
   private checkPos(pos: TilePosition) {
     if ([this.firstReveal, this.secondReveal, this.thirdReveal].includes(pos)) {
-      throw new Error("You already revealed that tile");
+      throw new Errors.InvalidMove();
     }
   }
 
@@ -66,12 +67,12 @@ export class Cactpot {
   }
 
   getScore() {
-    if (!this.lineChoice) throw new Error("You aren't done yet!");
+    if (!this.lineChoice) throw new Errors.NotDone();
     return this.cactpot.getScore(this.lineChoice);
   }
 
   getBestScore() {
-    if (!this.lineChoice) throw new Error("You aren't done yet!");
+    if (!this.lineChoice) throw new Errors.NotDone();
     return this.cactpot.getBestScore();
   }
 }
