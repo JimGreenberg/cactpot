@@ -1,34 +1,11 @@
-enum TilePosition {
-  TOP_LEFT,
-  TOP_MIDDLE,
-  TOP_RIGHT,
-  MIDDLE_LEFT,
-  CENTER,
-  MIDDLE_RIGHT,
-  BOTTOM_LEFT,
-  BOTTOM_MIDDLE,
-  BOTTOM_RIGHT,
-}
-function isTilePosition(arg: keyof any): arg is TilePosition {
-  return arg in TilePosition;
-}
+import {
+  TilePosition,
+  isTilePosition,
+  BoardLine,
+  isBoardLine,
+} from "./constants";
 
-enum BoardLine {
-  TOP_ROW = "TOP_ROW",
-  MIDDLE_ROW = "MIDDLE_ROW",
-  BOTTOM_ROW = "BOTTOM_ROW",
-  LEFT_COL = "LEFT_COL",
-  MIDDLE_COL = "MIDDLE_COL",
-  RIGHT_COL = "RIGHT_COL",
-  DIAGONAL = "DIAGONAL",
-  ANTIDIAGONAL = "ANTIDIAGONAL",
-}
-
-function isBoardLine(arg: keyof any): arg is BoardLine {
-  return arg in BoardLine;
-}
-
-class Tile {
+export class Tile {
   static readonly HIDDEN: unique symbol = Symbol("hidden");
 
   constructor(public value: number, public visible: boolean = false) {}
@@ -43,10 +20,10 @@ class Tile {
   }
 }
 
-type ThreeByThree<T> = [[T, T, T], [T, T, T], [T, T, T]];
-type Board = ThreeByThree<Tile>;
+export type ThreeByThree<T> = [[T, T, T], [T, T, T], [T, T, T]];
+export type Board = ThreeByThree<Tile>;
 
-class Cactpot {
+export class Cactpot {
   private static boardFromSeedString(seedString: string): Board {
     const tiles = seedString
       .split("")
@@ -205,111 +182,3 @@ class Cactpot {
     return this.board.map((row) => row.map((tile) => tile.display(done)));
   }
 }
-
-const enum Turn {
-  INIT,
-  FIRST,
-  SECOND,
-  THIRD,
-  FINAL,
-}
-
-const copy = {
-  [Turn.INIT]: "Select three slots to uncover",
-  [Turn.FIRST]: "Select two slots to uncover",
-  [Turn.SECOND]: "Select one slot to uncover",
-  [Turn.THIRD]: "Select a line to add up",
-  [Turn.FINAL]: "Score",
-};
-
-class CactpotGame {
-  private static *getPlaySequence(game: CactpotGame) {
-    if (!game.firstReveal) yield game.firstTurn;
-    if (!game.secondReveal) yield game.secondTurn;
-    if (!game.thirdReveal) yield game.thirdTurn;
-    return !game.lineChoice ? game.finalTurn : game.getScore; // getScore here is a failover
-  }
-
-  private cactpot: Cactpot;
-  private playSequence: ReturnType<(typeof CactpotGame)["getPlaySequence"]>;
-
-  constructor(
-    seedString: string = Cactpot.randomSeedString(),
-    public firstReveal?: TilePosition,
-    public secondReveal?: TilePosition,
-    public thirdReveal?: TilePosition,
-    public lineChoice?: BoardLine
-  ) {
-    const itemsToReveal = [
-      firstReveal,
-      secondReveal,
-      thirdReveal,
-      lineChoice,
-    ].filter(Boolean as unknown as (arg) => arg is TilePosition | BoardLine);
-    this.cactpot = new Cactpot(seedString, ...itemsToReveal);
-    this.playSequence = CactpotGame.getPlaySequence(this);
-  }
-
-  private checkPos(pos: TilePosition) {
-    if ([this.firstReveal, this.secondReveal, this.thirdReveal].includes(pos)) {
-      throw new Error("You already revealed that tile");
-    }
-  }
-
-  private firstTurn(pos: TilePosition) {
-    this.checkPos(pos);
-    this.firstReveal = pos;
-    this.cactpot.getTile(pos).reveal();
-  }
-
-  private secondTurn(pos: TilePosition) {
-    this.checkPos(pos);
-    this.secondReveal = pos;
-    this.cactpot.getTile(pos).reveal();
-  }
-
-  private thirdTurn(pos: TilePosition) {
-    this.checkPos(pos);
-    this.thirdReveal = pos;
-    this.cactpot.getTile(pos).reveal();
-  }
-
-  private finalTurn(line: BoardLine) {
-    this.lineChoice = line;
-    this.cactpot.getLine(line).forEach((tile) => tile.reveal());
-  }
-
-  takeTurn(arg: TilePosition | BoardLine) {
-    const { value: turnFn, done } = this.playSequence.next();
-    // @ts-ignore
-    turnFn.call(this, arg);
-    return this.cactpot.display(done);
-  }
-
-  getScore() {
-    if (!this.lineChoice) throw new Error("You aren't done yet!");
-    return this.cactpot.getScore(this.lineChoice);
-  }
-
-  getBestScore() {
-    if (!this.lineChoice) throw new Error("You aren't done yet!");
-    return this.cactpot.getBestScore();
-  }
-}
-
-function logDisplay(display: ReturnType<Cactpot["display"]>) {
-  display.forEach((row) =>
-    console.log(row.map((value) => (value === Tile.HIDDEN ? 0 : value)))
-  );
-  console.log("\n");
-}
-
-// const game = new CactpotGame(Cactpot.randomSeedString(), 1, 2, 3);
-const game = new CactpotGame();
-logDisplay(game.takeTurn(TilePosition.TOP_LEFT));
-logDisplay(game.takeTurn(TilePosition.BOTTOM_LEFT));
-logDisplay(game.takeTurn(TilePosition.TOP_RIGHT));
-logDisplay(game.takeTurn(BoardLine.ANTIDIAGONAL));
-console.log(game.getScore());
-console.log(game.getBestScore());
-console.log("done");
