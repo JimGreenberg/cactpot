@@ -1,4 +1,4 @@
-const enum TilePosition {
+enum TilePosition {
   TOP_LEFT,
   TOP_MIDDLE,
   TOP_RIGHT,
@@ -8,6 +8,9 @@ const enum TilePosition {
   BOTTOM_LEFT,
   BOTTOM_MIDDLE,
   BOTTOM_RIGHT,
+}
+function isTilePosition(arg: keyof any): arg is TilePosition {
+  return arg in TilePosition;
 }
 
 enum BoardRow {
@@ -21,6 +24,10 @@ enum BoardRow {
   ANTIDIAGONAL = "ANTIDIAGONAL",
 }
 
+function isBoardRow(arg: keyof any): arg is BoardRow {
+  return arg in BoardRow;
+}
+
 class Tile {
   static readonly HIDDEN: unique symbol = Symbol("hidden");
 
@@ -32,7 +39,7 @@ class Tile {
   }
 
   display(done = false) {
-    return this.visible || done ? this.value : Tile.HIDDEN;
+    return this.visible || done ? this.value : 0;
   }
 }
 
@@ -40,7 +47,18 @@ type ThreeByThree<T> = [[T, T, T], [T, T, T], [T, T, T]];
 type Board = ThreeByThree<Tile>;
 
 class Cactpot {
-  private static randomSeedString(): string {
+  private static boardFromSeedString(seedString: string): Board {
+    const tiles = seedString
+      .split("")
+      .map((value) => new Tile(parseInt(value)));
+    return [
+      [tiles[0], tiles[1], tiles[2]],
+      [tiles[3], tiles[4].reveal(), tiles[5]],
+      [tiles[6], tiles[7], tiles[8]],
+    ];
+  }
+
+  static randomSeedString(): string {
     function shuffle<T>(array: T[]): T[] {
       let currentIndex = array.length,
         randomIndex;
@@ -62,17 +80,6 @@ class Cactpot {
     }
 
     return shuffle(Array.from({ length: 9 }, (_, i) => i + 1)).join("");
-  }
-
-  private static boardFromSeedString(seedString: string): Board {
-    const tiles = seedString
-      .split("")
-      .map((value) => new Tile(parseInt(value)));
-    return [
-      [tiles[0], tiles[1], tiles[2]],
-      [tiles[3], tiles[4].reveal(), tiles[5]],
-      [tiles[6], tiles[7], tiles[8]],
-    ];
   }
 
   static readonly scores: Record<number, number> = {
@@ -99,8 +106,15 @@ class Cactpot {
 
   private readonly board: Board;
 
-  constructor(seedString = Cactpot.randomSeedString()) {
+  constructor(
+    seedString = Cactpot.randomSeedString(),
+    ...itemsToReveal: (TilePosition | BoardRow)[]
+  ) {
     this.board = Cactpot.boardFromSeedString(seedString);
+    itemsToReveal.forEach((item) => {
+      if (isTilePosition(item)) this.getTile(item).reveal();
+      if (isBoardRow(item)) this.getRow(item).map((tile) => tile.reveal());
+    });
   }
 
   private getTopRow(): Tile[] {
@@ -193,25 +207,31 @@ class Cactpot {
 }
 
 class CactpotGame {
-  private playSequence: ReturnType<CactpotGame["getPlaySequence"]>;
+  private static *getPlaySequence(game: CactpotGame) {
+    if (!game.firstReveal) yield game.firstTurn;
+    if (!game.secondReveal) yield game.secondTurn;
+    if (!game.thirdReveal) yield game.thirdTurn;
+    return !game.rowChoice ? game.finalTurn : game.getScore; // getScore here is a failover
+  }
 
-  public firstReveal?: TilePosition;
-  public secondReveal?: TilePosition;
-  public thirdReveal?: TilePosition;
-  public rowChoice?: BoardRow;
+  private cactpot: Cactpot;
+  private playSequence: ReturnType<(typeof CactpotGame)["getPlaySequence"]>;
 
   constructor(
-    private cactpot: Cactpot,
-    firstReveal?: TilePosition,
-    secondReveal?: TilePosition,
-    thirdReveal?: TilePosition,
-    rowChoice?: BoardRow
+    seedString: string = Cactpot.randomSeedString(),
+    public firstReveal?: TilePosition,
+    public secondReveal?: TilePosition,
+    public thirdReveal?: TilePosition,
+    public rowChoice?: BoardRow
   ) {
-    this.playSequence = this.getPlaySequence();
-    if (firstReveal) this.firstTurn(firstReveal);
-    if (secondReveal) this.secondTurn(secondReveal);
-    if (thirdReveal) this.thirdTurn(thirdReveal);
-    if (rowChoice) this.finalTurn(rowChoice);
+    const itemsToReveal = [
+      firstReveal,
+      secondReveal,
+      thirdReveal,
+      rowChoice,
+    ].filter(Boolean as unknown as (arg) => arg is TilePosition | BoardRow);
+    this.cactpot = new Cactpot(seedString, ...itemsToReveal);
+    this.playSequence = CactpotGame.getPlaySequence(this);
   }
 
   private checkPos(pos: TilePosition) {
@@ -243,18 +263,11 @@ class CactpotGame {
     this.cactpot.getRow(row).forEach((tile) => tile.reveal());
   }
 
-  private *getPlaySequence() {
-    if (!this.firstReveal) yield this.firstTurn;
-    if (!this.secondReveal) yield this.secondTurn;
-    if (!this.thirdReveal) yield this.thirdTurn;
-    return !this.rowChoice ? this.finalTurn : this.getScore; // getScore here is a failover
-  }
-
   takeTurn(arg: TilePosition | BoardRow) {
-    const turn = this.playSequence.next();
+    const { value: turnFn, done } = this.playSequence.next();
     // @ts-ignore
-    turn.value.call(this, arg);
-    return this.cactpot.display(turn.done); // .done is on the generator result, so this is actually checking whether the playsequence is done
+    turnFn.call(this, arg);
+    return this.cactpot.display(done);
   }
 
   getScore() {
@@ -268,10 +281,11 @@ class CactpotGame {
   }
 }
 
-const game = new CactpotGame(new Cactpot());
-console.log(game.takeTurn(0));
+// const game = new CactpotGame(Cactpot.randomSeedString(), 1, 2, 3);
+const game = new CactpotGame();
 console.log(game.takeTurn(1));
 console.log(game.takeTurn(2));
+console.log(game.takeTurn(3));
 console.log(game.takeTurn(BoardRow.ANTIDIAGONAL));
 console.log(game.getScore());
 console.log(game.getBestScore());
