@@ -80,6 +80,51 @@ export class Board {
     24: 3600,
   };
 
+  static positionsFromBoardLine(line: BoardLine): TilePosition[] {
+    return {
+      [BoardLine.TOP_ROW]: [
+        TilePosition.TOP_LEFT,
+        TilePosition.TOP_MIDDLE,
+        TilePosition.TOP_RIGHT,
+      ],
+      [BoardLine.MIDDLE_ROW]: [
+        TilePosition.MIDDLE_LEFT,
+        TilePosition.CENTER,
+        TilePosition.MIDDLE_RIGHT,
+      ],
+      [BoardLine.BOTTOM_ROW]: [
+        TilePosition.BOTTOM_LEFT,
+        TilePosition.BOTTOM_MIDDLE,
+        TilePosition.BOTTOM_RIGHT,
+      ],
+      [BoardLine.LEFT_COL]: [
+        TilePosition.TOP_LEFT,
+        TilePosition.MIDDLE_LEFT,
+        TilePosition.BOTTOM_LEFT,
+      ],
+      [BoardLine.MIDDLE_COL]: [
+        TilePosition.TOP_MIDDLE,
+        TilePosition.CENTER,
+        TilePosition.BOTTOM_MIDDLE,
+      ],
+      [BoardLine.RIGHT_COL]: [
+        TilePosition.TOP_RIGHT,
+        TilePosition.MIDDLE_RIGHT,
+        TilePosition.BOTTOM_RIGHT,
+      ],
+      [BoardLine.DIAGONAL]: [
+        TilePosition.BOTTOM_LEFT,
+        TilePosition.CENTER,
+        TilePosition.TOP_RIGHT,
+      ],
+      [BoardLine.ANTIDIAGONAL]: [
+        TilePosition.TOP_LEFT,
+        TilePosition.CENTER,
+        TilePosition.BOTTOM_RIGHT,
+      ],
+    }[line];
+  }
+
   private readonly tiles: ThreeByThree<Tile>;
 
   constructor(
@@ -91,39 +136,6 @@ export class Board {
       if (isTilePosition(item)) this.getTile(item).reveal();
       if (isBoardLine(item)) this.getLine(item).map((tile) => tile.reveal());
     });
-  }
-
-  private getTopRow(): Tile[] {
-    return this.tiles[0];
-  }
-  private getMiddleRow(): Tile[] {
-    return this.tiles[1];
-  }
-  private getBottomRow(): Tile[] {
-    return this.tiles[2];
-  }
-  private getLeftCol(): Tile[] {
-    return this.tiles.map(([c]) => c);
-  }
-  private getMiddleCol(): Tile[] {
-    return this.tiles.map(([, c]) => c);
-  }
-  private getRightCol(): Tile[] {
-    return this.tiles.map(([, , c]) => c);
-  }
-  private getDiagonal(): Tile[] {
-    return [
-      TilePosition.BOTTOM_LEFT,
-      TilePosition.CENTER,
-      TilePosition.TOP_RIGHT,
-    ].map((pos) => this.getTile(pos));
-  }
-  private getAntidiagonal(): Tile[] {
-    return [
-      TilePosition.TOP_LEFT,
-      TilePosition.CENTER,
-      TilePosition.BOTTOM_RIGHT,
-    ].map((pos) => this.getTile(pos));
   }
 
   getTile(position: TilePosition): Tile {
@@ -142,24 +154,7 @@ export class Board {
   }
 
   getLine(line: BoardLine): Tile[] {
-    switch (line) {
-      case BoardLine.TOP_ROW:
-        return this.getTopRow();
-      case BoardLine.MIDDLE_ROW:
-        return this.getMiddleRow();
-      case BoardLine.BOTTOM_ROW:
-        return this.getBottomRow();
-      case BoardLine.LEFT_COL:
-        return this.getLeftCol();
-      case BoardLine.MIDDLE_COL:
-        return this.getMiddleCol();
-      case BoardLine.RIGHT_COL:
-        return this.getRightCol();
-      case BoardLine.DIAGONAL:
-        return this.getDiagonal();
-      case BoardLine.ANTIDIAGONAL:
-        return this.getAntidiagonal();
-    }
+    return Board.positionsFromBoardLine(line).map((pos) => this.getTile(pos));
   }
 
   getScore(line: BoardLine): number {

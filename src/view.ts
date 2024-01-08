@@ -2,7 +2,13 @@ import { Summary } from "./cactpot";
 import { Board, Tile } from "./board";
 import { Turn, TilePosition, BoardLine } from "./constants";
 
-export function cactpotView({ board, score, bestScore, turn }: Summary) {
+export function cactpotView({
+  board,
+  score,
+  bestScore,
+  turn,
+  lineChoice,
+}: Summary) {
   const blocks: any[] = [];
 
   blocks.push({
@@ -26,7 +32,7 @@ export function cactpotView({ board, score, bestScore, turn }: Summary) {
     });
   }
 
-  blocks.push(...getBoardBlocks(board));
+  blocks.push(...getBoardBlocks(board, lineChoice));
 
   if (score) {
     blocks.push({
@@ -66,35 +72,45 @@ export function getErrorMessage() {
   return "";
 }
 
-function renderTile(value: number | typeof Tile.HIDDEN): string {
+function renderTile(
+  value: number | typeof Tile.HIDDEN,
+  selectedTile = false
+): string {
+  if (value === Tile.HIDDEN) return " ";
+  if (!selectedTile) return String(value);
   switch (value) {
-    case Tile.HIDDEN:
-      return " ";
+    case 1:
+      return ":one:";
+    case 2:
+      return ":two:";
+    case 3:
+      return ":three:";
+    case 4:
+      return ":four:";
+    case 5:
+      return ":five:";
+    case 6:
+      return ":six:";
+    case 7:
+      return ":seven:";
+    case 8:
+      return ":eight:";
+    case 9:
+      return ":nine:";
     default:
-      return String(value);
-    // case 1:
-    //   return ":one:";
-    // case 2:
-    //   return ":two:";
-    // case 3:
-    //   return ":three:";
-    // case 4:
-    //   return ":four:";
-    // case 5:
-    //   return ":five:";
-    // case 6:
-    //   return ":six:";
-    // case 7:
-    //   return ":seven:";
-    // case 8:
-    //   return ":eight:";
-    // case 9:
-    //   return ":nine:";
+      throw new Error(); // unreachable
   }
-  throw new Error(); // unreachable
 }
 
-function button({ text, value }: { text: string; value: string }) {
+function button({
+  text,
+  value,
+  style,
+}: {
+  text: string;
+  value: string;
+  style?: "primary" | "danger";
+}) {
   return {
     type: "button",
     text: {
@@ -103,10 +119,11 @@ function button({ text, value }: { text: string; value: string }) {
       text,
     },
     value,
+    style,
   };
 }
 
-function getBoardBlocks(board: Summary["board"]) {
+function getBoardBlocks(board: Summary["board"], lineChoice?: BoardLine) {
   function getBlankActions(elements: any[] = []) {
     return { type: "actions", elements };
   }
@@ -123,7 +140,7 @@ function getBoardBlocks(board: Summary["board"]) {
     ),
   ];
 
-  let initialTilePosition = TilePosition.TOP_LEFT;
+  let tilePosition = TilePosition.TOP_LEFT;
   const rowLines = [
     BoardLine.TOP_ROW,
     BoardLine.MIDDLE_ROW,
@@ -133,12 +150,16 @@ function getBoardBlocks(board: Summary["board"]) {
     blocks.push(
       getBlankActions([
         button({ text: ":arrow_right:", value: rowLines[i] }),
-        ...row.map((tile) =>
-          button({
-            text: renderTile(tile),
-            value: String(initialTilePosition++),
-          })
-        ),
+        ...row.map((tile) => {
+          const value = tilePosition++;
+          const selectedTile =
+            lineChoice &&
+            Board.positionsFromBoardLine(lineChoice).includes(value);
+          return button({
+            text: renderTile(tile, selectedTile),
+            value: String(value),
+          });
+        }),
       ])
     );
   });

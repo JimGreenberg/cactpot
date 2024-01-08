@@ -48,7 +48,7 @@ export class Cactpot {
     const isDone = turn === Turn.FINAL;
     return {
       board: this.board.display(isDone),
-      score: isDone ? this.board.getScore(this.lineChoice) : 0,
+      score: this.lineChoice ? this.board.getScore(this.lineChoice) : 0,
       bestScore: isDone ? this.board.getBestScore() : 0,
       turn,
       lineChoice: this.lineChoice,
