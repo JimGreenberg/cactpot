@@ -2,7 +2,7 @@
   "name": "cactpot",
   "version": "1.0.0",
   "description": "a cactpot slack app for the boys",
-  "main": "app.js",
+  "main": "app.ts",
   "type": "module",
   "scripts": {
     "start": "node --experimental-modules app.js"
@@ -15,5 +15,8 @@
   },
   "engines": {
     "node": "11.x"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
   }
 }
