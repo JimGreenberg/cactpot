@@ -18,8 +18,37 @@ export interface Summary {
 }
 
 export class Cactpot {
-  private lineChoice: BoardLine;
-  constructor(private board: Board = new Board()) {}
+  static from({
+    seedString,
+    firstReveal,
+    secondReveal,
+    thirdReveal,
+    lineChoice,
+    gameId,
+    roundId,
+  }: {
+    seedString: string;
+    firstReveal: TilePosition;
+    secondReveal: TilePosition;
+    thirdReveal: TilePosition;
+    lineChoice: BoardLine;
+    gameId: string;
+    roundId: string;
+  }): Cactpot {
+    return new Cactpot(
+      new Board(seedString, firstReveal, secondReveal, thirdReveal, lineChoice),
+      gameId,
+      roundId,
+      lineChoice
+    );
+  }
+
+  constructor(
+    private board: Board = new Board(),
+    public readonly gameId: string = "default",
+    public readonly roundId: string = "default",
+    private lineChoice?: BoardLine
+  ) {}
 
   private getCurrentTurn(): Turn {
     if (this.lineChoice) return Turn.FINAL;

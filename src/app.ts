@@ -14,15 +14,15 @@ const main = (app: App) => {
     await ack();
 
     const game = new Cactpot();
-    const moves = [
-      TilePosition.TOP_LEFT,
-      TilePosition.BOTTOM_LEFT,
-      TilePosition.TOP_RIGHT,
-      BoardLine.ANTIDIAGONAL,
-    ];
-    for (const move of moves) {
-      const { board, score, bestScore } = game.takeTurn(move);
-    }
+    // const moves = [
+    //   TilePosition.TOP_LEFT,
+    //   TilePosition.BOTTOM_LEFT,
+    //   TilePosition.TOP_RIGHT,
+    //   BoardLine.ANTIDIAGONAL,
+    // ];
+    // for (const move of moves) {
+    //   const { board, score, bestScore } = game.takeTurn(move);
+    // }
 
     await respond({ blocks: cactpotView(game.getSummary()) });
   });
