@@ -14,7 +14,7 @@ const main = (app: App) => {
     // Acknowledge command request
     await ack();
 
-    const game = new Cactpot();
+    // const game = new Cactpot();
     // const moves = [
     //   TilePosition.TOP_LEFT,
     //   TilePosition.BOTTOM_LEFT,
@@ -25,7 +25,16 @@ const main = (app: App) => {
     //   const { board, score, bestScore } = game.takeTurn(move);
     // }
 
-    await respond({ blocks: cactpotView(game.getSummary()) });
+    // await createGame()
+    await respond({ blocks: startView("foo", 1) });
+  });
+
+  app.action("join", async ({ action, respond, ack }) => {
+    await ack();
+  });
+
+  app.action("start-early", async ({ action, respond, ack }) => {
+    await ack();
   });
 
   app.action(/button/, async ({ action, respond, ack }) => {

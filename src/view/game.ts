@@ -1,6 +1,6 @@
-import { Summary } from "./cactpot";
-import { Board, Tile } from "./board";
-import { Turn, TilePosition, BoardLine } from "./constants";
+import { Summary } from "../cactpot";
+import { Board, Tile } from "../board";
+import { Turn, TilePosition, BoardLine } from "../constants";
 
 export function cactpotView(summary: Summary) {
   const { score, bestScore, turn } = summary;
