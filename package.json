@@ -2,10 +2,11 @@
   "name": "cactpot",
   "version": "1.0.0",
   "description": "a cactpot slack app for the boys",
-  "main": "app.ts",
-  "type": "module",
+  "type": "commonjs",
+  "module": "./src/app.ts",
   "scripts": {
-    "start": "node --experimental-modules app.js"
+    "start": "node dist/app.js",
+    "st": "tsc-watch --onsuccess \"node dist/app.js\""
   },
   "author": "jim",
   "license": "ISC",
@@ -17,6 +18,8 @@
     "node": "11.x"
   },
   "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsc-watch": "^6.0.4",
     "typescript": "^5.3.3"
   }
 }

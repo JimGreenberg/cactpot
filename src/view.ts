@@ -12,6 +12,7 @@ export function cactpotView({ board, score, bestScore, turn }: Summary) {
       text: getHeaderCopy(turn),
     },
   });
+
   const errorMessage = getErrorMessage();
   if (errorMessage) {
     blocks.push({
@@ -25,7 +26,7 @@ export function cactpotView({ board, score, bestScore, turn }: Summary) {
     });
   }
 
-  blocks.push(...renderBoardBlocks(board));
+  // blocks.push(...renderBoardBlocks(board));
 
   if (score) {
     blocks.push({
@@ -41,16 +42,7 @@ export function cactpotView({ board, score, bestScore, turn }: Summary) {
     });
   }
 
-  blocks.push({
-    type: "context",
-    elements: [
-      {
-        type: "plain_text",
-        text: "Scores",
-      },
-      ...Object.entries(Board.scores).map(getScoreInfoBlock),
-    ],
-  });
+  blocks.push(...getScoreInfoBlocks());
 
   return { blocks };
 }
@@ -108,11 +100,11 @@ function button(text: string) {
       emoji: true,
       text,
     },
-    value: text, // TODO
+    value: "click_me_123",
   };
 }
 
-function renderBoardBlocks(board: Summary["board"]) {
+function getBoardBlocks(board: Summary["board"]) {
   const blocks = new Array(4).fill({ type: "actions", elements: [] });
   // first row is always the same
   blocks[0].elements = [
@@ -128,7 +120,36 @@ function renderBoardBlocks(board: Summary["board"]) {
       ...row.map(renderTile).map(button),
     ];
   });
-  return board;
+  return blocks;
+}
+
+function getScoreInfoBlocks() {
+  function getBlankContext(elements: any[] = []) {
+    return {
+      type: "context",
+      elements,
+    };
+  }
+
+  const blocks = [
+    getBlankContext([
+      {
+        type: "plain_text",
+        text: "Scores",
+      },
+    ]),
+    getBlankContext(),
+  ];
+  const scoreBlocks = Object.entries(Board.scores).map(getScoreInfoBlock);
+  while (scoreBlocks.length) {
+    const nextElements = blocks[blocks.length - 1].elements;
+    if (nextElements.length < 5) {
+      nextElements.push(scoreBlocks.shift());
+    } else {
+      blocks.push(getBlankContext([scoreBlocks.shift()]));
+    }
+  }
+  return blocks;
 }
 
 function getScoreInfoBlock([label, score]: [string, number]) {
@@ -137,6 +158,7 @@ function getScoreInfoBlock([label, score]: [string, number]) {
     text: `*${label}* | ${score.toLocaleString()}`,
   };
 }
+
 function getScoreBlock([label, score]: [string, number]) {
   return {
     type: "mrkdwn",
