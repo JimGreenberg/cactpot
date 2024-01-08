@@ -1,6 +1,6 @@
 import { Summary } from "./cactpot";
 import { Board, Tile } from "./board";
-import { Turn } from "./constants";
+import { Turn, TilePosition, BoardLine } from "./constants";
 
 export function cactpotView({ board, score, bestScore, turn }: Summary) {
   const blocks: any[] = [];
@@ -26,7 +26,7 @@ export function cactpotView({ board, score, bestScore, turn }: Summary) {
     });
   }
 
-  // blocks.push(...renderBoardBlocks(board));
+  blocks.push(...getBoardBlocks(board));
 
   if (score) {
     blocks.push({
@@ -42,7 +42,7 @@ export function cactpotView({ board, score, bestScore, turn }: Summary) {
     });
   }
 
-  blocks.push(...getScoreInfoBlocks());
+  blocks.push(...getScoreInfoBlocks(score));
 
   return { blocks };
 }
@@ -69,30 +69,32 @@ export function getErrorMessage() {
 function renderTile(value: number | typeof Tile.HIDDEN): string {
   switch (value) {
     case Tile.HIDDEN:
-      return ":black_circle_for_record:";
-    case 1:
-      return ":one:";
-    case 2:
-      return ":two:";
-    case 3:
-      return ":three:";
-    case 4:
-      return ":four:";
-    case 5:
-      return ":five:";
-    case 6:
-      return ":six:";
-    case 7:
-      return ":seven:";
-    case 8:
-      return ":eight:";
-    case 9:
-      return ":nine:";
+      return " ";
+    default:
+      return String(value);
+    // case 1:
+    //   return ":one:";
+    // case 2:
+    //   return ":two:";
+    // case 3:
+    //   return ":three:";
+    // case 4:
+    //   return ":four:";
+    // case 5:
+    //   return ":five:";
+    // case 6:
+    //   return ":six:";
+    // case 7:
+    //   return ":seven:";
+    // case 8:
+    //   return ":eight:";
+    // case 9:
+    //   return ":nine:";
   }
   throw new Error(); // unreachable
 }
 
-function button(text: string) {
+function button({ text, value }: { text: string; value: string }) {
   return {
     type: "button",
     text: {
@@ -100,30 +102,51 @@ function button(text: string) {
       emoji: true,
       text,
     },
-    value: "click_me_123",
+    value,
   };
 }
 
 function getBoardBlocks(board: Summary["board"]) {
-  const blocks = new Array(4).fill({ type: "actions", elements: [] });
+  function getBlankActions(elements: any[] = []) {
+    return { type: "actions", elements };
+  }
   // first row is always the same
-  blocks[0].elements = [
-    ":arrow_lower_right:",
-    ":arrow_down:",
-    ":arrow_down:",
-    ":arrow_down:",
-    ":arrow_lower_left:",
-  ].map(button);
+  const blocks = [
+    getBlankActions(
+      [
+        { text: ":arrow_lower_right:", value: BoardLine.ANTIDIAGONAL },
+        { text: ":arrow_down:", value: BoardLine.LEFT_COL },
+        { text: ":arrow_down:", value: BoardLine.MIDDLE_COL },
+        { text: ":arrow_down:", value: BoardLine.RIGHT_COL },
+        { text: ":arrow_lower_left:", value: BoardLine.DIAGONAL },
+      ].map(button)
+    ),
+  ];
+
+  let initialTilePosition = TilePosition.TOP_LEFT;
+  const rowLines = [
+    BoardLine.TOP_ROW,
+    BoardLine.MIDDLE_ROW,
+    BoardLine.BOTTOM_ROW,
+  ];
   board.forEach((row, i) => {
-    blocks[i + 1] = [
-      button(":arrow_right:"),
-      ...row.map(renderTile).map(button),
-    ];
+    blocks.push(
+      getBlankActions([
+        button({ text: ":arrow_right:", value: rowLines[i] }),
+        ...row.map((tile) =>
+          button({
+            text: renderTile(tile),
+            value: String(initialTilePosition++),
+          })
+        ),
+      ])
+    );
   });
+
   return blocks;
 }
 
-function getScoreInfoBlocks() {
+function getScoreInfoBlocks(score: number, rows = 4) {
   function getBlankContext(elements: any[] = []) {
     return {
       type: "context",
@@ -131,35 +154,44 @@ function getScoreInfoBlocks() {
     };
   }
 
-  const blocks = [
+  const blocks = new Array(rows).fill(0).map(() => getBlankContext());
+  const scoreBlocks = Object.entries(Board.scores).map(([sum, points]) =>
+    getScoreInfoBlock([sum, points], score === points)
+  );
+  while (scoreBlocks.length) {
+    for (let i = 0; i < rows; i++) {
+      const scoreBlock = scoreBlocks.shift();
+      scoreBlock && blocks[i].elements.push(scoreBlock);
+    }
+  }
+  return [
     getBlankContext([
       {
         type: "plain_text",
         text: "Scores",
       },
     ]),
-    getBlankContext(),
+    ...blocks,
   ];
-  const scoreBlocks = Object.entries(Board.scores).map(getScoreInfoBlock);
-  while (scoreBlocks.length) {
-    const nextElements = blocks[blocks.length - 1].elements;
-    if (nextElements.length < 5) {
-      nextElements.push(scoreBlocks.shift());
-    } else {
-      blocks.push(getBlankContext([scoreBlocks.shift()]));
-    }
-  }
-  return blocks;
 }
 
-function getScoreInfoBlock([label, score]: [string, number]) {
+function getScoreInfoBlock([label, score]: [string, number], selected = false) {
+  const totalLength = 8;
+  const scoreFmt = score.toLocaleString();
+  const spacerLength = totalLength - scoreFmt.length - label.length;
+  function wrap(str: string, bookend: string): string {
+    return `${bookend}${str}${bookend}`;
+  }
+
+  const text =
+    wrap(wrap(label, "`"), "*") +
+    wrap(" ".repeat(spacerLength) + score.toLocaleString(), "`");
   return {
     type: "mrkdwn",
-    text: `*${label}* | ${score.toLocaleString()}`,
+    // text: `*${label}* | ${score.toLocaleString()}`,
+    text,
   };
 }
-
-console.log(JSON.stringify(getScoreInfoBlocks()));
 
 function getScoreBlock([label, score]: [string, number]) {
   return {

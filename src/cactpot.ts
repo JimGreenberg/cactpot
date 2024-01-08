@@ -13,6 +13,7 @@ export interface Summary {
   score: number;
   bestScore: number;
   turn: Turn;
+  lineChoice?: BoardLine;
 }
 
 export class Cactpot {
@@ -20,6 +21,7 @@ export class Cactpot {
   constructor(private board: Board = new Board()) {}
 
   private getCurrentTurn(): Turn {
+    if (this.lineChoice) return Turn.FINAL;
     const revealed = this.board.getRevealedCount();
     switch (revealed) {
       case 1:
@@ -30,8 +32,6 @@ export class Cactpot {
         return Turn.SECOND;
       case 4:
         return Turn.THIRD;
-      case 9:
-        return Turn.FINAL;
       default:
         throw new Errors.InvalidBoardState();
     }
@@ -51,6 +51,7 @@ export class Cactpot {
       score: isDone ? this.board.getScore(this.lineChoice) : 0,
       bestScore: isDone ? this.board.getBestScore() : 0,
       turn,
+      lineChoice: this.lineChoice,
     };
   }
 

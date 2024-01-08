@@ -162,10 +162,6 @@ export class Board {
     }
   }
 
-  revealAll(): void {
-    this.tiles.flat().forEach((tile) => tile.reveal());
-  }
-
   getScore(line: BoardLine): number {
     return Board.scores[
       this.getLine(line)
