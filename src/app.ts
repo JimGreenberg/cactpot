@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { App, BlockElementAction, ButtonAction } from "@slack/bolt";
-import { cactpotView } from "./view";
+import { startView } from "./view/start";
+import { cactpotView } from "./view/game";
 import { Cactpot } from "./cactpot";
 import { Board } from "./board";
 import { TilePosition, BoardLine } from "./constants";
