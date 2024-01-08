@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { connect, model, Schema, Types } from "mongoose";
+import { Cactpot } from "../cactpot";
 import { Board } from "../board";
 import { BoardLine, TilePosition } from "../constants";
 import * as Errors from "../error";
@@ -24,11 +25,12 @@ connect(process.env.MONGO_URL);
 
 export async function createGame(userId: string) {
   try {
-    return new Game({
+    const game = await new Game({
       userId,
       seedString: Board.randomSeedString(),
       roundId: new Types.ObjectId(),
     }).save();
+    return Cactpot.fromMongo(game as any);
   } catch {
     throw new Errors.CreateGameError();
   }
@@ -36,19 +38,20 @@ export async function createGame(userId: string) {
 
 export async function joinGame({
   userId,
-  gameId,
+  roundId,
+  seedString,
 }: {
   userId: string;
-  gameId: Types.ObjectId;
+  roundId: string;
+  seedString: string;
 }) {
-  const original = await Game.findById(gameId);
-  if (!original) throw new Errors.ErrorJoiningGame();
   try {
-    return new Game({
+    const game = await new Game({
       userId,
-      seedString: original.seedString,
-      roundId: original.roundId,
+      seedString,
+      roundId,
     }).save();
+    return Cactpot.fromMongo(game as any);
   } catch {
     throw new Errors.CreateGameError();
   }
@@ -72,15 +75,17 @@ export async function takeTurn(
   if (thirdReveal) game.thirdReveal = thirdReveal;
   if (lineChoice) game.lineChoice = lineChoice;
   try {
-    return game.save();
+    await game.save();
+    return Cactpot.fromMongo(game as any);
   } catch {
     throw new Errors.UpdateGameError();
   }
 }
 
-export async function getRound(roundId: Types.ObjectId) {
+export async function getRound(roundId: string) {
   try {
-    return Game.find({ roundId });
+    const games = await Game.find({ roundId });
+    return games.map((game) => Cactpot.fromMongo(game as any));
   } catch {
     throw new Errors.NotFound();
   }

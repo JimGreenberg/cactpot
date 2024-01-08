@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { Board } from "./board";
 import {
   TilePosition,
@@ -18,13 +19,13 @@ export interface Summary {
 }
 
 export class Cactpot {
-  static from({
+  static fromMongo({
     seedString,
     firstReveal,
     secondReveal,
     thirdReveal,
     lineChoice,
-    gameId,
+    _id,
     roundId,
   }: {
     seedString: string;
@@ -32,13 +33,13 @@ export class Cactpot {
     secondReveal: TilePosition;
     thirdReveal: TilePosition;
     lineChoice: BoardLine;
-    gameId: string;
-    roundId: string;
+    _id: Types.ObjectId;
+    roundId: Types.ObjectId;
   }): Cactpot {
     return new Cactpot(
       new Board(seedString, firstReveal, secondReveal, thirdReveal, lineChoice),
-      gameId,
-      roundId,
+      String(_id), // gameId
+      String(roundId),
       lineChoice
     );
   }
@@ -49,6 +50,10 @@ export class Cactpot {
     public readonly roundId: string = "default",
     private lineChoice?: BoardLine
   ) {}
+
+  public get seedString(): string {
+    return this.board.seedString;
+  }
 
   private getCurrentTurn(): Turn {
     if (this.lineChoice) return Turn.FINAL;

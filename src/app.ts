@@ -1,36 +1,36 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { App, BlockElementAction, ButtonAction } from "@slack/bolt";
+import { App, BlockElementAction, Button, ButtonAction } from "@slack/bolt";
 import { startView } from "./view/start";
 import { cactpotView } from "./view/game";
 import { Cactpot } from "./cactpot";
 import { Board } from "./board";
 import { TilePosition, BoardLine } from "./constants";
+import * as DB from "./mongo/game";
 
 const BOT_TEST = "C03LZF604RG";
 
 const main = (app: App) => {
   app.command("/cactpot", async ({ command, ack, respond }) => {
-    // Acknowledge command request
     await ack();
-
-    // const game = new Cactpot();
-    // const moves = [
-    //   TilePosition.TOP_LEFT,
-    //   TilePosition.BOTTOM_LEFT,
-    //   TilePosition.TOP_RIGHT,
-    //   BoardLine.ANTIDIAGONAL,
-    // ];
-    // for (const move of moves) {
-    //   const { board, score, bestScore } = game.takeTurn(move);
-    // }
-
-    // await createGame()
-    await respond({ blocks: startView("foo", 1) });
+    const game = await DB.createGame(command.user_id);
+    await respond({ response_type: "in_channel", blocks: startView(game, 1) });
   });
 
-  app.action("join", async ({ action, respond, ack }) => {
+  app.action("join", async ({ body, action, respond, ack }) => {
     await ack();
+    const { roundId, seedString } = JSON.parse((action as ButtonAction).value);
+    const game = await DB.joinGame({
+      userId: body.user.id,
+      // userId: "Foo",
+      roundId,
+      seedString,
+    });
+    const games = await DB.getRound(roundId);
+    await respond({
+      blocks: startView(game, games.length),
+      replace_original: true,
+    });
   });
 
   app.action("start-early", async ({ action, respond, ack }) => {

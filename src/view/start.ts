@@ -1,4 +1,12 @@
-export function startView(roundId: string, currentPlayers: number) {
+import { Cactpot } from "../cactpot";
+
+export function startView(cactpot: Cactpot, currentPlayers: number) {
+  const value = JSON.stringify({
+    gameId: cactpot.gameId,
+    roundId: cactpot.roundId,
+    seedString: cactpot.seedString,
+  });
+
   return [
     {
       type: "header",
@@ -12,7 +20,7 @@ export function startView(roundId: string, currentPlayers: number) {
       elements: [
         {
           type: "button",
-          value: roundId,
+          value,
           action_id: "join",
           text: {
             type: "plain_text",
@@ -21,7 +29,7 @@ export function startView(roundId: string, currentPlayers: number) {
         },
         {
           type: "button",
-          value: roundId,
+          value,
           action_id: "start-early",
           style: "danger",
           text: {
