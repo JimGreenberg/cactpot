@@ -35,11 +35,3 @@ export const enum Turn {
   THIRD,
   FINAL,
 }
-
-export const copy = {
-  [Turn.INIT]: "Select three slots to uncover",
-  [Turn.FIRST]: "Select two slots to uncover",
-  [Turn.SECOND]: "Select one slot to uncover",
-  [Turn.THIRD]: "Select a line to add up",
-  [Turn.FINAL]: "Score",
-};

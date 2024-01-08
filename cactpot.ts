@@ -1,4 +1,4 @@
-import { Board, ThreeByThree } from "./board";
+import { Board } from "./board";
 import {
   TilePosition,
   BoardLine,
@@ -8,7 +8,7 @@ import {
 } from "./constants";
 import * as Errors from "./error";
 
-interface Summary {
+export interface Summary {
   board: ReturnType<Board["display"]>;
   score: number;
   bestScore: number;

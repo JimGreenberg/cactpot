@@ -2,8 +2,18 @@
   "name": "cactpot",
   "version": "1.0.0",
   "description": "a cactpot slack app for the boys",
-  "main": "index.js",
-  "scripts": {},
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-modules app.js"
+  },
   "author": "jim",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@slack/bolt": "^3.17.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": "11.x"
+  }
 }
