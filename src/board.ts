@@ -8,7 +8,7 @@ import {
 export class Tile {
   static readonly HIDDEN: unique symbol = Symbol("hidden");
 
-  constructor(public value: number, public visible: boolean = false) {}
+  constructor(public readonly value: number, public visible: boolean = false) {}
 
   reveal(): Tile {
     this.visible = true;
@@ -128,7 +128,7 @@ export class Board {
   private readonly tiles: ThreeByThree<Tile>;
 
   constructor(
-    seedString = Board.randomSeedString(),
+    public readonly seedString = Board.randomSeedString(),
     ...itemsToReveal: (TilePosition | BoardLine)[]
   ) {
     this.tiles = Board.tilesFromSeedString(seedString);

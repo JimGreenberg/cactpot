@@ -14,6 +14,7 @@ export interface Summary {
   bestScore: number;
   turn: Turn;
   lineChoice?: BoardLine;
+  seedString: string;
 }
 
 export class Cactpot {
@@ -52,6 +53,7 @@ export class Cactpot {
       bestScore: isDone ? this.board.getBestScore() : 0,
       turn,
       lineChoice: this.lineChoice,
+      seedString: this.board.seedString,
     };
   }
 

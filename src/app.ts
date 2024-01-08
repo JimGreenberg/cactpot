@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { App } from "@slack/bolt";
+import { App, BlockElementAction, ButtonAction } from "@slack/bolt";
 import { cactpotView } from "./view";
 import { Cactpot } from "./cactpot";
+import { Board } from "./board";
 import { TilePosition, BoardLine } from "./constants";
 
 const BOT_TEST = "C03LZF604RG";
@@ -23,7 +24,17 @@ const main = (app: App) => {
       const { board, score, bestScore } = game.takeTurn(move);
     }
 
-    await respond(cactpotView(game.getSummary()));
+    await respond({ blocks: cactpotView(game.getSummary()) });
+  });
+
+  app.action(/button/, async ({ action, respond, ack }) => {
+    await ack();
+    const { value, seedString } = JSON.parse((action as ButtonAction).value);
+    const game = new Cactpot(new Board(seedString, value));
+    await respond({
+      replace_original: true,
+      blocks: cactpotView(game.getSummary()),
+    });
   });
 };
 

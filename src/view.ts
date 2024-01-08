@@ -2,13 +2,8 @@ import { Summary } from "./cactpot";
 import { Board, Tile } from "./board";
 import { Turn, TilePosition, BoardLine } from "./constants";
 
-export function cactpotView({
-  board,
-  score,
-  bestScore,
-  turn,
-  lineChoice,
-}: Summary) {
+export function cactpotView(summary: Summary) {
+  const { score, bestScore, turn } = summary;
   const blocks: any[] = [];
 
   blocks.push({
@@ -32,7 +27,7 @@ export function cactpotView({
     });
   }
 
-  blocks.push(...getBoardBlocks(board, lineChoice));
+  blocks.push(...getBoardBlocks(summary));
 
   if (score) {
     blocks.push({
@@ -50,7 +45,7 @@ export function cactpotView({
 
   blocks.push(...getScoreInfoBlocks(score));
 
-  return { blocks };
+  return blocks;
 }
 
 export function getHeaderCopy(turn: Turn) {
@@ -102,40 +97,47 @@ function renderTile(
   }
 }
 
-function button({
-  text,
-  value,
-  style,
-}: {
-  text: string;
-  value: string;
-  style?: "primary" | "danger";
-}) {
+function button({ text, value }: { text: string; value: string }) {
   return {
     type: "button",
+    value,
+    action_id: `button-${value}`,
     text: {
       type: "plain_text",
       emoji: true,
       text,
     },
-    value,
-    style,
   };
 }
 
-function getBoardBlocks(board: Summary["board"], lineChoice?: BoardLine) {
+function getBoardBlocks({ board, lineChoice, seedString }: Summary) {
   function getBlankActions(elements: any[] = []) {
     return { type: "actions", elements };
+  }
+  function getJsonStringValue(value: string) {
+    return JSON.stringify({ value, seedString });
   }
   // first row is always the same
   const blocks = [
     getBlankActions(
       [
-        { text: ":arrow_lower_right:", value: BoardLine.ANTIDIAGONAL },
-        { text: ":arrow_down:", value: BoardLine.LEFT_COL },
-        { text: ":arrow_down:", value: BoardLine.MIDDLE_COL },
-        { text: ":arrow_down:", value: BoardLine.RIGHT_COL },
-        { text: ":arrow_lower_left:", value: BoardLine.DIAGONAL },
+        {
+          text: ":arrow_lower_right:",
+          value: getJsonStringValue(BoardLine.ANTIDIAGONAL),
+        },
+        { text: ":arrow_down:", value: getJsonStringValue(BoardLine.LEFT_COL) },
+        {
+          text: ":arrow_down:",
+          value: getJsonStringValue(BoardLine.MIDDLE_COL),
+        },
+        {
+          text: ":arrow_down:",
+          value: getJsonStringValue(BoardLine.RIGHT_COL),
+        },
+        {
+          text: ":arrow_lower_left:",
+          value: getJsonStringValue(BoardLine.DIAGONAL),
+        },
       ].map(button)
     ),
   ];
@@ -157,7 +159,7 @@ function getBoardBlocks(board: Summary["board"], lineChoice?: BoardLine) {
             Board.positionsFromBoardLine(lineChoice).includes(value);
           return button({
             text: renderTile(tile, selectedTile),
-            value: String(value),
+            value: getJsonStringValue(String(value)),
           });
         }),
       ])
