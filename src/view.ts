@@ -153,11 +153,16 @@ function getScoreInfoBlocks() {
 }
 
 function getScoreInfoBlock([label, score]: [string, number]) {
+  const totalLength = 9;
+  const scoreFmt = score.toLocaleString();
+  const spacerLength = totalLength - scoreFmt.length - label.length;
   return {
     type: "mrkdwn",
-    text: `*${label}* | ${score.toLocaleString()}`,
+    text: "`" + label + " ".repeat(spacerLength) + score.toLocaleString() + "`",
   };
 }
+
+console.log(JSON.stringify(getScoreInfoBlocks()));
 
 function getScoreBlock([label, score]: [string, number]) {
   return {
