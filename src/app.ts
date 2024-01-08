@@ -20,15 +20,30 @@ const main = (app: App) => {
   app.action("join", async ({ body, action, respond, ack }) => {
     await ack();
     const { roundId, seedString } = JSON.parse((action as ButtonAction).value);
-    const game = await DB.joinGame({
-      userId: body.user.id,
-      // userId: "Foo",
-      roundId,
-      seedString,
-    });
+    let game: Cactpot;
+    try {
+      game = await DB.joinGame({
+        userId: body.user.id,
+        // userId: "Foo",
+        roundId,
+        seedString,
+      });
+    } catch {
+      return await respond({
+        response_type: "ephemeral",
+        text: "You've already joined this Cactpot :dingus:",
+        replace_original: false,
+      });
+    }
+    if (!game)
+      return await respond({
+        response_type: "ephemeral",
+        text: "Error joining game :dingus:",
+        replace_original: false,
+      });
     const games = await DB.getRound(roundId);
     await respond({
-      blocks: startView(game, games.length),
+      blocks: startView(game, games?.length || 1),
       replace_original: true,
     });
   });
