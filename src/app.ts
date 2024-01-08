@@ -13,7 +13,22 @@ const BOT_TEST = "C03LZF604RG";
 const main = (app: App) => {
   app.command("/cactpot", async ({ command, ack, respond }) => {
     await ack();
-    const game = await DB.createGame(command.user_id);
+    let game: Cactpot;
+    try {
+      game = await DB.createGame(command.user_id);
+    } catch {
+      return await respond({
+        response_type: "ephemeral",
+        text: "Error creating game :dingus:",
+        replace_original: false,
+      });
+    }
+    if (!game)
+      return await respond({
+        response_type: "ephemeral",
+        text: "Error creating game :dingus:",
+        replace_original: false,
+      });
     await respond({ response_type: "in_channel", blocks: startView(game, 1) });
   });
 
