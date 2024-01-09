@@ -58,8 +58,10 @@ export class Board {
     return shuffle(Array.from({ length: 9 }, (_, i) => i + 1)).join("");
   }
 
+  static readonly cactpot = 10000;
+
   static readonly scores: Record<number, number> = {
-    6: 10000,
+    6: Board.cactpot,
     7: 36,
     8: 720,
     9: 360,

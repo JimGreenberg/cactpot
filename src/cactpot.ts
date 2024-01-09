@@ -93,24 +93,6 @@ export class Cactpot {
     return tile.reveal();
   }
 
-  getSummary(): Summary {
-    const turn = this.getCurrentTurn();
-    const isDone = turn === Turn.FINAL;
-    return {
-      board: this.board.display(isDone),
-      score: this.lineChoice ? this.board.getScore(this.lineChoice) : 0,
-      bestScore: isDone ? this.board.getBestScore() : 0,
-      turn,
-      seedString: this.board.seedString,
-      gameId: this.gameId,
-      roundId: this.roundId,
-      firstReveal: this.firstReveal,
-      secondReveal: this.secondReveal,
-      thirdReveal: this.thirdReveal,
-      lineChoice: this.lineChoice,
-    };
-  }
-
   takeTurn(arg: TilePosition | BoardLine): Summary {
     const turn = this.getCurrentTurn();
     switch (turn) {
@@ -137,5 +119,38 @@ export class Cactpot {
         throw new Errors.Done();
     }
     return this.getSummary();
+  }
+
+  getSummary(): Summary {
+    const turn = this.getCurrentTurn();
+    const isDone = turn === Turn.FINAL;
+    return {
+      board: this.board.display(isDone),
+      score: this.lineChoice ? this.board.getScore(this.lineChoice) : 0,
+      bestScore: isDone ? this.board.getBestScore() : 0,
+      turn,
+      seedString: this.board.seedString,
+      gameId: this.gameId,
+      roundId: this.roundId,
+      firstReveal: this.firstReveal,
+      secondReveal: this.secondReveal,
+      thirdReveal: this.thirdReveal,
+      lineChoice: this.lineChoice,
+    };
+  }
+
+  leaderboardInfo():
+    | {
+        cactpotPossible: boolean;
+        score: number;
+      }
+    | undefined {
+    const turn = this.getCurrentTurn();
+    const isDone = turn === Turn.FINAL;
+    if (!isDone) return;
+    return {
+      cactpotPossible: this.board.getBestScore() === Board.cactpot,
+      score: this.board.getScore(this.lineChoice!),
+    };
   }
 }

@@ -1,12 +1,22 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { App, ButtonAction } from "@slack/bolt";
+import {
+  App,
+  ButtonAction,
+  Middleware,
+  RespondFn,
+  SlackCommandMiddlewareArgs,
+} from "@slack/bolt";
 import { startView } from "./view/start";
 import { cactpotView } from "./view/game";
 import { roundEndView } from "./view/roundEnd";
+import { leaderboardView } from "./view/leaderboard";
+import { Board } from "./board";
 import { Cactpot } from "./cactpot";
 import { Turn } from "./constants";
 import * as DB from "./mongo/game";
+import { User } from "./view/lib";
+import { hasAnOpaquePath } from "whatwg-url";
 
 const BOT_TEST = "C03LZF604RG";
 
@@ -24,21 +34,27 @@ async function getHumanMembers(app: App, channelId: string) {
     .filter(({ id }) => members.includes(id as string));
 }
 
-async function beginRound(app: App, channelId: string, games: Cactpot[]) {
-  return Promise.all(
-    games.map((game) =>
+async function beginRound(
+  app: App,
+  respond: RespondFn,
+  channelId: string,
+  games: Cactpot[]
+) {
+  return Promise.all([
+    ...games.map((game) =>
       app.client.chat.postEphemeral({
         blocks: cactpotView(game.getSummary()),
         user: game.userId,
         channel: channelId,
       })
-    )
-  );
+    ),
+    respond({ delete_original: true }),
+  ]);
 }
 
-const main = (app: App) => {
-  app.command("/cactpot", async ({ command, ack, respond }) => {
-    await ack();
+const cactpotStart: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
+  (app: App) =>
+  async ({ command, respond }) => {
     let game: Cactpot;
     try {
       game = await DB.createGame(command.user_id);
@@ -49,13 +65,101 @@ const main = (app: App) => {
         replace_original: false,
       });
     }
-    if (!game)
+    const user = await app.client.users.profile.get({ user: command.user_id });
+    if (!game || !user.profile?.display_name || !user.profile?.image_24) {
       return await respond({
         response_type: "ephemeral",
         text: "Error creating game :dingus:",
         replace_original: false,
       });
-    await respond({ response_type: "in_channel", blocks: startView(game, 1) });
+    }
+    await respond({
+      response_type: "in_channel",
+      blocks: startView(game, [user as User]),
+    });
+  };
+
+const cactpotLeaderboard: (
+  app: App
+) => Middleware<SlackCommandMiddlewareArgs> =
+  (app: App) =>
+  async ({ command, respond }) => {
+    const channelId = command.channel_id;
+    const humanMembers = await getHumanMembers(app, channelId);
+    if (!humanMembers?.length) throw new Error();
+
+    const games = await DB.getLeaderboard();
+    const roundMap: Record<string, { userId: string; score: number }[]> = {};
+    const winMap: Record<string, number> = {};
+    games.forEach((game) => {
+      if (!(game.roundId in roundMap)) roundMap[game.roundId] = [];
+      roundMap[game.roundId].push({
+        score: game.leaderboardInfo()!.score,
+        userId: game.userId,
+      });
+    });
+    Object.values(roundMap).forEach((round) => {
+      const max = Math.max(...round.map(({ score }) => score));
+      round.forEach(({ userId, score }) => {
+        if (score === max) {
+          if (!(userId in winMap)) winMap[userId] = 0;
+          winMap[userId]++;
+        }
+      });
+    });
+
+    return await respond({
+      response_type: "in_channel",
+      blocks: leaderboardView(
+        humanMembers
+          .map(({ id, profile }) => {
+            const { display_name, image_24 } = profile!;
+            const userGames = games.filter(({ userId }) => userId === id);
+            const leaderboardAggs = userGames
+              .map((game) => game.leaderboardInfo()!)
+              .reduce(
+                (
+                  { numGames, totalScore, cactpots, cactpotsMissed },
+                  { score, cactpotPossible }
+                ) => {
+                  return {
+                    numGames: numGames + 1,
+                    totalScore: score + totalScore,
+                    cactpots: cactpots + Number(score === Board.cactpot),
+                    cactpotsMissed:
+                      cactpotsMissed +
+                      Number(cactpotPossible && score != Board.cactpot),
+                  };
+                },
+                {
+                  numGames: 0,
+                  totalScore: 0,
+                  cactpots: 0,
+                  cactpotsMissed: 0,
+                }
+              );
+
+            return {
+              wins: winMap[id!],
+              name: display_name!,
+              image: image_24!,
+              ...leaderboardAggs,
+            };
+          })
+          .sort(({ wins: winsA }, { wins: winsB }) => winsB - winsA)
+      ),
+    });
+  };
+
+const main = (app: App) => {
+  app.command("/cactpot", async (args) => {
+    await args.ack();
+    switch (args.command.text) {
+      case "leaderboard":
+        return await cactpotLeaderboard(app)(args);
+      default:
+        return await cactpotStart(app)(args);
+    }
   });
 
   app.action("join", async ({ body, action, respond, ack }) => {
@@ -81,24 +185,24 @@ const main = (app: App) => {
     const games = await DB.getRound(roundId);
     if (!games?.length) throw new Error();
     const humanMembers = await getHumanMembers(app, channelId);
-
+    console.log(games.length, humanMembers.length);
     if (games.length >= humanMembers.length) {
-      await beginRound(app, channelId, games);
+      await beginRound(app, respond, channelId, games);
     } else {
       await respond({
-        blocks: startView(game, games.length),
+        blocks: startView(game, humanMembers as User[]),
         replace_original: true,
       });
     }
   });
 
-  app.action("start-early", async ({ body, action, ack }) => {
+  app.action("start-early", async ({ body, action, respond, ack }) => {
     await ack();
     const channelId = body?.channel?.id as string;
     const { roundId } = JSON.parse((action as ButtonAction).value);
     const games = await DB.getRound(roundId);
     if (!games?.length) throw new Error();
-    await beginRound(app, channelId, games);
+    await beginRound(app, respond, channelId, games);
   });
 
   app.action(/button/, async ({ action, body, respond, ack }) => {

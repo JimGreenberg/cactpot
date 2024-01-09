@@ -34,9 +34,17 @@ export function wrap(str: string, bookend: string): string {
   return `${bookend}${str}${bookend}`;
 }
 
-export function getScoreBlock([label, score]: [string, number]) {
+export function getScoreBlock([label, score = 0]: [string, number]) {
   return {
     type: "mrkdwn",
     text: `${label}: *${score.toLocaleString()}*`,
+  };
+}
+
+/** subtype of slack user */
+export interface User {
+  profile: {
+    display_name: string;
+    image_24: string;
   };
 }

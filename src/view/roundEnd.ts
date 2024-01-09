@@ -77,7 +77,18 @@ function renderGame({
               lineChoice &&
               Board.positionsFromBoardLine(lineChoice).includes(value);
             const char = renderTile(tile, selectedTile);
-            return selectedTile ? char : wrap(wrap(char, " "), "`");
+
+            const isLineChoiceRow = [
+              BoardLine.TOP_ROW,
+              BoardLine.MIDDLE_ROW,
+              BoardLine.BOTTOM_ROW,
+            ].includes(lineChoice as BoardLine);
+
+            return selectedTile
+              ? isLineChoiceRow
+                ? wrap(char, "  ")
+                : char
+              : wrap(wrap(char, " "), "`");
           })
           .join(" "),
       },

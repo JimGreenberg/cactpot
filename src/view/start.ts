@@ -1,6 +1,7 @@
 import { Cactpot } from "../cactpot";
+import { User } from "./lib";
 
-export function startView(cactpot: Cactpot, currentPlayers: number) {
+export function startView(cactpot: Cactpot, currentPlayers: User[]) {
   const value = JSON.stringify({
     gameId: cactpot.gameId,
     roundId: cactpot.roundId,
@@ -50,7 +51,17 @@ export function startView(cactpot: Cactpot, currentPlayers: number) {
     },
     {
       type: "context",
-      elements: [{ type: "plain_text", text: `${currentPlayers} joined` }],
+      elements: currentPlayers.map(
+        ({ profile: { image_24, display_name } }) => ({
+          type: "image",
+          image_url: image_24,
+          alt_text: display_name,
+        })
+      ),
+    },
+    {
+      type: "context",
+      elements: [{ type: "plain_text", text: `Round ID: ${cactpot.roundId}` }],
     },
   ];
 }

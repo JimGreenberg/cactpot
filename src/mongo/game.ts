@@ -31,6 +31,9 @@ const GameSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  score: {
+    type: Number,
+  },
 });
 GameSchema.index({ userId: 1, roundId: 1 }, { unique: true });
 
@@ -82,12 +85,13 @@ export async function takeTurn(
   const cactpot = Cactpot.fromMongo(game as any);
 
   cactpot.takeTurn(turn);
-  const { firstReveal, secondReveal, thirdReveal, lineChoice } =
+  const { firstReveal, secondReveal, thirdReveal, lineChoice, score } =
     cactpot.getSummary();
   if (firstReveal) game.firstReveal = firstReveal;
   if (secondReveal) game.secondReveal = secondReveal;
   if (thirdReveal) game.thirdReveal = thirdReveal;
   if (lineChoice) game.lineChoice = lineChoice;
+  if (score) game.score = score;
   try {
     await game.save();
     return cactpot;
@@ -108,4 +112,13 @@ export async function getRound(roundId: string) {
 
 export async function finalizeRound(roundId: string) {
   return await Game.updateMany({ roundId }, { leaderboardEnabled: true });
+}
+
+export async function getLeaderboard() {
+  try {
+    const games = await Game.find({ leaderboardEnabled: true });
+    return games.map((game) => Cactpot.fromMongo(game as any));
+  } catch {
+    throw new Errors.NotFound();
+  }
 }
