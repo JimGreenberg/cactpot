@@ -133,6 +133,8 @@ export class Cactpot {
         if (!isBoardLine(arg)) throw new Errors.InvalidInput();
         this.lineChoice = arg;
         break;
+      case Turn.FINAL:
+        throw new Errors.Done();
     }
     return this.getSummary();
   }

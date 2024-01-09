@@ -104,8 +104,13 @@ const main = (app: App) => {
   app.action(/button/, async ({ action, respond, ack }) => {
     await ack();
     const { value, gameId } = JSON.parse((action as ButtonAction).value);
-    const game = await DB.takeTurn(gameId, value);
-    return respond({
+    let game: Cactpot;
+    try {
+      game = await DB.takeTurn(gameId, value);
+    } catch (e) {
+      return;
+    }
+    await respond({
       replace_original: true,
       blocks: cactpotView(game.getSummary()),
     });

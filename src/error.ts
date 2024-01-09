@@ -6,3 +6,4 @@ export class NotFound extends Error {}
 export class ErrorJoiningGame extends Error {}
 export class CreateGameError extends Error {}
 export class UpdateGameError extends Error {}
+export class Done extends Error {}
