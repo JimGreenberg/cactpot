@@ -14,8 +14,13 @@ export interface Summary {
   score: number;
   bestScore: number;
   turn: Turn;
-  lineChoice?: BoardLine;
   seedString: string;
+  gameId: string;
+  roundId: string;
+  firstReveal?: TilePosition;
+  secondReveal?: TilePosition;
+  thirdReveal?: TilePosition;
+  lineChoice?: BoardLine;
 }
 
 export class Cactpot {
@@ -36,12 +41,16 @@ export class Cactpot {
     lineChoice: BoardLine;
     _id: Types.ObjectId;
     roundId: Types.ObjectId;
+    userId: string;
   }): Cactpot {
     return new Cactpot(
       new Board(seedString, firstReveal, secondReveal, thirdReveal, lineChoice),
       String(_id), // gameId
       String(roundId),
       userId,
+      firstReveal,
+      secondReveal,
+      thirdReveal,
       lineChoice
     );
   }
@@ -51,6 +60,9 @@ export class Cactpot {
     public readonly gameId: string = "default",
     public readonly roundId: string = "default",
     public readonly userId: string = "default",
+    private firstReveal?: TilePosition,
+    private secondReveal?: TilePosition,
+    private thirdReveal?: TilePosition,
     private lineChoice?: BoardLine
   ) {}
 
@@ -78,7 +90,7 @@ export class Cactpot {
   private revealTile(pos: TilePosition) {
     const tile = this.board.getTile(pos);
     if (tile.visible) throw new Errors.InvalidMove();
-    tile.reveal();
+    return tile.reveal();
   }
 
   getSummary(): Summary {
@@ -89,8 +101,13 @@ export class Cactpot {
       score: this.lineChoice ? this.board.getScore(this.lineChoice) : 0,
       bestScore: isDone ? this.board.getBestScore() : 0,
       turn,
-      lineChoice: this.lineChoice,
       seedString: this.board.seedString,
+      gameId: this.gameId,
+      roundId: this.roundId,
+      firstReveal: this.firstReveal,
+      secondReveal: this.secondReveal,
+      thirdReveal: this.thirdReveal,
+      lineChoice: this.lineChoice,
     };
   }
 
@@ -98,9 +115,18 @@ export class Cactpot {
     const turn = this.getCurrentTurn();
     switch (turn) {
       case Turn.INIT:
+        if (!isTilePosition(arg)) throw new Errors.InvalidInput();
+        this.firstReveal = arg;
+        this.revealTile(arg);
+        break;
       case Turn.FIRST:
+        if (!isTilePosition(arg)) throw new Errors.InvalidInput();
+        this.secondReveal = arg;
+        this.revealTile(arg);
+        break;
       case Turn.SECOND:
         if (!isTilePosition(arg)) throw new Errors.InvalidInput();
+        this.thirdReveal = arg;
         this.revealTile(arg);
         break;
       case Turn.THIRD:

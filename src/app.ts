@@ -103,8 +103,8 @@ const main = (app: App) => {
 
   app.action(/button/, async ({ action, respond, ack }) => {
     await ack();
-    const { value, seedString } = JSON.parse((action as ButtonAction).value);
-    const game = new Cactpot(new Board(seedString, value));
+    const { value, gameId } = JSON.parse((action as ButtonAction).value);
+    const game = await DB.takeTurn(gameId, value);
     return respond({
       replace_original: true,
       blocks: cactpotView(game.getSummary()),

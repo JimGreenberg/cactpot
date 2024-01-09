@@ -11,10 +11,22 @@ const GameSchema = new Schema({
   roundId: Schema.ObjectId,
   date: { type: Date, default: new Date() },
   seedString: { type: String, match: /[1-9]/ },
-  firstReveal: { type: Number, enum: TilePosition },
-  secondReveal: { type: Number, enum: TilePosition },
-  thirdReveal: { type: Number, enum: TilePosition },
-  lineChoice: { type: String, enum: BoardLine },
+  firstReveal: {
+    type: String,
+    // enum: Object.values(TilePosition),
+  },
+  secondReveal: {
+    type: String,
+    // enum: Object.values(TilePosition),
+  },
+  thirdReveal: {
+    type: String,
+    // enum: Object.values(TilePosition),
+  },
+  lineChoice: {
+    type: String,
+    //  enum: Object.values(BoardLine)
+  },
 });
 GameSchema.index({ userId: 1, roundId: 1 }, { unique: true });
 
@@ -57,27 +69,36 @@ export async function joinGame({
   }
 }
 
-type Turn = {
-  firstReveal?: TilePosition;
-  secondReveal?: TilePosition;
-  thirdReveal?: TilePosition;
-  lineChoice?: BoardLine;
-};
-
 export async function takeTurn(
   gameId: Types.ObjectId,
-  { firstReveal, secondReveal, thirdReveal, lineChoice }: Turn
+  turn: TilePosition | BoardLine
 ) {
-  const game = await Game.findById(gameId);
+  const game = await Game.findById(new Types.ObjectId(gameId));
   if (!game) throw new Errors.NotFound();
+  console.log("mongo");
+  console.log(
+    game.firstReveal,
+    game.secondReveal,
+    game.thirdReveal,
+    game.lineChoice
+  );
+  console.log("mongo");
+  const cactpot = Cactpot.fromMongo(game as any);
+  console.log(turn);
+  console.log(cactpot.getSummary());
+  cactpot.takeTurn(turn);
+  const { firstReveal, secondReveal, thirdReveal, lineChoice } =
+    cactpot.getSummary();
+  console.log(cactpot.getSummary());
   if (firstReveal) game.firstReveal = firstReveal;
   if (secondReveal) game.secondReveal = secondReveal;
   if (thirdReveal) game.thirdReveal = thirdReveal;
   if (lineChoice) game.lineChoice = lineChoice;
   try {
     await game.save();
-    return Cactpot.fromMongo(game as any);
-  } catch {
+    return cactpot;
+  } catch (e) {
+    console.error(e);
     throw new Errors.UpdateGameError();
   }
 }

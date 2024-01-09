@@ -1,13 +1,13 @@
 export enum TilePosition {
-  TOP_LEFT,
-  TOP_MIDDLE,
-  TOP_RIGHT,
-  MIDDLE_LEFT,
-  CENTER,
-  MIDDLE_RIGHT,
-  BOTTOM_LEFT,
-  BOTTOM_MIDDLE,
-  BOTTOM_RIGHT,
+  TOP_LEFT = "TOP_LEFT",
+  TOP_MIDDLE = "TOP_MIDDLE",
+  TOP_RIGHT = "TOP_RIGHT",
+  MIDDLE_LEFT = "MIDDLE_LEFT",
+  CENTER = "CENTER",
+  MIDDLE_RIGHT = "MIDDLE_RIGHT",
+  BOTTOM_LEFT = "BOTTOM_LEFT",
+  BOTTOM_MIDDLE = "BOTTOM_MIDDLE",
+  BOTTOM_RIGHT = "BOTTOM_RIGHT",
 }
 export function isTilePosition(arg: keyof any): arg is TilePosition {
   return arg in TilePosition;

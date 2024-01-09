@@ -45,6 +45,16 @@ export function cactpotView(summary: Summary) {
 
   blocks.push(...getScoreInfoBlocks(score));
 
+  blocks.push({
+    type: "context",
+    elements: [
+      {
+        type: "plain_text",
+        text: `Game ID: ${summary.gameId}    Round ID: ${summary.roundId}`,
+      },
+    ],
+  });
+
   return blocks;
 }
 
@@ -110,12 +120,12 @@ function button({ text, value }: { text: string; value: string }) {
   };
 }
 
-function getBoardBlocks({ board, lineChoice, seedString }: Summary) {
+function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
   function getBlankActions(elements: any[] = []) {
     return { type: "actions", elements };
   }
   function getJsonStringValue(value: string) {
-    return JSON.stringify({ value, seedString });
+    return JSON.stringify({ value, gameId });
   }
   // first row is always the same
   const blocks = [
@@ -142,7 +152,7 @@ function getBoardBlocks({ board, lineChoice, seedString }: Summary) {
     ),
   ];
 
-  let tilePosition = TilePosition.TOP_LEFT;
+  let tilePosition = 0;
   const rowLines = [
     BoardLine.TOP_ROW,
     BoardLine.MIDDLE_ROW,
@@ -153,7 +163,7 @@ function getBoardBlocks({ board, lineChoice, seedString }: Summary) {
       getBlankActions([
         button({ text: ":arrow_right:", value: rowLines[i] }),
         ...row.map((tile) => {
-          const value = tilePosition++;
+          const value = Object.values(TilePosition)[tilePosition++];
           const selectedTile =
             lineChoice &&
             Board.positionsFromBoardLine(lineChoice).includes(value);
