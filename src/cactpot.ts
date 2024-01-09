@@ -70,7 +70,7 @@ export class Cactpot {
     return this.board.seedString;
   }
 
-  private getCurrentTurn(): Turn {
+  getCurrentTurn(): Turn {
     if (this.lineChoice) return Turn.FINAL;
     const revealed = this.board.getRevealedCount();
     switch (revealed) {

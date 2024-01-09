@@ -1,16 +1,16 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { App, BlockElementAction, Button, ButtonAction } from "@slack/bolt";
+import { App, ButtonAction } from "@slack/bolt";
 import { startView } from "./view/start";
 import { cactpotView } from "./view/game";
+import { roundEndView } from "./view/roundEnd";
 import { Cactpot } from "./cactpot";
-import { Board } from "./board";
-import { TilePosition, BoardLine } from "./constants";
+import { Turn } from "./constants";
 import * as DB from "./mongo/game";
 
 const BOT_TEST = "C03LZF604RG";
 
-async function getHumanMemberCount(app: App, channelId: string) {
+async function getHumanMembers(app: App, channelId: string) {
   const { members } = await app.client.conversations.members({
     channel: channelId,
   });
@@ -21,7 +21,7 @@ async function getHumanMemberCount(app: App, channelId: string) {
 
   return users
     .filter(({ is_bot }) => !is_bot)
-    .filter(({ id }) => members.includes(id as string)).length;
+    .filter(({ id }) => members.includes(id as string));
 }
 
 async function beginRound(app: App, channelId: string, games: Cactpot[]) {
@@ -80,9 +80,9 @@ const main = (app: App) => {
 
     const games = await DB.getRound(roundId);
     if (!games?.length) throw new Error();
-    const humanMemberCount = await getHumanMemberCount(app, channelId);
+    const humanMembers = await getHumanMembers(app, channelId);
 
-    if (games.length >= humanMemberCount) {
+    if (games.length >= humanMembers.length) {
       await beginRound(app, channelId, games);
     } else {
       await respond({
@@ -101,8 +101,9 @@ const main = (app: App) => {
     await beginRound(app, channelId, games);
   });
 
-  app.action(/button/, async ({ action, respond, ack }) => {
+  app.action(/button/, async ({ action, body, respond, ack }) => {
     await ack();
+    const channelId = body?.channel?.id as string;
     const { value, gameId } = JSON.parse((action as ButtonAction).value);
     let game: Cactpot;
     try {
@@ -114,6 +115,27 @@ const main = (app: App) => {
       replace_original: true,
       blocks: cactpotView(game.getSummary()),
     });
+
+    const games = await DB.getRound(game.roundId);
+    if (!games?.length) throw new Error();
+    if (games.every((game) => game.getCurrentTurn() === Turn.FINAL)) {
+      const games = await DB.getRound(game.roundId);
+      const humanMembers = await getHumanMembers(app, channelId);
+      if (games.length === humanMembers.length) {
+        await DB.finalizeRound(game.roundId);
+      }
+      const blocks = roundEndView(
+        // @ts-ignore
+        games.map((g) => ({
+          ...humanMembers.find(({ id }) => id === g.userId),
+          ...g.getSummary(),
+        }))
+      );
+      await app.client.chat.postMessage({
+        channel: channelId,
+        blocks,
+      });
+    }
   });
 };
 

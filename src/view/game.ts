@@ -1,6 +1,7 @@
 import { Summary } from "../cactpot";
-import { Board, Tile } from "../board";
+import { Board } from "../board";
 import { Turn, TilePosition, BoardLine } from "../constants";
+import { renderTile, wrap, getScoreBlock } from "./lib";
 
 export function cactpotView(summary: Summary) {
   const { score, bestScore, turn } = summary;
@@ -77,36 +78,6 @@ export function getErrorMessage() {
   return "";
 }
 
-function renderTile(
-  value: number | typeof Tile.HIDDEN,
-  selectedTile = false
-): string {
-  if (value === Tile.HIDDEN) return " ";
-  if (!selectedTile) return String(value);
-  switch (value) {
-    case 1:
-      return ":one:";
-    case 2:
-      return ":two:";
-    case 3:
-      return ":three:";
-    case 4:
-      return ":four:";
-    case 5:
-      return ":five:";
-    case 6:
-      return ":six:";
-    case 7:
-      return ":seven:";
-    case 8:
-      return ":eight:";
-    case 9:
-      return ":nine:";
-    default:
-      throw new Error(); // unreachable
-  }
-}
-
 function button({ text, value }: { text: string; value: string }) {
   return {
     type: "button",
@@ -161,7 +132,10 @@ function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
   board.forEach((row, i) => {
     blocks.push(
       getBlankActions([
-        button({ text: ":arrow_right:", value: rowLines[i] }),
+        button({
+          text: ":arrow_right:",
+          value: getJsonStringValue(rowLines[i]),
+        }),
         ...row.map((tile) => {
           const value = Object.values(TilePosition)[tilePosition++];
           const selectedTile =
@@ -212,9 +186,6 @@ function getScoreInfoBlock([label, score]: [string, number], selected = false) {
   const totalLength = 8;
   const scoreFmt = score.toLocaleString();
   const spacerLength = totalLength - scoreFmt.length - label.length;
-  function wrap(str: string, bookend: string): string {
-    return `${bookend}${str}${bookend}`;
-  }
 
   const text =
     wrap(wrap(label, "`"), "*") +
@@ -223,12 +194,5 @@ function getScoreInfoBlock([label, score]: [string, number], selected = false) {
     type: "mrkdwn",
     // text: `*${label}* | ${score.toLocaleString()}`,
     text,
-  };
-}
-
-function getScoreBlock([label, score]: [string, number]) {
-  return {
-    type: "mrkdwn",
-    text: `${label}: *${score.toLocaleString()}*`,
   };
 }

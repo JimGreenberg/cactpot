@@ -27,6 +27,10 @@ const GameSchema = new Schema({
     type: String,
     //  enum: Object.values(BoardLine)
   },
+  leaderboardEnabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 GameSchema.index({ userId: 1, roundId: 1 }, { unique: true });
 
@@ -73,23 +77,13 @@ export async function takeTurn(
   gameId: Types.ObjectId,
   turn: TilePosition | BoardLine
 ) {
-  const game = await Game.findById(new Types.ObjectId(gameId));
+  const game = await Game.findOne({ _id: gameId, leaderboardEnabled: false });
   if (!game) throw new Errors.NotFound();
-  console.log("mongo");
-  console.log(
-    game.firstReveal,
-    game.secondReveal,
-    game.thirdReveal,
-    game.lineChoice
-  );
-  console.log("mongo");
   const cactpot = Cactpot.fromMongo(game as any);
-  console.log(turn);
-  console.log(cactpot.getSummary());
+
   cactpot.takeTurn(turn);
   const { firstReveal, secondReveal, thirdReveal, lineChoice } =
     cactpot.getSummary();
-  console.log(cactpot.getSummary());
   if (firstReveal) game.firstReveal = firstReveal;
   if (secondReveal) game.secondReveal = secondReveal;
   if (thirdReveal) game.thirdReveal = thirdReveal;
@@ -110,4 +104,8 @@ export async function getRound(roundId: string) {
   } catch {
     throw new Errors.NotFound();
   }
+}
+
+export async function finalizeRound(roundId: string) {
+  return await Game.updateMany({ roundId }, { leaderboardEnabled: true });
 }
