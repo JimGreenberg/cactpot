@@ -190,7 +190,12 @@ const main = (app: App) => {
       await beginRound(app, respond, channelId, games);
     } else {
       await respond({
-        blocks: startView(game, humanMembers as User[]),
+        blocks: startView(
+          game,
+          games.map(
+            ({ userId }) => humanMembers.find(({ id }) => id === userId) as User
+          )
+        ),
         replace_original: true,
       });
     }

@@ -40,7 +40,7 @@ export function startView(cactpot: Cactpot, currentPlayers: User[]) {
           confirm: {
             title: { text: "Start early?", type: "plain_text" },
             text: {
-              text: `Play with only ${currentPlayers} players? This will not affect the leaderboards`,
+              text: `Play with only ${currentPlayers.length} players? This will not affect the leaderboards`,
               type: "plain_text",
             },
             confirm: { text: "Play Anyway", type: "plain_text" },
