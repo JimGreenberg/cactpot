@@ -10,6 +10,32 @@ import * as DB from "./mongo/game";
 
 const BOT_TEST = "C03LZF604RG";
 
+async function getHumanMemberCount(app: App, channelId: string) {
+  const { members } = await app.client.conversations.members({
+    channel: channelId,
+  });
+  if (!members?.length) throw new Error();
+
+  const { members: users } = await app.client.users.list();
+  if (!users?.length) throw new Error();
+
+  return users
+    .filter(({ is_bot }) => !is_bot)
+    .filter(({ id }) => members.includes(id as string)).length;
+}
+
+async function beginRound(app: App, channelId: string, games: Cactpot[]) {
+  return Promise.all(
+    games.map((game) =>
+      app.client.chat.postEphemeral({
+        blocks: cactpotView(game.getSummary()),
+        user: game.userId,
+        channel: channelId,
+      })
+    )
+  );
+}
+
 const main = (app: App) => {
   app.command("/cactpot", async ({ command, ack, respond }) => {
     await ack();
@@ -34,12 +60,13 @@ const main = (app: App) => {
 
   app.action("join", async ({ body, action, respond, ack }) => {
     await ack();
+    const channelId = body?.channel?.id as string;
     const { roundId, seedString } = JSON.parse((action as ButtonAction).value);
+
     let game: Cactpot;
     try {
       game = await DB.joinGame({
         userId: body.user.id,
-        // userId: "Foo",
         roundId,
         seedString,
       });
@@ -50,28 +77,35 @@ const main = (app: App) => {
         replace_original: false,
       });
     }
-    if (!game)
-      return await respond({
-        response_type: "ephemeral",
-        text: "Error joining game :dingus:",
-        replace_original: false,
-      });
+
     const games = await DB.getRound(roundId);
-    await respond({
-      blocks: startView(game, games?.length || 1),
-      replace_original: true,
-    });
+    if (!games?.length) throw new Error();
+    const humanMemberCount = await getHumanMemberCount(app, channelId);
+
+    if (games.length >= humanMemberCount) {
+      await beginRound(app, channelId, games);
+    } else {
+      await respond({
+        blocks: startView(game, games.length),
+        replace_original: true,
+      });
+    }
   });
 
-  app.action("start-early", async ({ action, respond, ack }) => {
+  app.action("start-early", async ({ body, action, ack }) => {
     await ack();
+    const channelId = body?.channel?.id as string;
+    const { roundId } = JSON.parse((action as ButtonAction).value);
+    const games = await DB.getRound(roundId);
+    if (!games?.length) throw new Error();
+    await beginRound(app, channelId, games);
   });
 
   app.action(/button/, async ({ action, respond, ack }) => {
     await ack();
     const { value, seedString } = JSON.parse((action as ButtonAction).value);
     const game = new Cactpot(new Board(seedString, value));
-    await respond({
+    return respond({
       replace_original: true,
       blocks: cactpotView(game.getSummary()),
     });

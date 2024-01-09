@@ -27,6 +27,7 @@ export class Cactpot {
     lineChoice,
     _id,
     roundId,
+    userId,
   }: {
     seedString: string;
     firstReveal: TilePosition;
@@ -40,6 +41,7 @@ export class Cactpot {
       new Board(seedString, firstReveal, secondReveal, thirdReveal, lineChoice),
       String(_id), // gameId
       String(roundId),
+      userId,
       lineChoice
     );
   }
@@ -48,6 +50,7 @@ export class Cactpot {
     private board: Board = new Board(),
     public readonly gameId: string = "default",
     public readonly roundId: string = "default",
+    public readonly userId: string = "default",
     private lineChoice?: BoardLine
   ) {}
 
