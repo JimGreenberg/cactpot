@@ -2,10 +2,10 @@ import { Tile } from "../board";
 
 export function renderTile(
   value: number | typeof Tile.HIDDEN,
-  selectedTile = false
+  emoji = false
 ): string {
   if (value === Tile.HIDDEN) return " ";
-  if (!selectedTile) return String(value);
+  if (!emoji) return String(value);
   switch (value) {
     case 1:
       return ":one:";

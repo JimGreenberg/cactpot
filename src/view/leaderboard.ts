@@ -8,6 +8,7 @@ interface LeaderboardInfo {
   cactpots: number;
   cactpotsMissed: number;
   wins: number;
+  bestsAchieved: number;
 }
 
 export function leaderboardView(users: LeaderboardInfo[]) {
@@ -38,6 +39,8 @@ function leaderboardUserView({
   cactpots,
   cactpotsMissed,
   wins,
+  bestsAchieved,
+  numGames,
 }: LeaderboardInfo) {
   const blocks: any[] = [
     {
@@ -54,19 +57,22 @@ function leaderboardUserView({
         },
       ],
     },
+    {
+      type: "context",
+      elements: [
+        getScoreBlock(["Wins", wins]),
+        {
+          type: "mrkdwn",
+          text: `Best Score Rate: *${Math.floor(
+            (100 * bestsAchieved) / numGames
+          )}%*`,
+        },
+        getScoreBlock(["Cactpots", cactpots]),
+        getScoreBlock(["Cactpots Missed", cactpotsMissed]),
+      ],
+    },
   ];
 
-  blocks.push({
-    type: "section",
-    text: getScoreBlock(["Wins", wins]),
-  });
-  blocks.push({
-    type: "context",
-    elements: [
-      getScoreBlock(["Cactpots", cactpots]),
-      getScoreBlock(["Cactpots Missed", cactpotsMissed]),
-    ],
-  });
   blocks.push({ type: "divider" });
 
   return blocks;

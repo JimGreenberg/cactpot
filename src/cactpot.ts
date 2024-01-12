@@ -143,13 +143,16 @@ export class Cactpot {
     | {
         cactpotPossible: boolean;
         score: number;
+        bestScore: number;
       }
     | undefined {
     const turn = this.getCurrentTurn();
     const isDone = turn === Turn.FINAL;
     if (!isDone) return;
+    const bestScore = this.board.getBestScore();
     return {
-      cactpotPossible: this.board.getBestScore() === Board.cactpot,
+      bestScore,
+      cactpotPossible: bestScore === Board.cactpot,
       score: this.board.getScore(this.lineChoice!),
     };
   }

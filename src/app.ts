@@ -16,7 +16,6 @@ import { Cactpot } from "./cactpot";
 import { Turn } from "./constants";
 import * as DB from "./mongo/game";
 import { User } from "./view/lib";
-import { hasAnOpaquePath } from "whatwg-url";
 
 const BOT_TEST = "C03LZF604RG";
 
@@ -119,8 +118,14 @@ const cactpotLeaderboard: (
               .map((game) => game.leaderboardInfo()!)
               .reduce(
                 (
-                  { numGames, totalScore, cactpots, cactpotsMissed },
-                  { score, cactpotPossible }
+                  {
+                    numGames,
+                    totalScore,
+                    cactpots,
+                    cactpotsMissed,
+                    bestsAchieved,
+                  },
+                  { score, cactpotPossible, bestScore }
                 ) => {
                   return {
                     numGames: numGames + 1,
@@ -129,6 +134,7 @@ const cactpotLeaderboard: (
                     cactpotsMissed:
                       cactpotsMissed +
                       Number(cactpotPossible && score != Board.cactpot),
+                    bestsAchieved: bestsAchieved + Number(score == bestScore),
                   };
                 },
                 {
@@ -136,6 +142,7 @@ const cactpotLeaderboard: (
                   totalScore: 0,
                   cactpots: 0,
                   cactpotsMissed: 0,
+                  bestsAchieved: 0,
                 }
               );
 

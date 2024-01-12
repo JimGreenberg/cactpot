@@ -13,7 +13,7 @@ export function startView(cactpot: Cactpot, currentPlayers: User[]) {
       type: "header",
       text: {
         type: "plain_text",
-        text: "Would you like to play cactpot?",
+        text: "Would you like to play cactpot? <!channel>",
       },
     },
     {
