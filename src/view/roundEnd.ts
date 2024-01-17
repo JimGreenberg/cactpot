@@ -12,20 +12,16 @@ interface SummaryWithUser extends Summary {
 }
 
 export function roundEndView(games: SummaryWithUser[]) {
-  const blocks: any[] = [S.Header(S.PlainText("Results"))];
-  games.forEach((game) => blocks.push(...renderGame(game)));
-
-  blocks.push(
+  return [
+    S.Header(S.PlainText("Results")),
+    ...games.map(renderGame),
     S.Section(
       S.Markdown(
         getScoreBlock("The best score on this board was", games[0].bestScore)
       )
-    )
-  );
-
-  blocks.push(S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)));
-
-  return blocks;
+    ),
+    S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)),
+  ];
 }
 
 function renderGame({
@@ -36,7 +32,8 @@ function renderGame({
   gameId,
   profile: { display_name, image_24 },
 }: SummaryWithUser) {
-  const blocks: any[] = [
+  let tilePosition = 0;
+  return [
     S.Context(
       S.Image({
         image_url: image_24,
@@ -44,11 +41,7 @@ function renderGame({
       }),
       S.PlainText(display_name)
     ),
-  ];
-
-  let tilePosition = 0;
-  board.forEach((row) => {
-    blocks.push(
+    ...board.map((row) => {
       S.Section(
         S.Markdown(
           row
@@ -63,25 +56,21 @@ function renderGame({
             })
             .join(" ")
         )
-      )
-    );
-  });
+      );
+    }),
 
-  blocks.push(
     S.Context(
       S.PlainText(
         `Revealed ${reveals[0]}, ${reveals[1]} and ${
           reveals[2]
         }, then chose the ${boardLineText(lineChoice!)}`
       )
-    )
-  );
+    ),
 
-  blocks.push(S.Section(S.Markdown(getScoreBlock("Score", score))));
+    S.Section(S.Markdown(getScoreBlock("Score", score))),
 
-  blocks.push(S.Context(S.PlainText(`Game ID: ${gameId}`)));
+    S.Context(S.PlainText(`Game ID: ${gameId}`)),
 
-  blocks.push(S.Divider());
-
-  return blocks;
+    S.Divider(),
+  ];
 }

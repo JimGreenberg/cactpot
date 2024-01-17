@@ -1,4 +1,5 @@
-import { getScoreBlock } from "./lib";
+import { getScoreBlock } from "./util";
+import * as S from "./slack";
 
 interface LeaderboardInfo {
   name: string;
@@ -11,25 +12,12 @@ interface LeaderboardInfo {
 }
 
 export function leaderboardView(users: LeaderboardInfo[]) {
-  const blocks: any[] = [
-    {
-      type: "header",
-      text: {
-        type: "plain_text",
-        text: "Leaderboard",
-      },
-    },
-    {
-      type: "section",
-      text: {
-        type: "plain_text",
-        text: `${users[0].countGames} rounds played`,
-      },
-    },
-    { type: "divider" },
+  return [
+    S.Header(S.PlainText("Leaderboard")),
+    S.Section(S.PlainText(`${users[0].countGames} rounds played`)),
+    S.Divider(),
+    ...users.map(leaderboardUserView).flat(1),
   ];
-  users.forEach((user) => blocks.push(...leaderboardUserView(user)));
-  return blocks;
 }
 
 function leaderboardUserView({
@@ -41,38 +29,16 @@ function leaderboardUserView({
   bestsAchieved,
   countGames,
 }: LeaderboardInfo) {
-  const blocks: any[] = [
-    {
-      type: "context",
-      elements: [
-        {
-          type: "image",
-          image_url: image,
-          alt_text: name,
-        },
-        {
-          type: "plain_text",
-          text: name,
-        },
-      ],
-    },
-    {
-      type: "context",
-      elements: [
-        getScoreBlock(["Wins", wins]),
-        {
-          type: "mrkdwn",
-          text: `Best Score Rate: *${Math.floor(
-            (100 * bestsAchieved) / countGames
-          )}%*`,
-        },
-        getScoreBlock(["Cactpots", cactpots]),
-        getScoreBlock(["Cactpots Missed", cactpotsMissed]),
-      ],
-    },
+  return [
+    S.Context(S.Image({ image_url: image, alt_text: name }), S.PlainText(name)),
+    S.Context(
+      S.Markdown(getScoreBlock("Wins", wins)),
+      S.Markdown(
+        `Best Score Rate: *${Math.floor((100 * bestsAchieved) / countGames)}%*`
+      ),
+      S.Markdown(getScoreBlock("Cactpots", cactpots)),
+      S.Markdown(getScoreBlock("Cactpots Missed", cactpotsMissed))
+    ),
+    S.Divider(),
   ];
-
-  blocks.push({ type: "divider" });
-
-  return blocks;
 }
