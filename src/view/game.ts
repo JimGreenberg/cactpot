@@ -1,7 +1,7 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { Turn, TilePosition, BoardLine } from "../constants";
-import { renderTile, wrap, getScoreBlock } from "./lib";
+import { renderTile, wrap, getScoreBlock } from "./util";
 
 export function cactpotView(summary: Summary) {
   const { score, bestScore, turn } = summary;
