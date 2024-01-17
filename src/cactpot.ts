@@ -138,12 +138,16 @@ export class Cactpot {
     return this.getSummary();
   }
 
+  getScore(): number {
+    return this.lineChoice ? this.board.getScore(this.lineChoice) : 0;
+  }
+
   getSummary(): Summary {
     const turn = this.getCurrentTurn();
     const isDone = turn === Turn.FINAL;
     return {
       board: this.board.display(isDone),
-      score: this.lineChoice ? this.board.getScore(this.lineChoice) : 0,
+      score: this.getScore(),
       bestScore: isDone ? this.board.getBestScore() : 0,
       turn,
       seedString: this.board.seedString,
