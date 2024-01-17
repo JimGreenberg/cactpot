@@ -33,6 +33,6 @@ export function startView(roundId: string, currentPlayers: User[]) {
         })
       )
     ),
-    S.Context(S.PlainText(`Round ID: ${roundId}`)),
+    // S.Context(S.PlainText(`Round ID: ${roundId}`)),
   ];
 }

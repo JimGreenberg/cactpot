@@ -1,5 +1,5 @@
 import { Tile } from "../board";
-import { BoardLine } from "../constants";
+import { BoardLine, Turn } from "../constants";
 import * as S from "./slack";
 
 export function renderTile(
@@ -51,6 +51,16 @@ export function boardLineText(line: BoardLine): string {
     [BoardLine.DIAGONAL]: "Upwards Diagonal",
     [BoardLine.ANTIDIAGONAL]: "Downwards Diagonal",
   }[line];
+}
+
+export function turnText(turn: Turn): string {
+  return {
+    [Turn.INIT]: "Start",
+    [Turn.FIRST]: "Choosing 2nd tile",
+    [Turn.SECOND]: "Choosing 3rd tile",
+    [Turn.THIRD]: "Choosing Line",
+    [Turn.FINAL]: "Done",
+  }[turn];
 }
 
 /** subtype of slack user */

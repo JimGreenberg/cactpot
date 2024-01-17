@@ -20,7 +20,7 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         getScoreBlock("The best score on this board was", games[0].bestScore)
       )
     ),
-    S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)),
+    // S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)),
   ];
   return blocks;
 }
@@ -70,7 +70,7 @@ function renderGame({
 
     S.Section(S.Markdown(getScoreBlock("Score", score))),
 
-    S.Context(S.PlainText(`Game ID: ${gameId}`)),
+    // S.Context(S.PlainText(`Game ID: ${gameId}`)),
 
     S.Divider(),
   ];

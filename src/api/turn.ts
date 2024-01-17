@@ -10,13 +10,16 @@ import { SlackService } from "../slackService";
 import { cactpotView } from "../view/game";
 import { roundEndView } from "../view/roundEnd";
 import { Turn } from "../constants";
+import { inProgressRound } from "../view/inProgressRound";
 
 export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>
   async ({ action, body, respond }) => {
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
-    const { value, gameId } = JSON.parse((action as ButtonAction).value);
+    const { value, gameId, roundMessageTs } = JSON.parse(
+      (action as ButtonAction).value
+    );
 
     let game: Cactpot;
     try {
@@ -28,26 +31,42 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
 
     await respond({
       replace_original: true,
-      blocks: cactpotView(game.getSummary()),
+      blocks: cactpotView(game.getSummary(), roundMessageTs),
     });
 
     const games = await DB.getGamesByRound(game.roundId);
     if (!games?.length) throw new Error();
-    if (games.every((game) => game.getCurrentTurn() === Turn.FINAL)) {
-      const users = await service.getUsers(channelId);
+    const users = await service.getUsers(channelId);
+    if (!users?.length) throw new Error();
+    let blocks = [];
+
+    if (games.some((game) => game.getCurrentTurn() !== Turn.FINAL)) {
+      blocks = inProgressRound(
+        games.map((g) => {
+          const user = users.find(({ id }) => id === g.userId);
+          return {
+            turn: g.getCurrentTurn(),
+            name: user?.profile?.display_name!,
+            image: user?.profile?.image_24!,
+          };
+        })
+      );
+    } else {
       if (games.length === users.length) {
         await DB.enableLeaderboardForRound(game.roundId);
       }
-      const blocks = roundEndView(
+      blocks = roundEndView(
         // @ts-ignore
         games.map((g) => ({
           ...users.find(({ id }) => id === g.userId),
           ...g.getSummary(),
         }))
       );
-      await app.client.chat.postMessage({
-        channel: channelId,
-        blocks,
-      });
     }
+    await app.client.chat.update({
+      ts: roundMessageTs,
+      channel: channelId,
+      blocks,
+      text: "",
+    });
   };
