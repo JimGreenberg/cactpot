@@ -1,8 +1,7 @@
 import { App, Middleware, SlackCommandMiddlewareArgs } from "@slack/bolt";
 import * as DB from "../mongo";
-import { Cactpot } from "../cactpot";
 import { startView } from "../view/start";
-import type { User } from "../view/lib";
+import type { User } from "../view/util";
 
 export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
   (app: App) =>

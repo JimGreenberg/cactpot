@@ -5,10 +5,9 @@ import {
   ButtonAction,
 } from "@slack/bolt";
 import * as DB from "../mongo";
-import { Cactpot } from "../cactpot";
 import { SlackService } from "../slackService";
 import { startView } from "../view/start";
-import { User } from "../view/lib";
+import { User } from "../view/util";
 
 export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>

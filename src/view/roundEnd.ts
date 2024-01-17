@@ -11,7 +11,7 @@ interface SummaryWithUser extends Summary {
   };
 }
 
-export function roundEndView(games: SummaryWithUser[]) {
+export function roundEndView(games: SummaryWithUser[]): any[] {
   return [
     S.Header(S.PlainText("Results")),
     ...games.map(renderGame),
