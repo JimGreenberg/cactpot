@@ -1,6 +1,6 @@
 {
   "name": "cactpot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "a cactpot slack app for the boys",
   "type": "commonjs",
   "module": "./src/app.ts",
