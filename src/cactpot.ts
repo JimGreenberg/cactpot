@@ -23,50 +23,17 @@ export interface Summary {
 
 export class Cactpot {
   static fromMongo({
-    seedString,
-    initialReveal,
-    firstReveal,
-    secondReveal,
-    thirdReveal,
-    lineChoice,
-    _id,
-    roundId,
-    userId,
-  }: {
-    seedString: string;
-    initialReveal: TilePosition;
-    firstReveal: TilePosition;
-    secondReveal: TilePosition;
-    thirdReveal: TilePosition;
-    lineChoice: BoardLine;
-    _id: Types.ObjectId;
-    roundId: Types.ObjectId;
-    userId: string;
-  }): Cactpot {
-    return new Cactpot(
-      new Board(
-        seedString,
-        initialReveal,
-        firstReveal,
-        secondReveal,
-        thirdReveal,
-        lineChoice
-      ),
-      String(_id), // gameId
-      String(roundId),
-      userId,
-      [firstReveal, secondReveal, thirdReveal],
-      lineChoice
-    );
-  }
-  static fromMongo2({
     round: { seedString, initialReveal, _id: roundId },
-    _id,
+    _id: gameId,
     reveals,
     lineChoice,
     userId,
   }: {
-    round: { seedString: string; initialReveal: TilePosition; _id: string };
+    round: {
+      seedString: string;
+      initialReveal: TilePosition;
+      _id: Types.ObjectId;
+    };
     reveals: TilePosition[];
     lineChoice: BoardLine;
     _id: Types.ObjectId;
@@ -74,7 +41,7 @@ export class Cactpot {
   }): Cactpot {
     return new Cactpot(
       new Board(seedString, initialReveal, ...reveals, lineChoice),
-      String(_id), // gameId
+      String(gameId),
       String(roundId),
       userId,
       reveals,
@@ -97,15 +64,14 @@ export class Cactpot {
 
   getCurrentTurn(): Turn {
     if (this.lineChoice) return Turn.FINAL;
-    const revealed = this.board.getRevealedCount();
-    switch (revealed) {
-      case 1:
+    switch (this.reveals.length) {
+      case 0:
         return Turn.INIT;
-      case 2:
+      case 1:
         return Turn.FIRST;
-      case 3:
+      case 2:
         return Turn.SECOND;
-      case 4:
+      case 3:
         return Turn.THIRD;
       default:
         throw new Errors.InvalidBoardState();

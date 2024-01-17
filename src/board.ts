@@ -161,12 +161,6 @@ export class Board {
     );
   }
 
-  getRevealedCount(): number {
-    return this.tiles
-      .flat()
-      .reduce((acc, curr) => acc + Number(curr.visible), 0);
-  }
-
   display(done = false): ThreeByThree<ReturnType<Tile["display"]>> {
     // @ts-ignore
     return this.tiles.map((row) => row.map((tile) => tile.display(done)));
