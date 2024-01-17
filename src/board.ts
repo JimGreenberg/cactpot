@@ -1,3 +1,4 @@
+import "./array";
 import {
   TilePosition,
   isTilePosition,
@@ -29,33 +30,19 @@ export class Board {
       .map((value) => new Tile(parseInt(value)));
     return [
       [tiles[0], tiles[1], tiles[2]],
-      [tiles[3], tiles[4].reveal(), tiles[5]],
+      [tiles[3], tiles[4], tiles[5]],
       [tiles[6], tiles[7], tiles[8]],
     ];
   }
 
   static randomSeedString(): string {
-    function shuffle<T>(array: T[]): T[] {
-      let currentIndex = array.length,
-        randomIndex;
+    return Array.from({ length: 9 }, (_, i) => i + 1)
+      .shuffle()
+      .join("");
+  }
 
-      // While there remain elements to shuffle.
-      while (currentIndex > 0) {
-        // Pick a remaining element.
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-          array[randomIndex],
-          array[currentIndex],
-        ];
-      }
-
-      return array;
-    }
-
-    return shuffle(Array.from({ length: 9 }, (_, i) => i + 1)).join("");
+  private static randomTile(): TilePosition {
+    return Object.values(TilePosition).sample();
   }
 
   static readonly cactpot = 10000;
@@ -131,10 +118,11 @@ export class Board {
 
   constructor(
     public readonly seedString = Board.randomSeedString(),
+    private readonly initialReveal: TilePosition = Board.randomTile(),
     ...itemsToReveal: (TilePosition | BoardLine)[]
   ) {
     this.tiles = Board.tilesFromSeedString(seedString);
-    itemsToReveal.forEach((item) => {
+    [initialReveal, ...itemsToReveal].forEach((item) => {
       if (isTilePosition(item)) this.getTile(item).reveal();
       if (isBoardLine(item)) this.getLine(item).map((tile) => tile.reveal());
     });

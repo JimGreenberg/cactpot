@@ -48,9 +48,7 @@ export class Cactpot {
       String(_id), // gameId
       String(roundId),
       userId,
-      firstReveal,
-      secondReveal,
-      thirdReveal,
+      [firstReveal, secondReveal, thirdReveal],
       lineChoice
     );
   }
@@ -60,9 +58,7 @@ export class Cactpot {
     public readonly gameId: string = "default",
     public readonly roundId: string = "default",
     public readonly userId: string = "default",
-    private firstReveal?: TilePosition,
-    private secondReveal?: TilePosition,
-    private thirdReveal?: TilePosition,
+    private reveals: TilePosition[] = [],
     private lineChoice?: BoardLine
   ) {}
 
@@ -97,18 +93,10 @@ export class Cactpot {
     const turn = this.getCurrentTurn();
     switch (turn) {
       case Turn.INIT:
-        if (!isTilePosition(arg)) throw new Errors.InvalidInput();
-        this.firstReveal = arg;
-        this.revealTile(arg);
-        break;
       case Turn.FIRST:
-        if (!isTilePosition(arg)) throw new Errors.InvalidInput();
-        this.secondReveal = arg;
-        this.revealTile(arg);
-        break;
       case Turn.SECOND:
         if (!isTilePosition(arg)) throw new Errors.InvalidInput();
-        this.thirdReveal = arg;
+        this.reveals.push(arg);
         this.revealTile(arg);
         break;
       case Turn.THIRD:
@@ -132,9 +120,9 @@ export class Cactpot {
       seedString: this.board.seedString,
       gameId: this.gameId,
       roundId: this.roundId,
-      firstReveal: this.firstReveal,
-      secondReveal: this.secondReveal,
-      thirdReveal: this.thirdReveal,
+      firstReveal: this.reveals[1],
+      secondReveal: this.reveals[2],
+      thirdReveal: this.reveals[3],
       lineChoice: this.lineChoice,
     };
   }

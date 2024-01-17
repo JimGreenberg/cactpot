@@ -11,6 +11,10 @@ const GameSchema = new Schema({
   roundId: Schema.ObjectId,
   date: { type: Date, default: new Date() },
   seedString: { type: String, match: /[1-9]/ },
+  initialReveal: {
+    type: String,
+    // enum: Object.values(TilePosition),
+  },
   firstReveal: {
     type: String,
     // enum: Object.values(TilePosition),

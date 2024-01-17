@@ -5,8 +5,9 @@
   "type": "commonjs",
   "module": "./src/app.ts",
   "scripts": {
+    "build": "tsc",
     "start": "node dist/app.js",
-    "st": "tsc-watch --onsuccess \"node dist/app.js\""
+    "bs": "npm run build && npm run start"
   },
   "author": "jim",
   "license": "ISC",
@@ -15,9 +16,6 @@
     "dotenv": "^16.3.1",
     "mongodb": "^6.3.0",
     "mongoose": "^8.0.3"
-  },
-  "engines": {
-    "node": "11.x"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
