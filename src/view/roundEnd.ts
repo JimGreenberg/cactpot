@@ -1,7 +1,7 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { TilePosition } from "../constants";
-import { renderTile, wrap, getScoreBlock, boardLineText } from "./lib";
+import { renderTile, wrap, getScoreBlock, boardLineText } from "./util";
 
 interface SummaryWithUser extends Summary {
   profile: {
@@ -24,10 +24,7 @@ export function roundEndView(games: SummaryWithUser[]) {
 
   blocks.push({
     type: "section",
-    text: getScoreBlock([
-      "The best score on this board was",
-      games[0].bestScore,
-    ]),
+    text: getScoreBlock("The best score on this board was", games[0].bestScore),
   });
   blocks.push({
     type: "context",
@@ -100,7 +97,7 @@ function renderGame({
 
   blocks.push({
     type: "section",
-    text: getScoreBlock(["Score", score]),
+    text: getScoreBlock("Score", score),
   });
 
   blocks.push({

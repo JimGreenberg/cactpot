@@ -1,5 +1,6 @@
 import { Tile } from "../board";
 import { BoardLine } from "../constants";
+import * as S from "./slack";
 
 export function renderTile(
   value: number | typeof Tile.HIDDEN,
@@ -35,11 +36,8 @@ export function wrap(str: string, bookend: string): string {
   return `${bookend}${str}${bookend}`;
 }
 
-export function getScoreBlock([label, score = 0]: [string, number]) {
-  return {
-    type: "mrkdwn",
-    text: `${label}: *${score.toLocaleString()}*`,
-  };
+export function getScoreBlock(label: string, score = 0) {
+  return `${label}: *${score.toLocaleString()}*`;
 }
 
 export function boardLineText(line: BoardLine): string {

@@ -2,59 +2,35 @@ import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { Turn, TilePosition, BoardLine } from "../constants";
 import { renderTile, wrap, getScoreBlock } from "./util";
+import * as S from "./slack";
 
 export function cactpotView(summary: Summary) {
   const { score, bestScore, turn } = summary;
   const blocks: any[] = [];
 
-  blocks.push({
-    type: "header",
-    text: {
-      type: "plain_text",
-      text: getHeaderCopy(turn),
-    },
-  });
-
-  const errorMessage = getErrorMessage();
-  if (errorMessage) {
-    blocks.push({
-      type: "context",
-      elements: [
-        {
-          type: "mrkdwn",
-          text: `:x: ${errorMessage}`,
-        },
-      ],
-    });
-  }
+  blocks.push(S.Header(S.PlainText(getHeaderCopy(turn))));
 
   blocks.push(...getBoardBlocks(summary));
 
   if (score) {
-    blocks.push({
-      type: "section",
-      text: getScoreBlock(["You scored", score]),
-    });
+    blocks.push(S.Section(S.Markdown(getScoreBlock("You scored", score))));
   }
 
   if (bestScore) {
-    blocks.push({
-      type: "section",
-      text: getScoreBlock(["The best score on this board is", bestScore]),
-    });
+    blocks.push(
+      S.Section(
+        S.Markdown(getScoreBlock("The best score on this board is", bestScore))
+      )
+    );
   }
 
   blocks.push(...getScoreInfoBlocks(score));
 
-  blocks.push({
-    type: "context",
-    elements: [
-      {
-        type: "plain_text",
-        text: `Game ID: ${summary.gameId}    Round ID: ${summary.roundId}`,
-      },
-    ],
-  });
+  blocks.push(
+    S.Context(
+      S.PlainText(`Game ID: ${summary.gameId}    Round ID: ${summary.roundId}`)
+    )
+  );
 
   return blocks;
 }
@@ -74,52 +50,42 @@ export function getHeaderCopy(turn: Turn) {
   }
 }
 
-export function getErrorMessage() {
-  return "";
-}
-
-function button({ text, value }: { text: string; value: string }) {
-  return {
-    type: "button",
-    value,
-    action_id: `button-${value}`,
-    text: {
-      type: "plain_text",
-      emoji: true,
-      text,
-    },
-  };
-}
-
 function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
-  function getBlankActions(elements: any[] = []) {
-    return { type: "actions", elements };
-  }
   function getJsonStringValue(value: string) {
     return JSON.stringify({ value, gameId });
   }
   // first row is always the same
   const blocks = [
-    getBlankActions(
+    S.Actions(
       [
         {
           text: ":arrow_lower_right:",
           value: getJsonStringValue(BoardLine.ANTIDIAGONAL),
+          action_id: `line-button-${getJsonStringValue(
+            BoardLine.ANTIDIAGONAL
+          )}`,
         },
-        { text: ":arrow_down:", value: getJsonStringValue(BoardLine.LEFT_COL) },
+        {
+          text: ":arrow_down:",
+          value: getJsonStringValue(BoardLine.LEFT_COL),
+          action_id: `line-button-${getJsonStringValue(BoardLine.LEFT_COL)}`,
+        },
         {
           text: ":arrow_down:",
           value: getJsonStringValue(BoardLine.MIDDLE_COL),
+          action_id: `line-button-${getJsonStringValue(BoardLine.MIDDLE_COL)}`,
         },
         {
           text: ":arrow_down:",
           value: getJsonStringValue(BoardLine.RIGHT_COL),
+          action_id: `line-button-${getJsonStringValue(BoardLine.RIGHT_COL)}`,
         },
         {
           text: ":arrow_lower_left:",
           value: getJsonStringValue(BoardLine.DIAGONAL),
+          action_id: `line-button-${getJsonStringValue(BoardLine.DIAGONAL)}`,
         },
-      ].map(button)
+      ].map(S.Button)
     ),
   ];
 
@@ -131,22 +97,24 @@ function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
   ];
   board.forEach((row, i) => {
     blocks.push(
-      getBlankActions([
-        button({
+      S.Actions(
+        S.Button({
           text: ":arrow_right:",
           value: getJsonStringValue(rowLines[i]),
+          action_id: `line-button-${getJsonStringValue(rowLines[i])}`,
         }),
         ...row.map((tile) => {
           const value = Object.values(TilePosition)[tilePosition++];
           const selectedTile =
             lineChoice &&
             Board.positionsFromBoardLine(lineChoice).includes(value);
-          return button({
+          return S.Button({
             text: renderTile(tile, selectedTile),
             value: getJsonStringValue(String(value)),
+            action_id: `tile-button-${getJsonStringValue(String(value))}`,
           });
-        }),
-      ])
+        })
+      )
     );
   });
 
@@ -154,14 +122,7 @@ function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
 }
 
 function getScoreInfoBlocks(score: number, rows = 4) {
-  function getBlankContext(elements: any[] = []) {
-    return {
-      type: "context",
-      elements,
-    };
-  }
-
-  const blocks = new Array(rows).fill(0).map(() => getBlankContext());
+  const blocks = new Array(rows).fill(0).map(() => S.Context());
   const scoreBlocks = Object.entries(Board.scores).map(([sum, points]) =>
     getScoreInfoBlock([sum, points], score === points)
   );
@@ -171,15 +132,7 @@ function getScoreInfoBlocks(score: number, rows = 4) {
       scoreBlock && blocks[i].elements.push(scoreBlock);
     }
   }
-  return [
-    getBlankContext([
-      {
-        type: "plain_text",
-        text: "Scores",
-      },
-    ]),
-    ...blocks,
-  ];
+  return [S.Context(S.PlainText("Scores")), ...blocks];
 }
 
 function getScoreInfoBlock([label, score]: [string, number], selected = false) {
@@ -190,9 +143,6 @@ function getScoreInfoBlock([label, score]: [string, number], selected = false) {
   const text =
     wrap(wrap(label, "`"), "*") +
     wrap(" ".repeat(spacerLength) + score.toLocaleString(), "`");
-  return {
-    type: "mrkdwn",
-    // text: `*${label}* | ${score.toLocaleString()}`,
-    text,
-  };
+  // text: `*${label}* | ${score.toLocaleString()}`,
+  return S.Markdown(text);
 }

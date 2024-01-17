@@ -37,7 +37,7 @@ export function Confirm({ title, text, confirm, deny }: Record<string, Text>) {
   };
 }
 
-export function Context(...elements: (Text | Image)[]) {
+export function Context(...elements: any[]) {
   return { type: "context", elements };
 }
 
