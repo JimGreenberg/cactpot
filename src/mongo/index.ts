@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { connect, model, Schema, Types, PipelineStage } from "mongoose";
+import { connect, Types, PipelineStage } from "mongoose";
 import { Cactpot } from "../cactpot";
 import { Board } from "../board";
 import { BoardLine, TilePosition } from "../constants";
@@ -12,7 +12,7 @@ if (!process.env.MONGO_URL) throw new Error("No mongo url");
 connect(process.env.MONGO_URL);
 
 export async function createRound(): Promise<string> {
-  const board = new Board("123456789", TilePosition.CENTER);
+  const board = new Board();
   try {
     const round = await new Round({
       seedString: board.seedString,
