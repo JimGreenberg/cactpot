@@ -41,7 +41,7 @@ export class Board {
       .join("");
   }
 
-  private static randomTile(): TilePosition {
+  static randomTile(): TilePosition {
     return Object.values(TilePosition).sample();
   }
 
@@ -118,7 +118,7 @@ export class Board {
 
   constructor(
     public readonly seedString = Board.randomSeedString(),
-    private readonly initialReveal: TilePosition = Board.randomTile(),
+    public readonly initialReveal: TilePosition = Board.randomTile(),
     ...itemsToReveal: (TilePosition | BoardLine)[]
   ) {
     this.tiles = Board.tilesFromSeedString(seedString);

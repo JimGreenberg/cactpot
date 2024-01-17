@@ -3,7 +3,7 @@ export class InvalidInput extends Error {}
 export class InvalidMove extends Error {}
 export class NotDone extends Error {}
 export class NotFound extends Error {}
-export class ErrorJoiningGame extends Error {}
-export class CreateGameError extends Error {}
+export class JoinRoundError extends Error {}
+export class CreateError extends Error {}
 export class UpdateGameError extends Error {}
 export class Done extends Error {}

@@ -17,15 +17,14 @@ export interface Summary {
   seedString: string;
   gameId: string;
   roundId: string;
-  firstReveal?: TilePosition;
-  secondReveal?: TilePosition;
-  thirdReveal?: TilePosition;
+  reveals: TilePosition[];
   lineChoice?: BoardLine;
 }
 
 export class Cactpot {
   static fromMongo({
     seedString,
+    initialReveal,
     firstReveal,
     secondReveal,
     thirdReveal,
@@ -35,6 +34,7 @@ export class Cactpot {
     userId,
   }: {
     seedString: string;
+    initialReveal: TilePosition;
     firstReveal: TilePosition;
     secondReveal: TilePosition;
     thirdReveal: TilePosition;
@@ -44,7 +44,14 @@ export class Cactpot {
     userId: string;
   }): Cactpot {
     return new Cactpot(
-      new Board(seedString, firstReveal, secondReveal, thirdReveal, lineChoice),
+      new Board(
+        seedString,
+        initialReveal,
+        firstReveal,
+        secondReveal,
+        thirdReveal,
+        lineChoice
+      ),
       String(_id), // gameId
       String(roundId),
       userId,
@@ -120,9 +127,7 @@ export class Cactpot {
       seedString: this.board.seedString,
       gameId: this.gameId,
       roundId: this.roundId,
-      firstReveal: this.reveals[1],
-      secondReveal: this.reveals[2],
-      thirdReveal: this.reveals[3],
+      reveals: this.reveals,
       lineChoice: this.lineChoice,
     };
   }
