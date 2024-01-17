@@ -18,6 +18,7 @@ export interface Summary {
   gameId: string;
   roundId: string;
   reveals: TilePosition[];
+  revealValues: number[];
   lineChoice?: BoardLine;
 }
 
@@ -120,6 +121,7 @@ export class Cactpot {
       gameId: this.gameId,
       roundId: this.roundId,
       reveals: this.reveals,
+      revealValues: this.reveals.map((pos) => this.board.getTile(pos).value),
       lineChoice: this.lineChoice,
     };
   }

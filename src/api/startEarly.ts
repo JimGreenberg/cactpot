@@ -9,7 +9,7 @@ import { SlackService } from "../slackService";
 
 export const startEarly: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>
-  async ({ action, body, respond, ack }) => {
+  async ({ action, body, respond }) => {
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
     const { roundId } = JSON.parse((action as ButtonAction).value);

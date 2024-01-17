@@ -1,4 +1,5 @@
 import { Tile } from "../board";
+import { BoardLine } from "../constants";
 
 export function renderTile(
   value: number | typeof Tile.HIDDEN,
@@ -39,6 +40,19 @@ export function getScoreBlock([label, score = 0]: [string, number]) {
     type: "mrkdwn",
     text: `${label}: *${score.toLocaleString()}*`,
   };
+}
+
+export function boardLineText(line: BoardLine): string {
+  return {
+    [BoardLine.TOP_ROW]: "Top Row",
+    [BoardLine.MIDDLE_ROW]: "Middle Row",
+    [BoardLine.BOTTOM_ROW]: "Bottom Row",
+    [BoardLine.LEFT_COL]: "Left Column",
+    [BoardLine.MIDDLE_COL]: "Middle Column",
+    [BoardLine.RIGHT_COL]: "Right Column",
+    [BoardLine.DIAGONAL]: "Upwards Diagonal",
+    [BoardLine.ANTIDIAGONAL]: "Downwards Diagonal",
+  }[line];
 }
 
 /** subtype of slack user */

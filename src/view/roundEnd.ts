@@ -1,7 +1,7 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { TilePosition } from "../constants";
-import { renderTile, wrap, getScoreBlock } from "./lib";
+import { renderTile, wrap, getScoreBlock, boardLineText } from "./lib";
 
 interface SummaryWithUser extends Summary {
   profile: {
@@ -43,6 +43,7 @@ export function roundEndView(games: SummaryWithUser[]) {
 
 function renderGame({
   board,
+  reveals,
   score,
   lineChoice,
   gameId,
@@ -83,6 +84,18 @@ function renderGame({
           .join(" "),
       },
     });
+  });
+
+  blocks.push({
+    type: "context",
+    elements: [
+      {
+        type: "plain_text",
+        text: `Revealed ${reveals[0]}, ${reveals[1]} and ${
+          reveals[2]
+        }, then chose the ${boardLineText(lineChoice!)}`,
+      },
+    ],
   });
 
   blocks.push({
