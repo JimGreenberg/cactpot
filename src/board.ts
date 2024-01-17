@@ -128,6 +128,16 @@ export class Board {
     });
   }
 
+  public get bestScore(): number {
+    return Math.max(
+      ...Object.values(BoardLine).map((line) => this.getScore(line))
+    );
+  }
+
+  public get cactpotPossible(): boolean {
+    return this.bestScore === Board.cactpot;
+  }
+
   getTile(position: TilePosition): Tile {
     const [row, col] = {
       [TilePosition.TOP_LEFT]: [0, 0],
@@ -153,12 +163,6 @@ export class Board {
         .map(({ value }) => value)
         .reduce((a, c) => a + c, 0)
     ];
-  }
-
-  getBestScore(): number {
-    return Math.max(
-      ...Object.values(BoardLine).map((line) => this.getScore(line))
-    );
   }
 
   display(done = false): ThreeByThree<ReturnType<Tile["display"]>> {

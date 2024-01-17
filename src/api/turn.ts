@@ -29,9 +29,9 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
         });
         await respond({
           response_type: "in_channel",
-          text: `${
+          text: `:dingus: ${
             user?.profile?.display_name || "Someone"
-          } tried to select an already revealed tile :dingus:`,
+          } tried to select an already revealed tile`,
           replace_original: false,
         });
       }
@@ -46,15 +46,14 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     const games = await DB.getGamesByRound(game.roundId);
     if (!games?.length) throw new Error();
     if (games.every((game) => game.getCurrentTurn() === Turn.FINAL)) {
-      const games = await DB.getGamesByRound(game.roundId);
-      const humanMembers = await service.getUsers(channelId);
-      if (games.length === humanMembers.length) {
-        await DB.finalizeRound(game.roundId);
+      const users = await service.getUsers(channelId);
+      if (games.length === users.length) {
+        await DB.enableLeaderboardForRound(game.roundId);
       }
       const blocks = roundEndView(
         // @ts-ignore
         games.map((g) => ({
-          ...humanMembers.find(({ id }) => id === g.userId),
+          ...users.find(({ id }) => id === g.userId),
           ...g.getSummary(),
         }))
       );

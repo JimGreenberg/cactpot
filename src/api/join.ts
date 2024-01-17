@@ -15,7 +15,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   async ({ action, body, respond, ack }) => {
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
-    const { roundId, seedString } = JSON.parse((action as ButtonAction).value);
+    const { roundId } = JSON.parse((action as ButtonAction).value);
 
     try {
       await DB.joinGame({
@@ -32,16 +32,15 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
 
     const games = await DB.getGamesByRound(roundId);
     if (!games?.length) throw new Error();
-    const humanMembers = await service.getUsers(channelId);
-    console.log(games.length, humanMembers.length);
-    if (games.length >= humanMembers.length) {
+    const users = await service.getUsers(channelId);
+    if (games.length >= users.length) {
       await service.beginRound(respond, channelId, games);
     } else {
       await respond({
         blocks: startView(
           roundId,
           games.map(
-            ({ userId }) => humanMembers.find(({ id }) => id === userId) as User
+            ({ userId }) => users.find(({ id }) => id === userId) as User
           )
         ),
         replace_original: true,

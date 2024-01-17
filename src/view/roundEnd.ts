@@ -1,6 +1,6 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
-import { BoardLine, TilePosition } from "../constants";
+import { TilePosition } from "../constants";
 import { renderTile, wrap, getScoreBlock } from "./lib";
 
 interface SummaryWithUser extends Summary {

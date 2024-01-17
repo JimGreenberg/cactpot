@@ -14,7 +14,8 @@ export const leaderboard: (
     const users = await service.getUsers(channelId);
     if (!users?.length) throw new Error();
 
-    const userGames = (await DB.getLeaderboard()).map(
+    const leaderboard = await DB.getLeaderboard(channelId);
+    const leaderboardWithUsers = leaderboard.map(
       <T extends { userId: string }>({
         userId,
         ...rest
@@ -30,6 +31,6 @@ export const leaderboard: (
 
     return await respond({
       response_type: "in_channel",
-      blocks: leaderboardView(userGames),
+      blocks: leaderboardView(leaderboardWithUsers),
     });
   };

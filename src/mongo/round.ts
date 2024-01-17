@@ -2,13 +2,15 @@ import { model, Schema } from "mongoose";
 import { TilePosition } from "../constants";
 
 const RoundSchema = new Schema({
+  channelId: { type: String, required: true },
   date: { type: Date, default: new Date() },
-  seedString: { type: String, match: /[1-9]/ },
-  bestScore: Number,
-  cactpotPossible: Boolean,
+  seedString: { type: String, match: /[1-9]/, required: true },
+  bestScore: { type: Number, required: true },
+  cactpotPossible: { type: Boolean, required: true },
   initialReveal: {
     type: String,
     enum: Object.values(TilePosition),
+    required: true,
   },
   leaderboardEnabled: Boolean,
 });

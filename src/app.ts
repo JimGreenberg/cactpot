@@ -50,7 +50,7 @@ const runtime = () => {
   main(_app);
   // @ts-ignore
   _app.error((...args) => {
-    console.log(args);
+    console.error(args);
     runtime();
   });
 };

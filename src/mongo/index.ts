@@ -11,14 +11,15 @@ import Round from "./round";
 if (!process.env.MONGO_URL) throw new Error("No mongo url");
 connect(process.env.MONGO_URL);
 
-export async function createRound(): Promise<string> {
+export async function createRound(channelId: string): Promise<string> {
   const board = new Board();
   try {
     const round = await new Round({
+      channelId,
       seedString: board.seedString,
       initialReveal: board.initialReveal,
-      bestScore: board.getBestScore(),
-      cactpotPossible: board.getBestScore() === Board.cactpot,
+      bestScore: board.bestScore,
+      cactpotPossible: board.cactpotPossible,
     }).save();
     return String(round._id);
   } catch {
@@ -38,9 +39,9 @@ export async function joinGame({
       round: new Types.ObjectId(roundId),
       userId,
     }).save();
-    return Cactpot.fromMongo(game.toObject());
-  } catch {
-    throw new Errors.JoinRoundError();
+    return game.toObject();
+  } catch (e) {
+    throw new Errors.JoinRoundError(String(e));
   }
 }
 
@@ -54,6 +55,7 @@ export async function takeTurn(gameId: string, turn: TilePosition | BoardLine) {
   if (lineChoice) game.lineChoice = lineChoice;
   const score = cactpot.getScore();
   if (score) game.score = score;
+
   try {
     await game.save();
     return cactpot;
@@ -65,19 +67,22 @@ export async function takeTurn(gameId: string, turn: TilePosition | BoardLine) {
 
 export async function getGamesByRound(roundId: string) {
   try {
-    const games = await Game.find({ round: roundId });
-    return games.map((game) => Cactpot.fromMongo(game as any));
+    const games = await Game.find({ round: roundId }).populate("round");
+    return games.map((game) => Cactpot.fromMongo(game.toObject()));
   } catch {
-    throw new Errors.NotFound();
+    throw new Errors.NotFound("roundId");
   }
 }
 
-export async function finalizeRound(roundId: string) {
+export async function enableLeaderboardForRound(roundId: string) {
   await Round.findByIdAndUpdate(roundId, { leaderboardEnabled: true });
 }
 
-function _roundsWithWinningScore(): PipelineStage.Lookup["$lookup"]["pipeline"] {
+function _roundsWithWinningScore(
+  channelId: string
+): PipelineStage.Lookup["$lookup"]["pipeline"] {
   return Round.aggregate()
+    .match({ channelId, leaderboardEnabled: true })
     .lookup({
       from: Game.name,
       localField: "_id",
@@ -92,12 +97,11 @@ function _roundsWithWinningScore(): PipelineStage.Lookup["$lookup"]["pipeline"] 
       bestScore: 1,
       bestPlayerScore: 1,
       cactpotPossible: 1,
-      leaderboardEnabled: 1,
     })
     .pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
 }
 
-export async function getLeaderboard(): Promise<
+export async function getLeaderboard(channelId: string): Promise<
   {
     userId: string;
     countGames: number;
@@ -112,11 +116,10 @@ export async function getLeaderboard(): Promise<
       from: Round.name,
       localField: "round",
       foreignField: "_id",
-      pipeline: _roundsWithWinningScore(),
+      pipeline: _roundsWithWinningScore(channelId),
       as: "round",
     })
     .unwind("round")
-    .match({ "round.leaderboardEnabled": true })
     .group({
       _id: "$userId",
       countGames: { $count: {} },

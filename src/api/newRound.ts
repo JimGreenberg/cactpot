@@ -10,9 +10,10 @@ export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
     const userId = command.user_id;
     let roundId: string;
     try {
-      roundId = await DB.createRound();
+      roundId = await DB.createRound(command.channel_id);
       await DB.joinGame({ roundId, userId });
-    } catch {
+    } catch (e) {
+      console.error(e);
       return await respond({
         response_type: "ephemeral",
         text: "Error creating game :dingus:",

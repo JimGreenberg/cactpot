@@ -114,7 +114,7 @@ export class Cactpot {
     return {
       board: this.board.display(isDone),
       score: this.getScore(),
-      bestScore: isDone ? this.board.getBestScore() : 0,
+      bestScore: isDone ? this.board.bestScore : 0,
       turn,
       seedString: this.board.seedString,
       gameId: this.gameId,
@@ -134,7 +134,7 @@ export class Cactpot {
     const turn = this.getCurrentTurn();
     const isDone = turn === Turn.FINAL;
     if (!isDone) return;
-    const bestScore = this.board.getBestScore();
+    const bestScore = this.board.bestScore;
     return {
       bestScore,
       cactpotPossible: bestScore === Board.cactpot,
