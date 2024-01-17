@@ -10,6 +10,7 @@ import { SlackService } from "../slackService";
 import { cactpotView } from "../view/game";
 import { roundEndView } from "../view/roundEnd";
 import { Turn } from "../constants";
+import * as Errors from "../error";
 
 export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>
@@ -17,12 +18,26 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
     const { value, gameId } = JSON.parse((action as ButtonAction).value);
+
     let game: Cactpot;
     try {
       game = await DB.takeTurn(gameId, value);
     } catch (e) {
+      if (e instanceof Errors.InvalidMove) {
+        const user = await app.client.users.profile.get({
+          user: body?.user?.id,
+        });
+        await respond({
+          response_type: "in_channel",
+          text: `${
+            user?.profile?.display_name || "Someone"
+          } tried to select an already revealed tile :dingus:`,
+          replace_original: false,
+        });
+      }
       return;
     }
+
     await respond({
       replace_original: true,
       blocks: cactpotView(game.getSummary()),
