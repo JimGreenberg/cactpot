@@ -3,7 +3,6 @@ import {
   Middleware,
   SlackActionMiddlewareArgs,
   ButtonAction,
-  BlockAction,
 } from "@slack/bolt";
 import * as DB from "../mongo";
 import { SlackService } from "../slackService";
@@ -14,8 +13,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>
   async ({ action, body, respond, ack }) => {
     const service = new SlackService(app);
-    const channelId = body?.channel?.id!;
-    const messageTs = (body as BlockAction)?.message?.ts!;
+    const channelId = body?.channel?.id as string;
     const { roundId } = JSON.parse((action as ButtonAction).value);
 
     try {
@@ -35,8 +33,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     if (!games?.length) throw new Error();
     const users = await service.getUsers(channelId);
     if (games.length >= users.length) {
-      respond({ delete_original: true });
-      await service.beginRound(channelId, games, users);
+      await service.beginRound(respond, channelId, games);
     } else {
       await respond({
         blocks: startView(

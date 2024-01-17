@@ -1,7 +1,6 @@
-import { App } from "@slack/bolt";
+import { App, RespondFn } from "@slack/bolt";
 import { Cactpot } from "./cactpot";
 import { cactpotView } from "./view/game";
-import { inProgressRound } from "./view/inProgressRound";
 
 export class SlackService {
   constructor(private app: App) {}
@@ -20,30 +19,16 @@ export class SlackService {
       .filter(({ id }) => members.includes(id as string));
   }
 
-  async beginRound(channelId: string, games: Cactpot[], users: any[]) {
-    const { message } = await this.app.client.chat.postMessage({
-      text: "",
-      channel: channelId,
-      blocks: inProgressRound(
-        games.map((g) => {
-          const user = users.find(({ id }) => id === g.userId);
-          return {
-            turn: g.getCurrentTurn(),
-            name: user?.profile?.display_name!,
-            image: user?.profile?.image_24!,
-          };
-        })
-      ),
-    });
+  async beginRound(respond: RespondFn, channelId: string, games: Cactpot[]) {
     return Promise.all([
       ...games.map((game) =>
         this.app.client.chat.postEphemeral({
-          text: "",
-          blocks: cactpotView(game.getSummary(), message?.ts!),
+          blocks: cactpotView(game.getSummary()),
           user: game.userId,
           channel: channelId,
         })
       ),
+      respond({ delete_original: true }),
     ]);
   }
 }

@@ -1,16 +1,16 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { Turn, TilePosition, BoardLine } from "../constants";
-import { renderTile, getScoreBlock } from "./util";
+import { renderTile, wrap, getScoreBlock } from "./util";
 import * as S from "./slack";
 
-export function cactpotView(summary: Summary, roundMessageTs: string) {
+export function cactpotView(summary: Summary) {
   const { score, bestScore, turn } = summary;
   const blocks: any[] = [];
 
   blocks.push(S.Header(S.PlainText(getHeaderCopy(turn))));
 
-  blocks.push(...getBoardBlocks(summary, roundMessageTs));
+  blocks.push(...getBoardBlocks(summary));
 
   if (score) {
     blocks.push(S.Section(S.Markdown(getScoreBlock("You scored", score))));
@@ -24,11 +24,13 @@ export function cactpotView(summary: Summary, roundMessageTs: string) {
     );
   }
 
-  // blocks.push(
-  //   S.Context(
-  //     S.PlainText(`Game ID: ${summary.gameId}    Round ID: ${summary.roundId}`)
-  //   )
-  // );
+  blocks.push(...getScoreInfoBlocks(score));
+
+  blocks.push(
+    S.Context(
+      S.PlainText(`Game ID: ${summary.gameId}    Round ID: ${summary.roundId}`)
+    )
+  );
   return blocks;
 }
 
@@ -47,12 +49,9 @@ export function getHeaderCopy(turn: Turn) {
   }
 }
 
-function getBoardBlocks(
-  { board, lineChoice, gameId }: Summary,
-  roundMessageTs: string
-) {
+function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
   function getJsonStringValue(value: string) {
-    return JSON.stringify({ value, gameId, roundMessageTs });
+    return JSON.stringify({ value, gameId });
   }
   // first row is always the same
   const blocks = [
@@ -119,4 +118,30 @@ function getBoardBlocks(
   });
 
   return blocks;
+}
+
+function getScoreInfoBlocks(score: number, rows = 4) {
+  const blocks = new Array(rows).fill(0).map(() => S.Context());
+  const scoreBlocks = Object.entries(Board.scores).map(([sum, points]) =>
+    getScoreInfoBlock([sum, points], score === points)
+  );
+  while (scoreBlocks.length) {
+    for (let i = 0; i < rows; i++) {
+      const scoreBlock = scoreBlocks.shift();
+      scoreBlock && blocks[i].elements.push(scoreBlock);
+    }
+  }
+  return [S.Context(S.PlainText("Scores")), ...blocks];
+}
+
+function getScoreInfoBlock([label, score]: [string, number], selected = false) {
+  const totalLength = 8;
+  const scoreFmt = score.toLocaleString();
+  const spacerLength = totalLength - scoreFmt.length - label.length;
+
+  const text =
+    wrap(wrap(label, "`"), "*") +
+    wrap(" ".repeat(spacerLength) + score.toLocaleString(), "`");
+  // text: `*${label}* | ${score.toLocaleString()}`,
+  return S.Markdown(text);
 }
