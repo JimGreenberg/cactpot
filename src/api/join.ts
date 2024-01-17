@@ -32,7 +32,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
 
     const games = await DB.getGamesByRound(roundId);
     if (!games?.length) throw new Error();
-    const humanMembers = await service.getHumanMembers(channelId);
+    const humanMembers = await service.getUsers(channelId);
     console.log(games.length, humanMembers.length);
     if (games.length >= humanMembers.length) {
       await service.beginRound(respond, channelId, games);

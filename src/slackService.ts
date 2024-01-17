@@ -5,7 +5,7 @@ import { cactpotView } from "./view/game";
 export class SlackService {
   constructor(private app: App) {}
 
-  async getHumanMembers(channelId: string) {
+  async getUsers(channelId: string) {
     const { members } = await this.app.client.conversations.members({
       channel: channelId,
     });

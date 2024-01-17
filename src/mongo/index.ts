@@ -97,7 +97,16 @@ function _roundsWithWinningScore(): PipelineStage.Lookup["$lookup"]["pipeline"] 
     .pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
 }
 
-export async function getLeaderboard() {
+export async function getLeaderboard(): Promise<
+  {
+    userId: string;
+    countGames: number;
+    cactpots: number;
+    cactpotsMissed: number;
+    bestsAchieved: number;
+    wins: number;
+  }[]
+> {
   const pipeline = Game.aggregate()
     .lookup({
       from: Round.name,
@@ -140,6 +149,12 @@ export async function getLeaderboard() {
           },
         },
       },
+    })
+    .addFields({
+      userId: "$_id",
+    })
+    .sort({
+      wins: -1,
     });
 
   try {

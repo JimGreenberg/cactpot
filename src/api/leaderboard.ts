@@ -11,75 +11,25 @@ export const leaderboard: (
   async ({ command, respond }) => {
     const channelId = command.channel_id;
     const service = new SlackService(app);
-    const humanMembers = await service.getHumanMembers(channelId);
-    if (!humanMembers?.length) throw new Error();
+    const users = await service.getUsers(channelId);
+    if (!users?.length) throw new Error();
 
-    const games = await DB.getLeaderboard();
-    const roundMap: Record<string, { userId: string; score: number }[]> = {};
-    const winMap: Record<string, number> = {};
-    games.forEach((game) => {
-      if (!(game.roundId in roundMap)) roundMap[game.roundId] = [];
-      roundMap[game.roundId].push({
-        score: game.leaderboardInfo()!.score,
-        userId: game.userId,
-      });
-    });
-    Object.values(roundMap).forEach((round) => {
-      const max = Math.max(...round.map(({ score }) => score));
-      round.forEach(({ userId, score }) => {
-        if (score === max) {
-          if (!(userId in winMap)) winMap[userId] = 0;
-          winMap[userId]++;
-        }
-      });
-    });
+    const userGames = (await DB.getLeaderboard()).map(
+      <T extends { userId: string }>({
+        userId,
+        ...rest
+      }: T): Omit<T, "userId"> & { name: string; image: string } => {
+        const user = users.find(({ id }) => id === userId);
+        return {
+          ...rest,
+          name: user?.profile?.display_name || "",
+          image: user?.profile?.image_24 || "",
+        };
+      }
+    );
+
     return await respond({
       response_type: "in_channel",
-      blocks: leaderboardView(
-        humanMembers
-          .map(({ id, profile }) => {
-            const { display_name, image_24 } = profile!;
-            const userGames = games.filter(({ userId }) => userId === id);
-            const leaderboardAggs = userGames
-              .map((game) => game.leaderboardInfo()!)
-              .reduce(
-                (
-                  {
-                    numGames,
-                    totalScore,
-                    cactpots,
-                    cactpotsMissed,
-                    bestsAchieved,
-                  },
-                  { score, cactpotPossible, bestScore }
-                ) => {
-                  return {
-                    numGames: numGames + 1,
-                    totalScore: score + totalScore,
-                    cactpots: cactpots + Number(score === Board.cactpot),
-                    cactpotsMissed:
-                      cactpotsMissed +
-                      Number(cactpotPossible && score != Board.cactpot),
-                    bestsAchieved: bestsAchieved + Number(score == bestScore),
-                  };
-                },
-                {
-                  numGames: 0,
-                  totalScore: 0,
-                  cactpots: 0,
-                  cactpotsMissed: 0,
-                  bestsAchieved: 0,
-                }
-              );
-
-            return {
-              wins: winMap[id!],
-              name: display_name!,
-              image: image_24!,
-              ...leaderboardAggs,
-            };
-          })
-          .sort(({ wins: winsA }, { wins: winsB }) => winsB - winsA)
-      ),
+      blocks: leaderboardView(userGames),
     });
   };

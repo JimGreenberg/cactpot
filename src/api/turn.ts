@@ -32,7 +32,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     if (!games?.length) throw new Error();
     if (games.every((game) => game.getCurrentTurn() === Turn.FINAL)) {
       const games = await DB.getGamesByRound(game.roundId);
-      const humanMembers = await service.getHumanMembers(channelId);
+      const humanMembers = await service.getUsers(channelId);
       if (games.length === humanMembers.length) {
         await DB.finalizeRound(game.roundId);
       }
