@@ -55,7 +55,7 @@ export async function createGame(userId: string) {
     }).save();
     return Cactpot.fromMongo(game as any);
   } catch {
-    throw new Errors.CreateGameError();
+    throw new Errors.CreateError("game");
   }
 }
 
@@ -76,7 +76,7 @@ export async function joinGame({
     }).save();
     return Cactpot.fromMongo(game as any);
   } catch {
-    throw new Errors.CreateGameError();
+    throw new Errors.CreateError("game");
   }
 }
 
@@ -89,8 +89,8 @@ export async function takeTurn(
   const cactpot = Cactpot.fromMongo(game as any);
 
   cactpot.takeTurn(turn);
-  const { firstReveal, secondReveal, thirdReveal, lineChoice, score } =
-    cactpot.getSummary();
+  const { reveals, lineChoice, score } = cactpot.getSummary();
+  const [firstReveal, secondReveal, thirdReveal] = reveals;
   if (firstReveal) game.firstReveal = firstReveal;
   if (secondReveal) game.secondReveal = secondReveal;
   if (thirdReveal) game.thirdReveal = thirdReveal;

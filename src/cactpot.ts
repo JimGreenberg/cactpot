@@ -59,6 +59,28 @@ export class Cactpot {
       lineChoice
     );
   }
+  static fromMongo2({
+    round: { seedString, initialReveal, _id: roundId },
+    _id,
+    reveals,
+    lineChoice,
+    userId,
+  }: {
+    round: { seedString: string; initialReveal: TilePosition; _id: string };
+    reveals: TilePosition[];
+    lineChoice: BoardLine;
+    _id: Types.ObjectId;
+    userId: string;
+  }): Cactpot {
+    return new Cactpot(
+      new Board(seedString, initialReveal, ...reveals, lineChoice),
+      String(_id), // gameId
+      String(roundId),
+      userId,
+      reveals,
+      lineChoice
+    );
+  }
 
   constructor(
     private board: Board = new Board(),
@@ -92,7 +114,7 @@ export class Cactpot {
 
   private revealTile(pos: TilePosition) {
     const tile = this.board.getTile(pos);
-    if (tile.visible) throw new Errors.InvalidMove();
+    if (tile.visible) throw new Errors.InvalidMove(pos);
     return tile.reveal();
   }
 
@@ -102,12 +124,12 @@ export class Cactpot {
       case Turn.INIT:
       case Turn.FIRST:
       case Turn.SECOND:
-        if (!isTilePosition(arg)) throw new Errors.InvalidInput();
+        if (!isTilePosition(arg)) throw new Errors.InvalidInput(arg);
         this.reveals.push(arg);
         this.revealTile(arg);
         break;
       case Turn.THIRD:
-        if (!isBoardLine(arg)) throw new Errors.InvalidInput();
+        if (!isBoardLine(arg)) throw new Errors.InvalidInput(arg);
         this.lineChoice = arg;
         break;
       case Turn.FINAL:

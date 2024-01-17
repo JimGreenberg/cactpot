@@ -52,7 +52,7 @@ if (!process.env.MONGO_URL) throw new Error("No mongo url");
 connect(process.env.MONGO_URL);
 
 export async function createRound() {
-  const board = new Board();
+  const board = new Board("123456789");
   try {
     const round = await new Round({
       seedString: board.seedString,
@@ -84,15 +84,12 @@ export async function joinGame({
   }
 }
 
-export async function takeTurn(
-  gameId: Types.ObjectId,
-  turn: TilePosition | BoardLine
-) {
-  const game = await Game.findById(gameId);
+export async function takeTurn(gameId: string, turn: TilePosition | BoardLine) {
+  const game = await Game.findById(gameId).populate("round");
   if (!game) throw new Errors.NotFound();
-  const cactpot = Cactpot.fromMongo(game.toObject());
+  const cactpot = Cactpot.fromMongo2(game.toObject());
 
-  const { reveals, lineChoice, score } = cactpot.takeTurn(turn);
+  const { reveals, lineChoice } = cactpot.takeTurn(turn);
   game.reveals = reveals;
   if (lineChoice) game.lineChoice = lineChoice;
   const leaderboardInfo = cactpot.leaderboardInfo();
@@ -109,14 +106,14 @@ export async function takeTurn(
 export async function getGamesByRound(roundId: string) {
   try {
     const games = await Game.find({ round: roundId });
-    return games.map((game) => Cactpot.fromMongo(game as any));
+    return games.map((game) => Cactpot.fromMongo2(game as any));
   } catch {
     throw new Errors.NotFound();
   }
 }
 
 export async function finalizeRound(roundId: string) {
-  return await Round.findByIdAndUpdate(roundId, { leaderboardEnabled: true });
+  await Round.findByIdAndUpdate(roundId, { leaderboardEnabled: true });
 }
 
 export async function getLeaderboard() {
@@ -124,6 +121,7 @@ export async function getLeaderboard() {
     .lookup({
       from: ROUND_MODEL_NAME,
       localField: "round",
+      foreignField: "_id",
       as: "round",
     })
     .unwind("round")
@@ -146,7 +144,7 @@ export async function getLeaderboard() {
             if: {
               $and: [
                 "$round.cactpotPossible",
-                { $neq: ["$leaderboardInfo.score", Board.cactpot] },
+                { $ne: ["$leaderboardInfo.score", Board.cactpot] },
               ],
             },
             then: 1,
