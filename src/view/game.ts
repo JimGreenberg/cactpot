@@ -31,7 +31,6 @@ export function cactpotView(summary: Summary) {
       S.PlainText(`Game ID: ${summary.gameId}    Round ID: ${summary.roundId}`)
     )
   );
-
   return blocks;
 }
 
@@ -57,7 +56,7 @@ function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
   // first row is always the same
   const blocks = [
     S.Actions(
-      [
+      ...[
         {
           text: ":arrow_lower_right:",
           value: getJsonStringValue(BoardLine.ANTIDIAGONAL),

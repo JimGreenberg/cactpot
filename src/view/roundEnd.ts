@@ -12,9 +12,9 @@ interface SummaryWithUser extends Summary {
 }
 
 export function roundEndView(games: SummaryWithUser[]): any[] {
-  return [
+  const blocks = [
     S.Header(S.PlainText("Results")),
-    ...games.map(renderGame),
+    ...games.map(renderGame).flat(1),
     S.Section(
       S.Markdown(
         getScoreBlock("The best score on this board was", games[0].bestScore)
@@ -22,11 +22,12 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
     ),
     S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)),
   ];
+  return blocks;
 }
 
 function renderGame({
   board,
-  reveals,
+  revealValues,
   score,
   lineChoice,
   gameId,
@@ -41,7 +42,7 @@ function renderGame({
       }),
       S.PlainText(display_name)
     ),
-    ...board.map((row) => {
+    ...board.map((row) =>
       S.Section(
         S.Markdown(
           row
@@ -56,13 +57,13 @@ function renderGame({
             })
             .join(" ")
         )
-      );
-    }),
+      )
+    ),
 
     S.Context(
       S.PlainText(
-        `Revealed ${reveals[0]}, ${reveals[1]} and ${
-          reveals[2]
+        `Revealed ${revealValues[0]}, ${revealValues[1]} and ${
+          revealValues[2]
         }, then chose the ${boardLineText(lineChoice!)}`
       )
     ),

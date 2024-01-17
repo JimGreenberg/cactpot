@@ -6,18 +6,17 @@ interface Text {
 export function Actions(...elements: any[]) {
   return { type: "actions", elements };
 }
+export function ConfirmActions(...elements: any[]) {
+  return { type: "actions", elements };
+}
 
-export function Button({
-  value,
-  action_id,
-  text,
-  style,
-}: Record<string, string>) {
+export function Button({ value, action_id, text, style, confirm }: any) {
   return {
     type: "button",
     value,
     action_id,
     style,
+    confirm,
     text: {
       text,
       type: "plain_text",
@@ -26,18 +25,7 @@ export function Button({
   };
 }
 
-export function Confirm({ title, text, confirm, deny }: Record<string, Text>) {
-  return {
-    confirm: {
-      title,
-      text,
-      confirm,
-      deny,
-    },
-  };
-}
-
-export function Context(...elements: any[]) {
+export function Context(...elements: (Text | ReturnType<typeof Image>)[]) {
   return { type: "context", elements };
 }
 

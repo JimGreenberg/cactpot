@@ -29,6 +29,13 @@ export const leaderboard: (
       }
     );
 
+    if (!leaderboardWithUsers.length) {
+      return await respond({
+        response_type: "ephemeral",
+        text: "Error finding games :dingus:",
+      });
+    }
+
     return await respond({
       response_type: "in_channel",
       blocks: leaderboardView(leaderboardWithUsers),

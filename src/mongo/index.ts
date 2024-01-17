@@ -65,6 +65,15 @@ export async function takeTurn(gameId: string, turn: TilePosition | BoardLine) {
   }
 }
 
+export async function getGameById(gameId: string) {
+  try {
+    const game = await Game.findById(gameId).populate("round");
+    return Cactpot.fromMongo(game!.toObject());
+  } catch {
+    throw new Errors.NotFound("game");
+  }
+}
+
 export async function getGamesByRound(roundId: string) {
   try {
     const games = await Game.find({ round: roundId }).populate("round");
@@ -84,11 +93,12 @@ function _roundsWithWinningScore(
   return Round.aggregate()
     .match({ channelId, leaderboardEnabled: true })
     .lookup({
-      from: Game.name,
+      from: Game.collection.name,
       localField: "_id",
       foreignField: "round",
       as: "games",
     })
+    .match({ "games.0": { $exists: true } })
     .addFields({
       bestPlayerScore: { $max: "$games.score" },
     })
@@ -113,7 +123,7 @@ export async function getLeaderboard(channelId: string): Promise<
 > {
   const pipeline = Game.aggregate()
     .lookup({
-      from: Round.name,
+      from: Round.collection.name,
       localField: "round",
       foreignField: "_id",
       pipeline: _roundsWithWinningScore(channelId),
