@@ -1,11 +1,9 @@
 import { Cactpot } from "../cactpot";
 import { User } from "./lib";
 
-export function startView(cactpot: Cactpot, currentPlayers: User[]) {
+export function startView(roundId: string, currentPlayers: User[]) {
   const value = JSON.stringify({
-    gameId: cactpot.gameId,
-    roundId: cactpot.roundId,
-    seedString: cactpot.seedString,
+    roundId,
   });
 
   return [
@@ -61,7 +59,7 @@ export function startView(cactpot: Cactpot, currentPlayers: User[]) {
     },
     {
       type: "context",
-      elements: [{ type: "plain_text", text: `Round ID: ${cactpot.roundId}` }],
+      elements: [{ type: "plain_text", text: `Round ID: ${roundId}` }],
     },
   ];
 }

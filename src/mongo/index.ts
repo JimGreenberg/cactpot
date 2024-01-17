@@ -11,7 +11,7 @@ import Round from "./round";
 if (!process.env.MONGO_URL) throw new Error("No mongo url");
 connect(process.env.MONGO_URL);
 
-export async function createRound() {
+export async function createRound(): Promise<string> {
   const board = new Board("123456789", TilePosition.CENTER);
   try {
     const round = await new Round({
@@ -20,7 +20,7 @@ export async function createRound() {
       bestScore: board.getBestScore(),
       cactpotPossible: board.getBestScore() === Board.cactpot,
     }).save();
-    return round.toObject();
+    return String(round._id);
   } catch {
     throw new Errors.CreateError("round");
   }
@@ -38,7 +38,7 @@ export async function joinGame({
       round: new Types.ObjectId(roundId),
       userId,
     }).save();
-    return game.toObject();
+    return Cactpot.fromMongo(game.toObject());
   } catch {
     throw new Errors.JoinRoundError();
   }

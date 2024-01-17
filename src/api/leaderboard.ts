@@ -1,5 +1,5 @@
 import { App, Middleware, SlackCommandMiddlewareArgs } from "@slack/bolt";
-import * as DB from "../mongo/game";
+import * as DB from "../mongo";
 import { Board } from "../board";
 import { leaderboardView } from "../view/leaderboard";
 import { SlackService } from "../slackService";

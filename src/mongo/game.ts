@@ -24,5 +24,7 @@ const GameSchema = new Schema({
   },
   score: Number,
 });
-const GAME_MODEL_NAME = "game2";
+GameSchema.index({ userId: 1, round: 1 }, { unique: true });
+
+const GAME_MODEL_NAME = "game";
 export default model(GAME_MODEL_NAME, GameSchema);

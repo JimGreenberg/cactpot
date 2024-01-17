@@ -1,5 +1,5 @@
 import { App, Middleware, SlackCommandMiddlewareArgs } from "@slack/bolt";
-import * as DB from "../mongo/game";
+import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
 import { startView } from "../view/start";
 import type { User } from "../view/lib";
@@ -7,9 +7,11 @@ import type { User } from "../view/lib";
 export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
   (app: App) =>
   async ({ command, respond }) => {
-    let game: Cactpot;
+    const userId = command.user_id;
+    let roundId: string;
     try {
-      game = await DB.createGame(command.user_id);
+      roundId = await DB.createRound();
+      await DB.joinGame({ roundId, userId });
     } catch {
       return await respond({
         response_type: "ephemeral",
@@ -17,8 +19,8 @@ export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
         replace_original: false,
       });
     }
-    const user = await app.client.users.profile.get({ user: command.user_id });
-    if (!game || !user.profile?.display_name || !user.profile?.image_24) {
+    const user = await app.client.users.profile.get({ user: userId });
+    if (!roundId || !user.profile?.display_name || !user.profile?.image_24) {
       return await respond({
         response_type: "ephemeral",
         text: "Error creating game :dingus:",
@@ -27,6 +29,6 @@ export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
     }
     await respond({
       response_type: "in_channel",
-      blocks: startView(game, [user as User]),
+      blocks: startView(roundId, [user as User]),
     });
   };

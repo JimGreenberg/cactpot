@@ -4,7 +4,7 @@ import {
   SlackActionMiddlewareArgs,
   ButtonAction,
 } from "@slack/bolt";
-import * as DB from "../mongo/game";
+import * as DB from "../mongo";
 import { SlackService } from "../slackService";
 
 export const startEarly: (app: App) => Middleware<SlackActionMiddlewareArgs> =
@@ -13,7 +13,7 @@ export const startEarly: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
     const { roundId } = JSON.parse((action as ButtonAction).value);
-    const games = await DB.getRound(roundId);
+    const games = await DB.getGamesByRound(roundId);
     if (!games?.length) throw new Error();
     await service.beginRound(respond, channelId, games);
   };

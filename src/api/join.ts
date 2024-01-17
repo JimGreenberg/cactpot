@@ -4,7 +4,7 @@ import {
   SlackActionMiddlewareArgs,
   ButtonAction,
 } from "@slack/bolt";
-import * as DB from "../mongo/game";
+import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
 import { SlackService } from "../slackService";
 import { startView } from "../view/start";
@@ -17,12 +17,10 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     const channelId = body?.channel?.id as string;
     const { roundId, seedString } = JSON.parse((action as ButtonAction).value);
 
-    let game: Cactpot;
     try {
-      game = await DB.joinGame({
+      await DB.joinGame({
         userId: body.user.id,
         roundId,
-        seedString,
       });
     } catch {
       return await respond({
@@ -32,7 +30,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
       });
     }
 
-    const games = await DB.getRound(roundId);
+    const games = await DB.getGamesByRound(roundId);
     if (!games?.length) throw new Error();
     const humanMembers = await service.getHumanMembers(channelId);
     console.log(games.length, humanMembers.length);
@@ -41,7 +39,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     } else {
       await respond({
         blocks: startView(
-          game,
+          roundId,
           games.map(
             ({ userId }) => humanMembers.find(({ id }) => id === userId) as User
           )

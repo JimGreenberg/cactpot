@@ -12,5 +12,5 @@ const RoundSchema = new Schema({
   },
   leaderboardEnabled: Boolean,
 });
-const ROUND_MODEL_NAME = "round2";
+const ROUND_MODEL_NAME = "round";
 export default model(ROUND_MODEL_NAME, RoundSchema);

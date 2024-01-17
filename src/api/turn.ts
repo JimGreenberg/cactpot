@@ -4,7 +4,7 @@ import {
   SlackActionMiddlewareArgs,
   ButtonAction,
 } from "@slack/bolt";
-import * as DB from "../mongo/game";
+import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
 import { SlackService } from "../slackService";
 import { cactpotView } from "../view/game";
@@ -13,7 +13,7 @@ import { Turn } from "../constants";
 
 export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>
-  async ({ action, body, respond, ack }) => {
+  async ({ action, body, respond }) => {
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
     const { value, gameId } = JSON.parse((action as ButtonAction).value);
@@ -28,10 +28,10 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
       blocks: cactpotView(game.getSummary()),
     });
 
-    const games = await DB.getRound(game.roundId);
+    const games = await DB.getGamesByRound(game.roundId);
     if (!games?.length) throw new Error();
     if (games.every((game) => game.getCurrentTurn() === Turn.FINAL)) {
-      const games = await DB.getRound(game.roundId);
+      const games = await DB.getGamesByRound(game.roundId);
       const humanMembers = await service.getHumanMembers(channelId);
       if (games.length === humanMembers.length) {
         await DB.finalizeRound(game.roundId);
