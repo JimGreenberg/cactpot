@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { connect, Types, PipelineStage } from "mongoose";
+import mongoose, { connect, Types, PipelineStage } from "mongoose";
 import { Cactpot } from "../cactpot";
 import { Board } from "../board";
 import { BoardLine, TilePosition } from "../constants";
@@ -175,4 +175,10 @@ export async function getLeaderboard(channelId: string): Promise<
   } catch {
     throw new Errors.NotFound();
   }
+}
+
+// Migrations
+
+export async function syncIndexes() {
+  await mongoose.syncIndexes();
 }
