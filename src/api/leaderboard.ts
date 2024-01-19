@@ -15,19 +15,10 @@ export const leaderboard: (
     if (!users?.length) throw new Error();
 
     const leaderboard = await DB.getLeaderboard(channelId);
-    const leaderboardWithUsers = leaderboard.map(
-      <T extends { userId: string }>({
-        userId,
-        ...rest
-      }: T): Omit<T, "userId"> & { name: string; image: string } => {
-        const user = users.find(({ id }) => id === userId);
-        return {
-          ...rest,
-          name: user?.profile?.display_name || "",
-          image: user?.profile?.image_24 || "",
-        };
-      }
-    );
+    const leaderboardWithUsers = leaderboard.map(({ userId, ...rest }) => {
+      const user = users.find(({ id }) => id === userId)!;
+      return { ...rest, name: user.name, image: user.image };
+    });
 
     if (!leaderboardWithUsers.length) {
       return await respond({

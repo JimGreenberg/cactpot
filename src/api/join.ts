@@ -7,7 +7,6 @@ import {
 import * as DB from "../mongo";
 import { SlackService } from "../slackService";
 import { startView } from "../view/start";
-import { User } from "../view/util";
 
 export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>
@@ -38,9 +37,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
       await respond({
         blocks: startView(
           roundId,
-          games.map(
-            ({ userId }) => users.find(({ id }) => id === userId) as User
-          )
+          games.map(({ userId }) => users.find(({ id }) => id === userId)!)
         ),
         replace_original: true,
       });

@@ -21,6 +21,7 @@ export async function createRound(channelId: string): Promise<string> {
       bestScore: board.bestScore,
       cactpotPossible: board.cactpotPossible,
     }).save();
+    console.log(String(round._id));
     return String(round._id);
   } catch {
     throw new Errors.CreateError("round");
@@ -34,9 +35,12 @@ export async function joinGame({
   roundId: string;
   userId: string;
 }) {
+  console.log(roundId);
+  const round = new Types.ObjectId(roundId);
+  console.log(round);
   try {
     const game = await new Game({
-      round: new Types.ObjectId(roundId),
+      round,
       userId,
     }).save();
     return game.toObject();
@@ -76,7 +80,9 @@ export async function getGameById(gameId: string) {
 
 export async function getGamesByRound(roundId: string) {
   try {
-    const games = await Game.find({ round: roundId }).populate("round");
+    const games = await Game.find({ round: roundId })
+      .sort({ score: -1 })
+      .populate("round");
     return games.map((game) => Cactpot.fromMongo(game.toObject()));
   } catch {
     throw new Errors.NotFound("roundId");

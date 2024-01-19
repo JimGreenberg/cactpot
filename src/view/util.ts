@@ -52,11 +52,3 @@ export function boardLineText(line: BoardLine): string {
     [BoardLine.ANTIDIAGONAL]: "Downwards Diagonal",
   }[line];
 }
-
-/** subtype of slack user */
-export interface User {
-  profile: {
-    display_name: string;
-    image_24: string;
-  };
-}

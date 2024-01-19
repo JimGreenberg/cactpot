@@ -16,13 +16,19 @@ export class SlackService {
 
     return users
       .filter(({ is_bot }) => !is_bot)
-      .filter(({ id }) => members.includes(id as string));
+      .filter(({ id }) => members.includes(id as string))
+      .map((user) => ({
+        id: user.id!,
+        name: user.profile?.display_name!,
+        image: user.profile?.image_24!,
+      }));
   }
 
   async beginRound(respond: RespondFn, channelId: string, games: Cactpot[]) {
     return Promise.all([
       ...games.map((game) =>
         this.app.client.chat.postEphemeral({
+          text: "",
           blocks: cactpotView(game.getSummary()),
           user: game.userId,
           channel: channelId,

@@ -1,7 +1,13 @@
-import { User } from "./util";
 import * as S from "./slack";
 
-export function startView(roundId: string, currentPlayers: User[]) {
+export function startView(
+  roundId: string,
+  currentPlayers: {
+    id: string;
+    name: string;
+    image: string;
+  }[]
+) {
   const value = JSON.stringify({
     roundId,
   });
@@ -26,10 +32,10 @@ export function startView(roundId: string, currentPlayers: User[]) {
       })
     ),
     S.Context(
-      ...currentPlayers.map(({ profile: { image_24, display_name } }) =>
+      ...currentPlayers.map(({ image, name }) =>
         S.Image({
-          image_url: image_24,
-          alt_text: display_name,
+          image_url: image,
+          alt_text: name,
         })
       )
     ),

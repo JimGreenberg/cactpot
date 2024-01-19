@@ -17,6 +17,8 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
     const { value, gameId } = JSON.parse((action as ButtonAction).value);
+    if (!gameId) throw new Error();
+    if (!value) throw new Error();
 
     let game: Cactpot;
     try {
@@ -39,11 +41,14 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
         await DB.enableLeaderboardForRound(game.roundId);
       }
       const blocks = roundEndView(
-        // @ts-ignore
-        games.map((g) => ({
-          ...users.find(({ id }) => id === g.userId),
-          ...g.getSummary(),
-        }))
+        games.map((g) => {
+          const { name, image } = users.find(({ id }) => id === g.userId)!;
+          return {
+            name,
+            image,
+            ...g.getSummary(),
+          };
+        })
       );
       await app.client.chat.postMessage({
         channel: channelId,

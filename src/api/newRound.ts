@@ -1,7 +1,6 @@
 import { App, Middleware, SlackCommandMiddlewareArgs } from "@slack/bolt";
 import * as DB from "../mongo";
 import { startView } from "../view/start";
-import type { User } from "../view/util";
 
 export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
   (app: App) =>
@@ -19,8 +18,13 @@ export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
         replace_original: false,
       });
     }
-    const user = await app.client.users.profile.get({ user: userId });
-    if (!roundId || !user.profile?.display_name || !user.profile?.image_24) {
+    const slackUser = await app.client.users.profile.get({ user: userId });
+    const user = {
+      id: userId,
+      name: slackUser.profile?.display_name!,
+      image: slackUser.profile?.image_24!,
+    };
+    if (!roundId || !user.name || !user.image) {
       return await respond({
         response_type: "ephemeral",
         text: "Error creating game :dingus:",
@@ -29,6 +33,6 @@ export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
     }
     await respond({
       response_type: "in_channel",
-      blocks: startView(roundId, [user as User]),
+      blocks: startView(roundId, [user]),
     });
   };
