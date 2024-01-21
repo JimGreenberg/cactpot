@@ -28,7 +28,7 @@ export class SlackService {
     return Promise.all([
       ...games.map((game) =>
         this.app.client.chat.postEphemeral({
-          text: "",
+          text: "<!channel> Cactpot has begun!",
           blocks: cactpotView(game.getSummary()),
           user: game.userId,
           channel: channelId,
