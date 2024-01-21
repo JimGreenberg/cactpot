@@ -34,5 +34,6 @@ export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
     await respond({
       response_type: "in_channel",
       blocks: startView(roundId, [user]),
+      text: "<!channel>",
     });
   };

@@ -1,7 +1,7 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { TilePosition } from "../constants";
-import { renderTile, wrap, getScoreBlock, boardLineText } from "./util";
+import { wrap, getScoreBlock, boardLineText, tileChar } from "./util";
 import * as S from "./slack";
 
 interface SummaryWithUser extends Summary {
@@ -11,15 +11,21 @@ interface SummaryWithUser extends Summary {
 
 export function roundEndView(games: SummaryWithUser[]): any[] {
   const blocks = [
-    S.Header(S.PlainText("Results")),
-    ...games.map(renderGame).flat(1),
-    S.Section(S.PlainText("Scores")),
+    S.Header(S.PlainText("Scores")),
     ...getScoreBlocks(games),
     S.Context(
       S.Markdown(
         getScoreBlock("The best score on this board was", games[0].bestScore)
       )
     ),
+    S.Divider(),
+    S.Section(S.Markdown("Watch a replay"), {
+      accessory: S.StaticSelect({
+        placeholder: S.PlainText("Selet a player"),
+        options: games.map(getPlayerOption),
+        action_id: "send-replay-message",
+      }),
+    }),
     S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)),
   ];
   return blocks;
@@ -57,9 +63,12 @@ function renderGame({
               const selectedTile =
                 lineChoice &&
                 Board.positionsFromBoardLine(lineChoice).includes(value);
-              const char = wrap(wrap(renderTile(tile, false), " "), "`");
+              const char = wrap(wrap(tileChar(tile), " "), "`");
 
-              return wrap(selectedTile ? wrap(char, "*") : char, " ");
+              return wrap(
+                selectedTile ? wrap(wrap(char, "*"), "_") : char,
+                " "
+              );
             })
             .join(" ")
         )
@@ -85,15 +94,43 @@ function getScoreBlocks(
     ":second_place_medal:",
     ":dingus:",
   ];
-  return Object.entries(scoreMap).map(([score, users], i) =>
-    S.Context(
-      S.Markdown(`${placementEmojis[i]} ${wrap(score, "*")}`),
-      ...users.map(({ name, image }) =>
-        S.Image({
-          image_url: image,
-          alt_text: name,
-        })
+  return Object.entries(scoreMap)
+    .sort(([scoreA], [scoreB]) => parseInt(scoreB) - parseInt(scoreA))
+    .map(([score, users], i) =>
+      S.Context(
+        S.Markdown(`${placementEmojis[i]} ${wrap(score, "*")}`),
+        ...users.map(({ name, image }) =>
+          S.Image({
+            image_url: image,
+            alt_text: name,
+          })
+        )
       )
-    )
-  );
+    );
 }
+
+function getPlayerOption({
+  gameId,
+  name,
+  image,
+}: {
+  gameId: string;
+  name: string;
+  image: string;
+}) {
+  const value = JSON.stringify({ gameId, name, image });
+  return S.Option({ value, text: name });
+}
+
+// function getReplayButton({ name, image, gameId }: SummaryWithUser) {
+//   return [
+//     S.Context(
+//       S.Image({
+//         image_url: image,
+//         alt_text: name,
+//       }),
+//       S.PlainText(name)
+//     ),
+//     S.Section(),
+//   ];
+// }

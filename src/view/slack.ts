@@ -37,7 +37,13 @@ export function Header(text: Text) {
   return { type: "header", text };
 }
 
-export function Image({ image_url, alt_text }: Record<string, string>) {
+export function Image({
+  image_url,
+  alt_text,
+}: {
+  image_url: string;
+  alt_text: string;
+}) {
   return { type: "image", image_url, alt_text };
 }
 
@@ -45,10 +51,35 @@ export function Markdown(text: string): Text {
   return { type: "mrkdwn", text };
 }
 
-export function PlainText(text: string): Text {
-  return { type: "plain_text", text };
+export function Option({ value, text }: { value: string; text: string }) {
+  return {
+    text: PlainText(text),
+    value,
+  };
 }
 
-export function Section(text: Text) {
+export function PlainText(text: string): Text {
+  return { type: "plain_text", text, emoji: true } as Text;
+}
+
+export function Section(text: Text, { accessory }: { accessory?: any } = {}) {
+  if (accessory) return { type: "section", text, accessory };
   return { type: "section", text };
+}
+
+export function StaticSelect({
+  placeholder,
+  options,
+  action_id,
+}: {
+  placeholder?: Text;
+  options: ReturnType<typeof Option>[];
+  action_id: string;
+}) {
+  return {
+    type: "static_select",
+    placeholder,
+    options,
+    action_id,
+  };
 }

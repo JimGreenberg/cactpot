@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { Board } from "./board";
+import { Board, Tile } from "./board";
 import {
   TilePosition,
   BoardLine,
@@ -61,6 +61,9 @@ export class Cactpot {
 
   public get seedString(): string {
     return this.board.seedString;
+  }
+  public get initialReveal(): TilePosition {
+    return this.board.initialReveal;
   }
 
   getCurrentTurn(): Turn {

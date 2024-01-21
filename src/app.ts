@@ -5,6 +5,7 @@ import { newRound } from "./api/newRound";
 import { leaderboard } from "./api/leaderboard";
 import { takeTurn } from "./api/turn";
 import { joinGame } from "./api/join";
+import { test, beginReplay, sendReplayMessage } from "./api/replay";
 import { startEarly } from "./api/startEarly";
 
 const BOT_TEST = "C03LZF604RG";
@@ -15,6 +16,8 @@ const main = (app: App) => {
     switch (args.command.text) {
       case "leaderboard":
         return await leaderboard(app)(args);
+      case "test":
+        return await test(app)(args);
       default:
         return await newRound(app)(args);
     }
@@ -33,6 +36,23 @@ const main = (app: App) => {
   app.action(/button/, async (args) => {
     await args.ack();
     await takeTurn(app)(args);
+  });
+
+  // action on results page to send ephemeral message with begin replay button
+  app.action("send-replay-message", async (args) => {
+    await args.ack();
+    await sendReplayMessage(app)(args);
+  });
+
+  // button on the replay message to kick off the animation
+  app.action("begin-replay", async (args) => {
+    await args.ack();
+    await beginReplay(app)(args);
+  });
+
+  app.action("delete", async ({ ack, respond }) => {
+    await ack();
+    await respond({ delete_original: true });
   });
 };
 

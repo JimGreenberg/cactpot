@@ -1,13 +1,17 @@
 import { Tile } from "../board";
 import { BoardLine } from "../constants";
-import * as S from "./slack";
 
-export function renderTile(
-  value: number | typeof Tile.HIDDEN,
-  emoji = false
-): string {
+export function tileButtonText(value: number | typeof Tile.HIDDEN): string {
   if (value === Tile.HIDDEN) return " ";
-  if (!emoji) return String(value);
+  return String(value);
+}
+
+export function tileChar(value: number | typeof Tile.HIDDEN): string {
+  if (value === Tile.HIDDEN) return "_";
+  return String(value);
+}
+
+export function tileEmoji(value: number | typeof Tile.HIDDEN): string {
   switch (value) {
     case 1:
       return ":one:";
@@ -28,7 +32,7 @@ export function renderTile(
     case 9:
       return ":nine:";
     default:
-      throw new Error(); // unreachable
+      return " ";
   }
 }
 

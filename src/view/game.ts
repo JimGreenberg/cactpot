@@ -1,7 +1,7 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { Turn, TilePosition, BoardLine } from "../constants";
-import { renderTile, wrap, getScoreBlock } from "./util";
+import { tileButtonText, tileEmoji, wrap, getScoreBlock } from "./util";
 import * as S from "./slack";
 
 export function cactpotView(summary: Summary) {
@@ -108,7 +108,7 @@ function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
             lineChoice &&
             Board.positionsFromBoardLine(lineChoice).includes(value);
           return S.Button({
-            text: renderTile(tile, selectedTile),
+            text: selectedTile ? tileEmoji(tile) : tileButtonText(tile),
             value: getJsonStringValue(String(value)),
             action_id: `tile-button-${getJsonStringValue(String(value))}`,
           });
