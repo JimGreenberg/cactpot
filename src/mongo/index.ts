@@ -187,7 +187,7 @@ export async function getLastUnfinishedGame(
   userId: string,
   channelId: string
 ): Promise<Cactpot | undefined> {
-  const result = await Game.aggregate()
+  const results = await Game.aggregate()
     .lookup({
       from: Round.collection.name,
       localField: "round",
@@ -200,7 +200,7 @@ export async function getLastUnfinishedGame(
     .limit(1)
     .exec();
 
-  return result ? Cactpot.fromMongo(result[0]) : undefined;
+  return results.length ? Cactpot.fromMongo(results[0]) : undefined;
 }
 
 // Migrations
