@@ -5,7 +5,8 @@ import { newRound } from "./api/newRound";
 import { leaderboard } from "./api/leaderboard";
 import { takeTurn } from "./api/turn";
 import { joinGame } from "./api/join";
-import { test, beginReplay, sendReplayMessage } from "./api/replay";
+import { beginReplay, sendReplayMessage } from "./api/replay";
+import { unfinished } from "./api/unfinished";
 import { startEarly } from "./api/startEarly";
 
 const BOT_TEST = "C03LZF604RG";
@@ -16,8 +17,8 @@ const main = (app: App) => {
     switch (args.command.text) {
       case "leaderboard":
         return await leaderboard(app)(args);
-      case "test":
-        return await test(app)(args);
+      case "unfinished":
+        return await unfinished(app)(args);
       default:
         return await newRound(app)(args);
     }

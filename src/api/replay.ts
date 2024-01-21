@@ -10,53 +10,10 @@ import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
 import { Board } from "../board";
 import { replayView, beginReplayButton } from "../view/replay";
-import * as S from "../view/slack";
 
 async function delay(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
-
-export const test: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
-  (app: App) =>
-  async ({ command, respond }) => {
-    const value = JSON.stringify({
-      name: "joe mama",
-      // image:
-      //   "https://avatars.slack-edge.com/2020-08-06/1271474166391_d7566d49c28e3b41c21b_24.png",
-      gameId: "65ab20eed2c344434e14c412",
-    });
-    await respond({
-      text: "",
-      blocks: [
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: "Watch a replay",
-          },
-          accessory: {
-            type: "static_select",
-            placeholder: {
-              type: "plain_text",
-              text: "Select a player",
-              emoji: true,
-            },
-            options: [
-              {
-                text: {
-                  type: "plain_text",
-                  text: ":dingus: *this is plain_text text*",
-                  emoji: true,
-                },
-                value,
-              },
-            ],
-            action_id: "begin-replay",
-          },
-        },
-      ],
-    });
-  };
 
 export const sendReplayMessage: (
   app: App

@@ -183,6 +183,26 @@ export async function getLeaderboard(channelId: string): Promise<
   }
 }
 
+export async function getLastUnfinishedGame(
+  userId: string,
+  channelId: string
+): Promise<Cactpot | undefined> {
+  const result = await Game.aggregate()
+    .lookup({
+      from: Round.collection.name,
+      localField: "round",
+      foreignField: "_id",
+      as: "round",
+    })
+    .unwind("round")
+    .match({ userId, "round.channelId": channelId, score: { $exists: false } })
+    .sort({ _id: -1 })
+    .limit(1)
+    .exec();
+
+  return result ? Cactpot.fromMongo(result[0]) : undefined;
+}
+
 // Migrations
 
 export async function syncIndexes() {
