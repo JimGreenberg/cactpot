@@ -21,7 +21,7 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
     S.Divider(),
     S.Section(S.Markdown("Watch a replay"), {
       accessory: S.StaticSelect({
-        placeholder: S.PlainText("Selet a player"),
+        placeholder: S.PlainText("Select a player"),
         options: games.map(getPlayerOption),
         action_id: "send-replay-message",
       }),
