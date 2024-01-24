@@ -4,7 +4,7 @@ import { startView } from "../view/start";
 
 export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
   (app: App) =>
-  async ({ command, respond }) => {
+  async ({ command, respond, say }) => {
     const userId = command.user_id;
     let roundId: string;
     try {
@@ -31,8 +31,7 @@ export const newRound: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
         replace_original: false,
       });
     }
-    await respond({
-      response_type: "in_channel",
+    await say({
       blocks: startView(roundId, [user]),
       text: "<!channel> A round of Cactpot is starting!",
     });
