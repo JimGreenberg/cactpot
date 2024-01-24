@@ -9,6 +9,7 @@ interface LeaderboardInfo {
   cactpotsMissed: number;
   wins: number;
   bestsAchieved: number;
+  totalScore: number;
 }
 
 export function leaderboardView(users: LeaderboardInfo[]) {
@@ -26,6 +27,7 @@ function leaderboardUserView({
   cactpots,
   cactpotsMissed,
   wins,
+  totalScore,
   bestsAchieved,
   countGames,
 }: LeaderboardInfo) {
@@ -33,6 +35,7 @@ function leaderboardUserView({
     S.Context(S.Image({ image_url: image, alt_text: name }), S.PlainText(name)),
     S.Context(
       S.Markdown(getScoreBlock("Wins", wins)),
+      S.Markdown(getScoreBlock("Total Score", totalScore)),
       S.Markdown(
         `Best Score Rate: *${Math.floor((100 * bestsAchieved) / countGames)}%*`
       ),

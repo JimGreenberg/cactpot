@@ -124,6 +124,7 @@ export async function getLeaderboard(channelId: string): Promise<
     cactpots: number;
     cactpotsMissed: number;
     bestsAchieved: number;
+    totalScore: number;
     wins: number;
   }[]
 > {
@@ -153,6 +154,9 @@ export async function getLeaderboard(channelId: string): Promise<
             ],
           },
         },
+      },
+      totalScore: {
+        $sum: "$score",
       },
       bestsAchieved: {
         $sum: {
