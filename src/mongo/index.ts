@@ -178,6 +178,7 @@ export async function getLeaderboard(channelId: string): Promise<
     })
     .sort({
       wins: -1,
+      totalScore: -1,
     });
 
   try {
