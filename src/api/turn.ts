@@ -7,7 +7,7 @@ import {
 import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
 import { SlackService } from "../slackService";
-import { cactpotView } from "../view/game";
+import { cactpotFullWidth } from "../view/cactpotFullWidth";
 import { roundEndView } from "../view/roundEnd";
 import { Turn } from "../constants";
 
@@ -30,7 +30,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
 
     await respond({
       replace_original: true,
-      blocks: cactpotView(game.getSummary()),
+      blocks: cactpotFullWidth(game.getSummary()),
     });
 
     const games = await DB.getGamesByRound(game.roundId);

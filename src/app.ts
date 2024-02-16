@@ -3,6 +3,9 @@ dotenv.config();
 import { App } from "@slack/bolt";
 import * as API from "./api";
 
+import { Cactpot } from "./cactpot";
+import { cactpotFullWidth } from "./view/cactpotFullWidth";
+
 const BOT_TEST = "C03LZF604RG";
 
 const main = (app: App) => {
@@ -13,6 +16,17 @@ const main = (app: App) => {
         return await API.leaderboard(app)(args);
       case "unfinished":
         return await API.unfinished(app)(args);
+      case "modal":
+        const game = new Cactpot();
+        await args.client.views.open({
+          trigger_id: args.body.trigger_id,
+          view: {
+            type: "modal",
+            title: { type: "plain_text", text: "joe mama" },
+            blocks: cactpotFullWidth(game.getSummary()),
+          },
+        });
+        return;
       default:
         return await API.newRound(app)(args);
     }

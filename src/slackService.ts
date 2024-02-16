@@ -1,6 +1,6 @@
 import { App, RespondFn } from "@slack/bolt";
 import { Cactpot } from "./cactpot";
-import { cactpotView } from "./view/game";
+import { cactpotFullWidth } from "./view/cactpotFullWidth";
 
 export class SlackService {
   constructor(private app: App) {}
@@ -29,7 +29,7 @@ export class SlackService {
       ...games.map((game) =>
         this.app.client.chat.postEphemeral({
           text: "<!channel> Cactpot has begun!",
-          blocks: cactpotView(game.getSummary()),
+          blocks: cactpotFullWidth(game.getSummary()),
           user: game.userId,
           channel: channelId,
         })

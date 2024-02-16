@@ -1,7 +1,7 @@
-export { newRound } from "./newRound";
-export { leaderboard } from "./leaderboard";
-export { takeTurn } from "./turn";
-export { joinGame } from "./join";
-export { startEarly } from "./startEarly";
-export { unfinished } from "./unfinished";
-export { beginReplay, sendReplayMessage } from "./replay";
+export * from "./newRound";
+export * from "./leaderboard";
+export * from "./turn";
+export * from "./join";
+export * from "./startEarly";
+export * from "./unfinished";
+export * from "./replay";

@@ -2,7 +2,6 @@ import {
   App,
   Middleware,
   SlackActionMiddlewareArgs,
-  SlackCommandMiddlewareArgs,
   ButtonAction,
   StaticSelectAction,
 } from "@slack/bolt";

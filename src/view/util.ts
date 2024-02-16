@@ -1,5 +1,5 @@
 import { Tile } from "../board";
-import { BoardLine } from "../constants";
+import { BoardLine, TilePosition } from "../constants";
 
 export function tileButtonText(value: number | typeof Tile.HIDDEN): string {
   if (value === Tile.HIDDEN) return " ";
@@ -44,6 +44,19 @@ export function getScoreBlock(label: string, score = 0) {
   return `${label}: *${score.toLocaleString()}*`;
 }
 
+export function tilePositionText(tile: TilePosition): string {
+  return {
+    [TilePosition.TOP_LEFT]: "Top Left",
+    [TilePosition.TOP_MIDDLE]: "Top Middle",
+    [TilePosition.TOP_RIGHT]: "Top Right",
+    [TilePosition.MIDDLE_LEFT]: "Middle Left",
+    [TilePosition.CENTER]: "Center",
+    [TilePosition.MIDDLE_RIGHT]: "Middle Right",
+    [TilePosition.BOTTOM_LEFT]: "Bottom Left",
+    [TilePosition.BOTTOM_MIDDLE]: "Bottom Middle",
+    [TilePosition.BOTTOM_RIGHT]: "Bottom Right",
+  }[tile];
+}
 export function boardLineText(line: BoardLine): string {
   return {
     [BoardLine.TOP_ROW]: "Top Row",
