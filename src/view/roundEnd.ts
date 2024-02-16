@@ -91,7 +91,7 @@ function getScoreBlocks(
   const placementEmojis = [
     ":first_place_medal:",
     ":second_place_medal:",
-    ":second_place_medal:",
+    ":third_place_medal:",
     ":dingus:",
   ];
   return Object.entries(scoreMap)
@@ -121,16 +121,3 @@ function getPlayerOption({
   const value = JSON.stringify({ gameId, name, image });
   return S.Option({ value, text: name });
 }
-
-// function getReplayButton({ name, image, gameId }: SummaryWithUser) {
-//   return [
-//     S.Context(
-//       S.Image({
-//         image_url: image,
-//         alt_text: name,
-//       }),
-//       S.PlainText(name)
-//     ),
-//     S.Section(),
-//   ];
-// }
