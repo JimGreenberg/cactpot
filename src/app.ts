@@ -1,13 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { App } from "@slack/bolt";
-import { newRound } from "./api/newRound";
-import { leaderboard } from "./api/leaderboard";
-import { takeTurn } from "./api/turn";
-import { joinGame } from "./api/join";
-import { beginReplay, sendReplayMessage } from "./api/replay";
-import { unfinished } from "./api/unfinished";
-import { startEarly } from "./api/startEarly";
+import * as API from "./api";
 
 const BOT_TEST = "C03LZF604RG";
 
@@ -16,39 +10,39 @@ const main = (app: App) => {
     await args.ack();
     switch (args.command.text) {
       case "leaderboard":
-        return await leaderboard(app)(args);
+        return await API.leaderboard(app)(args);
       case "unfinished":
-        return await unfinished(app)(args);
+        return await API.unfinished(app)(args);
       default:
-        return await newRound(app)(args);
+        return await API.newRound(app)(args);
     }
   });
 
   app.action("join", async (args) => {
     await args.ack();
-    await joinGame(app)(args);
+    await API.joinGame(app)(args);
   });
 
   app.action("start-early", async (args) => {
     await args.ack();
-    await startEarly(app)(args);
+    await API.startEarly(app)(args);
   });
 
   app.action(/button/, async (args) => {
     await args.ack();
-    await takeTurn(app)(args);
+    await API.takeTurn(app)(args);
   });
 
   // action on results page to send ephemeral message with begin replay button
   app.action("send-replay-message", async (args) => {
     await args.ack();
-    await sendReplayMessage(app)(args);
+    await API.sendReplayMessage(app)(args);
   });
 
   // button on the replay message to kick off the animation
   app.action("begin-replay", async (args) => {
     await args.ack();
-    await beginReplay(app)(args);
+    await API.beginReplay(app)(args);
   });
 
   app.action("delete", async ({ ack, respond }) => {

@@ -208,8 +208,4 @@ export async function getLastUnfinishedGame(
   return results.length ? Cactpot.fromMongo(results[0]) : undefined;
 }
 
-// Migrations
-
-export async function syncIndexes() {
-  await mongoose.syncIndexes();
-}
+Game.syncIndexes();
