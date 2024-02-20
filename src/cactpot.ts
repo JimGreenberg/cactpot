@@ -17,6 +17,7 @@ export interface Summary {
   seedString: string;
   gameId: string;
   roundId: string;
+  initialReveal: TilePosition;
   reveals: TilePosition[];
   revealValues: number[];
   lineChoice?: BoardLine;
@@ -123,6 +124,7 @@ export class Cactpot {
       seedString: this.board.seedString,
       gameId: this.gameId,
       roundId: this.roundId,
+      initialReveal: this.board.initialReveal,
       reveals: this.reveals,
       revealValues: this.reveals.map((pos) => this.board.getTile(pos).value),
       lineChoice: this.lineChoice,

@@ -8,21 +8,19 @@ import {
   tilePositionText,
   boardLineText,
 } from "./util";
-import { getScoreInfoBlocks } from "./game";
+import { getScoreInfoBlocks, getJsonStringValue } from "./game";
 import * as S from "./slack";
 
-export function getJsonStringValue(value: string, gameId: string) {
-  return JSON.stringify({ value, gameId });
-}
-
 export function cactpotMobile(summary: Summary) {
-  const { score, bestScore, turn, gameId } = summary;
+  const { score, bestScore, turn, gameId, initialReveal, reveals } = summary;
   const blocks: any[] = [];
 
   blocks.push(...getBoardBlocks(summary));
 
   if ([Turn.INIT, Turn.FIRST, Turn.SECOND].includes(turn)) {
-    blocks.push(S.Actions(...getTileActions(gameId)));
+    blocks.push(
+      S.Actions(...getTileActions(gameId, initialReveal, ...reveals))
+    );
   }
 
   if (turn === Turn.THIRD) {
@@ -73,12 +71,13 @@ function getBoardBlocks({ board, lineChoice }: Summary) {
   );
 }
 
-function getTileActions(gameId: string) {
+function getTileActions(gameId: string, ...reveals: TilePosition[]) {
   return Object.values(TilePosition)
+    .filter((tile) => !reveals.includes(tile))
     .map((tile) => ({
       text: tilePositionText(tile),
-      value: getJsonStringValue(tile, gameId),
-      action_id: `tile-button-${getJsonStringValue(tile, gameId)}`,
+      value: getJsonStringValue(tile, gameId, true),
+      action_id: `tile-button-${tile}`,
     }))
     .map(S.Button);
 }
@@ -87,8 +86,8 @@ function getLineChoiceActions(gameId: string) {
   return Object.values(BoardLine)
     .map((line) => ({
       text: boardLineText(line),
-      value: getJsonStringValue(line, gameId),
-      action_id: `line-button-${getJsonStringValue(line, gameId)}`,
+      value: getJsonStringValue(line, gameId, true),
+      action_id: `line-button-${line}`,
     }))
     .map(S.Button);
 }

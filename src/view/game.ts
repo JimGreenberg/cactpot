@@ -43,3 +43,11 @@ function getScoreInfoBlock([label, score]: [string, number], selected = false) {
   // text: `*${label}* | ${score.toLocaleString()}`,
   return S.Markdown(text);
 }
+
+export function getJsonStringValue(
+  value: string,
+  gameId: string,
+  mobile = false
+) {
+  return JSON.stringify({ value, gameId, mobile });
+}

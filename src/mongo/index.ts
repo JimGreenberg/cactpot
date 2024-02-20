@@ -21,7 +21,6 @@ export async function createRound(channelId: string): Promise<string> {
       bestScore: board.bestScore,
       cactpotPossible: board.cactpotPossible,
     }).save();
-    console.log(String(round._id));
     return String(round._id);
   } catch {
     throw new Errors.CreateError("round");
@@ -35,9 +34,7 @@ export async function joinGame({
   roundId: string;
   userId: string;
 }) {
-  console.log(roundId);
   const round = new Types.ObjectId(roundId);
-  console.log(round);
   try {
     const game = await new Game({
       round,
@@ -50,6 +47,9 @@ export async function joinGame({
 }
 
 export async function takeTurn(gameId: string, turn: TilePosition | BoardLine) {
+  if (!turn) {
+    throw new Error(); // TODO too lazy to refactor this DB method
+  }
   const game = await Game.findById(gameId).populate("round");
   if (!game) throw new Errors.NotFound();
   const cactpot = Cactpot.fromMongo(game.toObject());

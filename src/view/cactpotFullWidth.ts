@@ -2,11 +2,11 @@ import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { TilePosition, BoardLine } from "../constants";
 import { tileButtonText, tileEmoji, getScoreBlock } from "./util";
-import { getHeaderCopy, getScoreInfoBlocks } from "./game";
+import { getHeaderCopy, getScoreInfoBlocks, getJsonStringValue } from "./game";
 import * as S from "./slack";
 
 export function cactpotFullWidth(summary: Summary) {
-  const { score, bestScore, turn } = summary;
+  const { score, bestScore, turn, gameId } = summary;
   const blocks: any[] = [];
 
   blocks.push(S.Header(S.PlainText(getHeaderCopy(turn))));
@@ -28,6 +28,16 @@ export function cactpotFullWidth(summary: Summary) {
   blocks.push(...getScoreInfoBlocks(score));
 
   blocks.push(
+    S.Actions(
+      S.Button({
+        text: "Mobile mode",
+        value: getJsonStringValue("", gameId, true),
+        action_id: "mobile-button",
+      })
+    )
+  );
+
+  blocks.push(
     S.Context(
       S.PlainText(`Game ID: ${summary.gameId}    Round ID: ${summary.roundId}`)
     )
@@ -36,41 +46,22 @@ export function cactpotFullWidth(summary: Summary) {
 }
 
 function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
-  function getJsonStringValue(value: string) {
-    return JSON.stringify({ value, gameId });
-  }
   // first row is always the same
   const blocks = [
     S.Actions(
       ...[
-        {
-          text: ":arrow_lower_right:",
-          value: getJsonStringValue(BoardLine.ANTIDIAGONAL),
-          action_id: `line-button-${getJsonStringValue(
-            BoardLine.ANTIDIAGONAL
-          )}`,
-        },
-        {
-          text: ":arrow_down:",
-          value: getJsonStringValue(BoardLine.LEFT_COL),
-          action_id: `line-button-${getJsonStringValue(BoardLine.LEFT_COL)}`,
-        },
-        {
-          text: ":arrow_down:",
-          value: getJsonStringValue(BoardLine.MIDDLE_COL),
-          action_id: `line-button-${getJsonStringValue(BoardLine.MIDDLE_COL)}`,
-        },
-        {
-          text: ":arrow_down:",
-          value: getJsonStringValue(BoardLine.RIGHT_COL),
-          action_id: `line-button-${getJsonStringValue(BoardLine.RIGHT_COL)}`,
-        },
-        {
-          text: ":arrow_lower_left:",
-          value: getJsonStringValue(BoardLine.DIAGONAL),
-          action_id: `line-button-${getJsonStringValue(BoardLine.DIAGONAL)}`,
-        },
-      ].map(S.Button)
+        [":arrow_lower_right:", BoardLine.ANTIDIAGONAL],
+        [":arrow_down:", BoardLine.LEFT_COL],
+        [":arrow_down:", BoardLine.MIDDLE_COL],
+        [":arrow_down:", BoardLine.RIGHT_COL],
+        [":arrow_lower_left:", BoardLine.DIAGONAL],
+      ].map(([text, line]) =>
+        S.Button({
+          text,
+          value: getJsonStringValue(line, gameId),
+          action_id: `line-button-${line}`,
+        })
+      )
     ),
   ];
 
@@ -85,18 +76,18 @@ function getBoardBlocks({ board, lineChoice, gameId }: Summary) {
       S.Actions(
         S.Button({
           text: ":arrow_right:",
-          value: getJsonStringValue(rowLines[i]),
-          action_id: `line-button-${getJsonStringValue(rowLines[i])}`,
+          value: getJsonStringValue(rowLines[i], gameId),
+          action_id: `line-button-${rowLines[i]}`,
         }),
-        ...row.map((tile) => {
-          const value = Object.values(TilePosition)[tilePosition++];
+        ...row.map((rowTile) => {
+          const tile = Object.values(TilePosition)[tilePosition++];
           const selectedTile =
             lineChoice &&
-            Board.positionsFromBoardLine(lineChoice).includes(value);
+            Board.positionsFromBoardLine(lineChoice).includes(tile);
           return S.Button({
-            text: selectedTile ? tileEmoji(tile) : tileButtonText(tile),
-            value: getJsonStringValue(String(value)),
-            action_id: `tile-button-${getJsonStringValue(String(value))}`,
+            text: selectedTile ? tileEmoji(rowTile) : tileButtonText(rowTile),
+            value: getJsonStringValue(String(tile), gameId),
+            action_id: `tile-button-${tile}`,
           });
         })
       )

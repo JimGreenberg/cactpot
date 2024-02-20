@@ -1,6 +1,6 @@
 import { App, Middleware, SlackCommandMiddlewareArgs } from "@slack/bolt";
 import * as DB from "../mongo";
-import { cactpotView } from "../view/game";
+import { cactpotFullWidth } from "../view/cactpotFullWidth";
 
 export const unfinished: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
   (app: App) =>
@@ -12,7 +12,7 @@ export const unfinished: (app: App) => Middleware<SlackCommandMiddlewareArgs> =
 
     return await app.client.chat.postEphemeral({
       text: "<!channel> Cactpot has begun!",
-      blocks: cactpotView(game.getSummary()),
+      blocks: cactpotFullWidth(game.getSummary()),
       user: userId,
       channel: channelId,
     });
