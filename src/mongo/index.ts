@@ -96,7 +96,7 @@ export async function enableLeaderboardForRound(roundId: string) {
 function _roundsWithWinningScore(
   channelId: string
 ): PipelineStage.Lookup["$lookup"]["pipeline"] {
-  return Round.aggregate()
+  const agg = Round.aggregate()
     .match({ channelId, leaderboardEnabled: true })
     .lookup({
       from: Game.collection.name,
@@ -106,15 +106,29 @@ function _roundsWithWinningScore(
     })
     .match({ "games.0": { $exists: true } })
     .addFields({
+      // the best score a player achieved
       bestPlayerScore: { $max: "$games.score" },
+      // the number of players who achieved that score
+      bestPlayerScoreCount: {
+        $size: {
+          $filter: {
+            input: "$games",
+            as: "game",
+            cond: { $eq: ["$$game.score", { $max: "$games.score" }] },
+          },
+        },
+      },
     })
     .project({
       _id: 1,
       bestScore: 1,
       bestPlayerScore: 1,
+      bestPlayerScoreCount: 1,
       cactpotPossible: 1,
-    })
-    .pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
+    });
+  agg.exec().then(console.log);
+
+  return agg.pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
 }
 
 export async function getLeaderboard(channelId: string): Promise<
@@ -126,6 +140,7 @@ export async function getLeaderboard(channelId: string): Promise<
     bestsAchieved: number;
     totalScore: number;
     wins: number;
+    soloWins: number;
   }[]
 > {
   const pipeline = Game.aggregate()
@@ -172,6 +187,16 @@ export async function getLeaderboard(channelId: string): Promise<
           },
         },
       },
+      soloWins: {
+        $sum: {
+          $toInt: {
+            $and: [
+              { $eq: ["$score", "$round.bestPlayerScore"] },
+              { $eq: ["$round.bestPlayerScoreCount", 1] },
+            ],
+          },
+        },
+      },
     })
     .addFields({
       userId: "$_id",
@@ -182,6 +207,7 @@ export async function getLeaderboard(channelId: string): Promise<
     });
 
   try {
+    pipeline.exec().then(console.log);
     return pipeline.exec();
   } catch {
     throw new Errors.NotFound();
