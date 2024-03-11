@@ -257,28 +257,27 @@ export async function findCheaters(channelId: string): Promise<
     .unwind("round")
     .match({
       "round.channelId": channelId,
+      "round.leaderboardEnabled": true,
     });
-  // const games = await Game.find({ channelId, );
   const games = await agg.exec();
   const gamesWithOpti = games.map((game) => {
     const cactpot = Cactpot.fromMongo(game);
     const optimalLine = cactpot.optimalLine();
-    const summary = cactpot.getSummary();
+    const { userId, lineChoice } = cactpot.getSummary();
     return {
-      ...summary,
-      optimalLine,
-      didSelectOptimalLine: optimalLine === summary.lineChoice,
+      userId,
+      didSelectOptimalLine: optimalLine === lineChoice,
     };
   });
-  const map = gamesWithOpti.reduce<Record<string, number[]>>(
-    (acc, { userId, didSelectOptimalLine }) => {
-      if (!acc[userId]) acc[userId] = [];
-      acc[userId].push(Number(didSelectOptimalLine));
-      return acc;
+  const usersWithCount = gamesWithOpti.reduce<Record<string, number[]>>(
+    (userMap, { userId, didSelectOptimalLine }) => {
+      if (!userMap[userId]) userMap[userId] = [];
+      userMap[userId].push(Number(didSelectOptimalLine));
+      return userMap;
     },
     {}
   );
-  return Object.entries(map).map(([userId, arr]) => ({
+  return Object.entries(usersWithCount).map(([userId, arr]) => ({
     userId,
     countGames: arr.length,
     numOptimalChoices: arr.reduce((a, b) => a + b, 0),
