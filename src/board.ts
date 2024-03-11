@@ -165,6 +165,38 @@ export class Board {
     ];
   }
 
+  getEv(line: BoardLine) {
+    function sum(nums: number[]) {
+      return nums.reduce((acc, curr) => acc + curr, 0);
+    }
+    function getCombinations<T>(arr: T[], size: number, prev: T[] = []) {
+      if (prev.length === size) return [prev];
+      let combinations: T[][] = [];
+      arr.forEach((el, i) => {
+        const prevCopy = [...prev];
+        prevCopy.push(el);
+        combinations = combinations.concat(
+          getCombinations(arr.slice(i + 1), size, prevCopy)
+        );
+      });
+      return combinations;
+    }
+    const unused = this.tiles
+      .flat()
+      .filter(({ visible }) => !visible)
+      .map(({ value }) => value);
+    const visibleInThisLine = this.getLine(line)
+      .filter(({ visible }) => visible)
+      .map(({ value }) => value);
+    const visibleSum = sum(visibleInThisLine);
+    const spaces = 3 - visibleInThisLine.length;
+    const combinations = getCombinations(unused, spaces);
+    const sums = combinations.map(
+      (combination) => Board.scores[sum(combination) + visibleSum]
+    );
+    return sum(sums) / sums.length;
+  }
+
   display(done = false): ThreeByThree<ReturnType<Tile["display"]>> {
     // @ts-ignore
     return this.tiles.map((row) => row.map((tile) => tile.display(done)));

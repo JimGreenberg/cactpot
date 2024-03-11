@@ -21,6 +21,7 @@ export interface Summary {
   reveals: TilePosition[];
   revealValues: number[];
   lineChoice?: BoardLine;
+  userId: string;
 }
 
 export class Cactpot {
@@ -128,6 +129,7 @@ export class Cactpot {
       reveals: this.reveals,
       revealValues: this.reveals.map((pos) => this.board.getTile(pos).value),
       lineChoice: this.lineChoice,
+      userId: this.userId,
     };
   }
 
@@ -147,5 +149,22 @@ export class Cactpot {
       cactpotPossible: bestScore === Board.cactpot,
       score: this.board.getScore(this.lineChoice!),
     };
+  }
+
+  optimalLine(): BoardLine {
+    if (this.reveals.length !== 3) {
+      throw new Errors.InvalidBoardState();
+    }
+    let max = 0;
+    let maxLine: BoardLine;
+    Object.values(BoardLine).forEach((line) => {
+      const ev = this.board.getEv(line);
+      if (ev > max) {
+        max = ev;
+        maxLine = line;
+      }
+    });
+    // @ts-ignore
+    return maxLine;
   }
 }

@@ -126,7 +126,6 @@ function _roundsWithWinningScore(
       bestPlayerScoreCount: 1,
       cactpotPossible: 1,
     });
-  agg.exec().then(console.log);
 
   return agg.pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
 }
@@ -143,7 +142,7 @@ export async function getLeaderboard(channelId: string): Promise<
     soloWins: number;
   }[]
 > {
-  const pipeline = Game.aggregate()
+  const agg = Game.aggregate()
     .lookup({
       from: Round.collection.name,
       localField: "round",
@@ -207,8 +206,7 @@ export async function getLeaderboard(channelId: string): Promise<
     });
 
   try {
-    pipeline.exec().then(console.log);
-    return pipeline.exec();
+    return agg.exec();
   } catch {
     throw new Errors.NotFound();
   }
@@ -226,12 +224,65 @@ export async function getLastUnfinishedGame(
       as: "round",
     })
     .unwind("round")
-    .match({ userId, "round.channelId": channelId, score: { $exists: false } })
+    .match({
+      userId,
+      "round.leaderboardEnabled": true,
+      "round.channelId": channelId,
+      score: { $exists: false },
+    })
     .sort({ _id: -1 })
     .limit(1)
     .exec();
 
   return results.length ? Cactpot.fromMongo(results[0]) : undefined;
+}
+
+export async function findCheaters(channelId: string): Promise<
+  {
+    userId: string;
+    countGames: number;
+    numOptimalChoices: number;
+  }[]
+> {
+  const agg = Game.aggregate()
+    .match({
+      reveals: { $size: 3 },
+    })
+    .lookup({
+      from: Round.collection.name,
+      localField: "round",
+      foreignField: "_id",
+      as: "round",
+    })
+    .unwind("round")
+    .match({
+      "round.channelId": channelId,
+    });
+  // const games = await Game.find({ channelId, );
+  const games = await agg.exec();
+  const gamesWithOpti = games.map((game) => {
+    const cactpot = Cactpot.fromMongo(game);
+    const optimalLine = cactpot.optimalLine();
+    const summary = cactpot.getSummary();
+    return {
+      ...summary,
+      optimalLine,
+      didSelectOptimalLine: optimalLine === summary.lineChoice,
+    };
+  });
+  const map = gamesWithOpti.reduce<Record<string, number[]>>(
+    (acc, { userId, didSelectOptimalLine }) => {
+      if (!acc[userId]) acc[userId] = [];
+      acc[userId].push(Number(didSelectOptimalLine));
+      return acc;
+    },
+    {}
+  );
+  return Object.entries(map).map(([userId, arr]) => ({
+    userId,
+    countGames: arr.length,
+    numOptimalChoices: arr.reduce((a, b) => a + b, 0),
+  }));
 }
 
 Game.syncIndexes();
