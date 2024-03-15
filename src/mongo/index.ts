@@ -226,7 +226,6 @@ export async function getLastUnfinishedGame(
     .unwind("round")
     .match({
       userId,
-      "round.leaderboardEnabled": true,
       "round.channelId": channelId,
       score: { $exists: false },
     })
