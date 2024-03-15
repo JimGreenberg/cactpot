@@ -27,7 +27,6 @@ export class SlackService {
   async beginRound(respond: RespondFn, channelId: string, games: Cactpot[]) {
     return Promise.all([
       ...games.map((game) => {
-        console.log(cactpotFullWidth(game.getSummary()));
         this.app.client.chat.postEphemeral({
           text: "<!channel> Cactpot has begun!",
           blocks: cactpotFullWidth(game.getSummary()),
