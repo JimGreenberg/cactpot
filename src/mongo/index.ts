@@ -134,6 +134,8 @@ function _roundsWithWinningScore(
       bestScore: 1,
       bestPlayerScore: 1,
       bestPlayerScoreCount: 1,
+      worstPlayerScore: 1,
+      worstPlayerScoreCount: 1,
       cactpotPossible: 1,
     });
 
