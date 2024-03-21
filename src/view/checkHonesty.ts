@@ -9,7 +9,7 @@ interface HonestyInfo {
 
 export function checkHonestyView(users: HonestyInfo[]) {
   return [
-    S.Header(S.PlainText("Optimal Play Dashboard")),
+    S.Header(S.PlainText("Optimal Play* Dashboard")),
     S.Divider(),
     ...users.map(checkHonestyUserView).flat(1),
   ];
