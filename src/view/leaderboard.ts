@@ -44,6 +44,7 @@ function leaderboardUserView({
       ),
       S.Markdown(getScoreBlock("Cactpots", cactpots)),
       S.Markdown(getScoreBlock("Cactpots Missed", cactpotsMissed))
+      S.Markdown(getScoreBlock("Fun Had",Math. Math.floor(Math.random() * 100) + "%" ))
     ),
     S.Divider(),
   ];
