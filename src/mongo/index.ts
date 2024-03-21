@@ -106,8 +106,9 @@ function _roundsWithWinningScore(
     })
     .match({ "games.0": { $exists: true } })
     .addFields({
-      // the best score a player achieved
+      // the best/worst score a player achieved
       bestPlayerScore: { $max: "$games.score" },
+      worstPlayerScore: { $min: "$games.score" },
       // the number of players who achieved that score
       bestPlayerScoreCount: {
         $size: {
@@ -115,6 +116,15 @@ function _roundsWithWinningScore(
             input: "$games",
             as: "game",
             cond: { $eq: ["$$game.score", { $max: "$games.score" }] },
+          },
+        },
+      },
+      worstPlayerScoreCount: {
+        $size: {
+          $filter: {
+            input: "$games",
+            as: "game",
+            cond: { $eq: ["$$game.score", { $min: "$games.score" }] },
           },
         },
       },
@@ -140,6 +150,7 @@ export async function getLeaderboard(channelId: string): Promise<
     totalScore: number;
     wins: number;
     soloWins: number;
+    soloLosses: number;
   }[]
 > {
   const agg = Game.aggregate()
@@ -192,6 +203,16 @@ export async function getLeaderboard(channelId: string): Promise<
             $and: [
               { $eq: ["$score", "$round.bestPlayerScore"] },
               { $eq: ["$round.bestPlayerScoreCount", 1] },
+            ],
+          },
+        },
+      },
+      soloLosses: {
+        $sum: {
+          $toInt: {
+            $and: [
+              { $eq: ["$score", "$round.worstPlayerScore"] },
+              { $eq: ["$round.worstPlayerScoreCount", 1] },
             ],
           },
         },
