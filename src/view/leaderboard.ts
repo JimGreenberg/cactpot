@@ -15,7 +15,7 @@ interface LeaderboardInfo {
 
 export function leaderboardView(users: LeaderboardInfo[]) {
   return [
-    S.Header(S.PlainText("Leaderboard")),
+    S.Header(S.PlainText("Leaderboard *")),
     S.Section(S.PlainText(`${users[0].countGames} rounds played`)),
     S.Divider(),
     ...users.map(leaderboardUserView).flat(1),
