@@ -17,6 +17,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   async ({ action, body, respond }) => {
     const service = new SlackService(app);
     const channelId = body?.channel?.id as string;
+    const userId = body?.user?.id as string;
     const { value, gameId, mobile } = JSON.parse(
       (action as ButtonAction).value
     );
@@ -50,7 +51,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
       const unfinished = games.find(
         (game) => game.getCurrentTurn() !== Turn.FINAL
       );
-      if (unfinished) {
+      if (unfinished && unfinished.userId !== userId) {
         await app.client.chat.postMessage({
           channel: channelId,
           text: `Everyone is done except <@${unfinished.userId}>`,
