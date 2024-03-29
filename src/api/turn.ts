@@ -39,6 +39,25 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
 
     const games = await DB.getGamesByRound(game.roundId);
     if (!games?.length) throw new Error();
+
+    // if all but one game is final
+    if (
+      games
+        .map((game) => Number(game.getCurrentTurn() === Turn.FINAL))
+        .reduce((acc, curr) => acc + curr, 0) ===
+      games.length - 1
+    ) {
+      const unfinished = games.find(
+        (game) => game.getCurrentTurn() !== Turn.FINAL
+      );
+      if (unfinished) {
+        await app.client.chat.postMessage({
+          channel: channelId,
+          text: `Everyone is done except <@${unfinished.userId}>`,
+        });
+      }
+    }
+
     if (games.every((game) => game.getCurrentTurn() === Turn.FINAL)) {
       const users = await service.getUsers(channelId);
       if (games.length === users.length) {
