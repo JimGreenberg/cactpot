@@ -40,14 +40,14 @@ function leaderboardUserView({
     S.Context(
       S.Markdown(getScoreBlock("Wins", wins)),
       S.Markdown(getScoreBlock("Solo Wins", soloWins)),
-      S.Markdown(getScoreBlock("Solo Losses", soloLosses)),
+      S.Markdown(getScoreBlock("Spicy Keychains", soloLosses)),
       S.Markdown(getScoreBlock("Total Score", totalScore)),
       S.Markdown(
         `Best Score Rate: *${Math.floor((100 * bestsAchieved) / countGames)}%*`
       ),
       S.Markdown(getScoreBlock("Cactpots", cactpots)),
       S.Markdown(getScoreBlock("Cactpots Missed", cactpotsMissed)),
-      S.Markdown(`Fun Had: *${Math.floor(Math.random() * 100)}%*`)
+      S.Markdown(`Fun Had: *${Math.floor(Math.random() * 101)}%*`)
     ),
     S.Divider(),
   ];
