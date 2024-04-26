@@ -13,7 +13,7 @@ export function startView(
   });
 
   return [
-    S.Header(S.PlainText("Would you like to play cactpot?")),
+    S.Header(S.PlainText("Play cactpot.")),
     S.Actions(
       S.Button({ value, action_id: "join", text: "Join" }),
       S.Button({
