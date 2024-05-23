@@ -128,6 +128,12 @@ function _roundsWithWinningScore(
           },
         },
       },
+      isAllUniqueScores: {
+        $eq: [
+          { $maxN: { $input: "$games.score", n: { $size: "$games" } } },
+          { $size: "$games" },
+        ],
+      },
     })
     .project({
       _id: 1,
@@ -137,6 +143,7 @@ function _roundsWithWinningScore(
       worstPlayerScore: 1,
       worstPlayerScoreCount: 1,
       cactpotPossible: 1,
+      isAllUniqueScores: 1,
     });
 
   return agg.pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
@@ -153,6 +160,7 @@ export async function getLeaderboard(channelId: string): Promise<
     wins: number;
     soloWins: number;
     soloLosses: number;
+    dingusAwards: number;
   }[]
 > {
   const agg = Game.aggregate()
@@ -215,6 +223,17 @@ export async function getLeaderboard(channelId: string): Promise<
             $and: [
               { $eq: ["$score", "$round.worstPlayerScore"] },
               { $eq: ["$round.worstPlayerScoreCount", 1] },
+            ],
+          },
+        },
+      },
+      dingusAwards: {
+        $sum: {
+          $toInt: {
+            $and: [
+              { $eq: ["$score", "$round.worstPlayerScore"] },
+              { $eq: ["$round.worstPlayerScoreCount", 1] },
+              "$round.isAllUniqueScores",
             ],
           },
         },
