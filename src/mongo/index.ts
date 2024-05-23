@@ -129,10 +129,7 @@ function _roundsWithWinningScore(
         },
       },
       isAllUniqueScores: {
-        $eq: [
-          { $maxN: { $input: "$games.score", n: { $size: "$games" } } },
-          { $size: "$games" },
-        ],
+        $eq: [{ $size: { $setUnion: ["$games.score"] } }, { $size: "$games" }],
       },
     })
     .project({
