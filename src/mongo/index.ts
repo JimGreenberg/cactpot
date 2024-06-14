@@ -300,17 +300,16 @@ export async function findCheaters(channelId: string): Promise<
   const games = await agg.exec();
   const gamesWithOpti = games.map((game) => {
     const cactpot = Cactpot.fromMongo(game);
-    const optimalLine = cactpot.optimalLine();
-    const { userId, lineChoice } = cactpot.getSummary();
+    const { userId, playedOptimally } = cactpot.getSummary();
     return {
       userId,
-      didSelectOptimalLine: optimalLine === lineChoice,
+      playedOptimally,
     };
   });
   const usersWithCount = gamesWithOpti.reduce<Record<string, number[]>>(
-    (userMap, { userId, didSelectOptimalLine }) => {
+    (userMap, { userId, playedOptimally }) => {
       if (!userMap[userId]) userMap[userId] = [];
-      userMap[userId].push(Number(didSelectOptimalLine));
+      userMap[userId].push(Number(playedOptimally));
       return userMap;
     },
     {}

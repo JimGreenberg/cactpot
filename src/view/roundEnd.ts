@@ -10,6 +10,16 @@ interface SummaryWithUser extends Summary {
 }
 
 export function roundEndView(games: SummaryWithUser[]): any[] {
+  const optimalUsers: any[] = games
+    .filter(({ playedOptimally }) => playedOptimally)
+    .map(({ name, image }) =>
+      S.Image({
+        image_url: image,
+        alt_text: name,
+      })
+    );
+  if (!optimalUsers.length) optimalUsers.push(S.Markdown(":dingus:"));
+
   const blocks = [
     S.Header(S.PlainText("Scores")),
     ...getScoreBlocks(games),
@@ -18,6 +28,7 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         getScoreBlock("The best score on this board was", games[0].bestScore)
       )
     ),
+    S.Context(S.Markdown("Played optimally: "), ...optimalUsers),
     S.Divider(),
     S.Section(S.Markdown("Watch a replay"), {
       accessory: S.StaticSelect({
@@ -98,7 +109,9 @@ function getScoreBlocks(
     .sort(([scoreA], [scoreB]) => parseInt(scoreB) - parseInt(scoreA))
     .map(([score, users], i) =>
       S.Context(
-        S.Markdown(`${placementEmojis[i]} ${wrap(score, "*")}`),
+        S.Markdown(
+          `${placementEmojis[i]} ${wrap(score.toLocaleString(), "*")}`
+        ),
         ...users.map(({ name, image }) =>
           S.Image({
             image_url: image,

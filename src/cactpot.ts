@@ -21,6 +21,7 @@ export interface Summary {
   reveals: TilePosition[];
   revealValues: number[];
   lineChoice?: BoardLine;
+  playedOptimally?: boolean;
   userId: string;
 }
 
@@ -68,6 +69,35 @@ export class Cactpot {
     return this.board.initialReveal;
   }
 
+  private revealTile(pos: TilePosition) {
+    const tile = this.board.getTile(pos);
+    if (tile.visible) throw new Errors.InvalidMove(pos);
+    return tile.reveal();
+  }
+
+  /** given a board in which the player is about to, or has selected a line
+   * returns the boardlines with the highest EV
+   * this is an array since there may be a tie
+   */
+  private optimalLines(): BoardLine[] {
+    if (this.reveals.length !== 3) {
+      throw new Errors.InvalidBoardState();
+    }
+    let max = 0;
+    let maxLines: BoardLine[];
+    Object.values(BoardLine).forEach((line) => {
+      const ev = this.board.getEv(line);
+      if (ev > max) {
+        max = ev;
+        maxLines = [line];
+      } else if (ev === max) {
+        maxLines.push(line);
+      }
+    });
+    // @ts-ignore
+    return maxLines;
+  }
+
   getCurrentTurn(): Turn {
     if (this.lineChoice) return Turn.FINAL;
     switch (this.reveals.length) {
@@ -82,12 +112,6 @@ export class Cactpot {
       default:
         throw new Errors.InvalidBoardState();
     }
-  }
-
-  private revealTile(pos: TilePosition) {
-    const tile = this.board.getTile(pos);
-    if (tile.visible) throw new Errors.InvalidMove(pos);
-    return tile.reveal();
   }
 
   takeTurn(arg: TilePosition | BoardLine): Summary {
@@ -130,6 +154,9 @@ export class Cactpot {
       revealValues: this.reveals.map((pos) => this.board.getTile(pos).value),
       lineChoice: this.lineChoice,
       userId: this.userId,
+      playedOptimally: this.optimalLines().includes(
+        this.lineChoice as BoardLine
+      ),
     };
   }
 
@@ -149,22 +176,5 @@ export class Cactpot {
       cactpotPossible: bestScore === Board.cactpot,
       score: this.board.getScore(this.lineChoice!),
     };
-  }
-
-  optimalLine(): BoardLine {
-    if (this.reveals.length !== 3) {
-      throw new Errors.InvalidBoardState();
-    }
-    let max = 0;
-    let maxLine: BoardLine;
-    Object.values(BoardLine).forEach((line) => {
-      const ev = this.board.getEv(line);
-      if (ev > max) {
-        max = ev;
-        maxLine = line;
-      }
-    });
-    // @ts-ignore
-    return maxLine;
   }
 }
