@@ -79,7 +79,7 @@ export class Cactpot {
    * returns the boardlines with the highest EV
    * this is an array since there may be a tie
    */
-  private optimalLines(): BoardLine[] {
+  private getOptimalLines(): BoardLine[] {
     if (this.reveals.length !== 3) {
       throw new Errors.InvalidBoardState();
     }
@@ -141,6 +141,10 @@ export class Cactpot {
   getSummary(): Summary {
     const turn = this.getCurrentTurn();
     const isDone = turn === Turn.FINAL;
+    let optimalLines: BoardLine[] = [];
+    try {
+      optimalLines = this.getOptimalLines();
+    } catch (e) {}
     return {
       board: this.board.display(isDone),
       score: this.getScore(),
@@ -154,9 +158,7 @@ export class Cactpot {
       revealValues: this.reveals.map((pos) => this.board.getTile(pos).value),
       lineChoice: this.lineChoice,
       userId: this.userId,
-      playedOptimally: this.optimalLines().includes(
-        this.lineChoice as BoardLine
-      ),
+      playedOptimally: optimalLines.includes(this.lineChoice as BoardLine),
     };
   }
 
