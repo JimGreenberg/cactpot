@@ -124,7 +124,8 @@ export class Board {
     this.tiles = Board.tilesFromSeedString(seedString);
     [initialReveal, ...itemsToReveal].forEach((item) => {
       if (isTilePosition(item)) this.getTile(item).reveal();
-      if (isBoardLine(item)) this.getLine(item).map((tile) => tile.reveal());
+      // this will interfere with the optmial score checker
+      // if (isBoardLine(item)) this.getLine(item).map((tile) => tile.reveal());
     });
   }
 
