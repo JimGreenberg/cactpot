@@ -36,7 +36,7 @@ export function tileEmoji(value: number | typeof Tile.HIDDEN): string {
   }
 }
 
-function wrap(str: string, bookend: string): string {
+export function wrap(str: string, bookend: string): string {
   return `${bookend}${str}${bookend}`;
 }
 
