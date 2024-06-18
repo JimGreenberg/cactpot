@@ -43,7 +43,11 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         image_url: mostFunHad.image,
         alt_text: mostFunHad.name,
       }),
-      S.Markdown(`${mostFunHad.name} had the most fun`)
+      S.Markdown(
+        ` ${mostFunHad.name} had the most fun (*${Math.floor(
+          Math.random() * 101
+        )}%*)`
+      )
     ),
     S.Divider(),
     S.Section(S.Markdown("Watch a replay"), {
