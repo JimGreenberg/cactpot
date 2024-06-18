@@ -11,8 +11,6 @@ const main = (app: App) => {
     switch (args.command.text) {
       case "leaderboard":
         return await API.leaderboard(app)(args);
-      case "check-honesty":
-        return await API.checkHonesty(app)(args);
       case "unfinished":
         return await API.unfinished(app)(args);
       default:
