@@ -14,6 +14,8 @@ interface LeaderboardInfo {
   totalScore: number;
   /** a dingus award is the ultimate humiliation */
   dingusAwards: number;
+  didPlayOptimallyCount: number;
+  zags: number;
 }
 
 export function leaderboardView(users: LeaderboardInfo[]) {
@@ -37,17 +39,25 @@ function leaderboardUserView({
   bestsAchieved,
   countGames,
   dingusAwards,
+  didPlayOptimallyCount,
+  zags,
 }: LeaderboardInfo) {
   return [
     S.Context(S.Image({ image_url: image, alt_text: name }), S.PlainText(name)),
     S.Context(
       S.Markdown(getScoreBlock("Wins", wins)),
       S.Markdown(getScoreBlock("Solo Wins", soloWins)),
+      S.Markdown(getScoreBlock("Zags", zags)),
       S.Markdown(getScoreBlock("Spicy Keychains", soloLosses)),
       S.Markdown(getScoreBlock(":dingus: Awards", dingusAwards)),
       S.Markdown(getScoreBlock("Total Score", totalScore)),
       S.Markdown(
         `Best Score Rate: *${Math.floor((100 * bestsAchieved) / countGames)}%*`
+      ),
+      S.Markdown(
+        `Optimal* Play Rate: *${Math.floor(
+          (100 * didPlayOptimallyCount) / countGames
+        )}%*`
       ),
       S.Markdown(getScoreBlock("Cactpots", cactpots)),
       S.Markdown(getScoreBlock("Cactpots Missed", cactpotsMissed)),
