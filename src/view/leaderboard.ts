@@ -60,8 +60,7 @@ function leaderboardUserView({
         )}%*`
       ),
       S.Markdown(getScoreBlock("Cactpots", cactpots)),
-      S.Markdown(getScoreBlock("Cactpots Missed", cactpotsMissed)),
-      S.Markdown(`Fun Had: *${Math.floor(Math.random() * 101)}%*`)
+      S.Markdown(getScoreBlock("Cactpots Missed", cactpotsMissed))
     ),
     S.Divider(),
   ];

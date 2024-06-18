@@ -25,7 +25,90 @@ export function Button({ value, action_id, text, style, confirm }: any) {
   };
 }
 
-export function Context(...elements: (Text | ReturnType<typeof Image>)[]) {
+type ContextElement = Text | ReturnType<typeof Image>;
+/**
+ *
+ * Context may only have 10 elements
+ * use tuple type overload signatures to enforce
+ */
+export function Context(
+  ...elements: [
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement
+  ]
+): any;
+export function Context(
+  ...elements: [
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement
+  ]
+): any;
+export function Context(
+  ...elements: [
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement
+  ]
+): any;
+export function Context(
+  ...elements: [
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement
+  ]
+): any;
+export function Context(
+  ...elements: [
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement
+  ]
+): any;
+export function Context(
+  ...elements: [
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement,
+    ContextElement
+  ]
+): any;
+export function Context(
+  ...elements: [ContextElement, ContextElement, ContextElement, ContextElement]
+): any;
+export function Context(
+  ...elements: [ContextElement, ContextElement, ContextElement]
+): any;
+export function Context(...elements: [ContextElement, ContextElement]): any;
+export function Context(...elements: [ContextElement]): any;
+export function Context(...elements: [ContextElement]): any {
   return { type: "context", elements };
 }
 

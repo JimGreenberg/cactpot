@@ -26,6 +26,7 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         alt_text: name,
       })
     );
+  const mostFunHad = games.sample();
   if (!optimalUsers.length) optimalUsers.push(S.Markdown(":dingus:"));
 
   const blocks = [
@@ -36,7 +37,14 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         getScoreBlock("The best score on this board was", games[0].bestScore)
       )
     ),
-    S.Context(S.Markdown("Played optimally: "), ...optimalUsers),
+    S.Context(S.Markdown("Played optimally: "), ...(optimalUsers as [any])),
+    S.Context(
+      S.Image({
+        image_url: mostFunHad.image,
+        alt_text: mostFunHad.name,
+      }),
+      S.Markdown(`${mostFunHad.name} had the most fun`)
+    ),
     S.Divider(),
     S.Section(S.Markdown("Watch a replay"), {
       accessory: S.StaticSelect({
@@ -116,12 +124,12 @@ function getScoreBlocks(
     .map(([score, users], i) =>
       S.Context(
         S.Markdown(`${placementEmojis[i]} ${bold(score.toLocaleString())}`),
-        ...users.map(({ name, image }) =>
+        ...(users.map(({ name, image }) =>
           S.Image({
             image_url: image,
             alt_text: name,
           })
-        )
+        ) as [any])
       )
     );
 }
