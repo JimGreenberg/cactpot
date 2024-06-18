@@ -348,8 +348,21 @@ export async function addDidPlayOptimally() {
     const cactpot = Cactpot.fromMongo(game.toObject());
     const { didPlayOptimally } = cactpot.getSummary();
     game.didPlayOptimally = didPlayOptimally;
-    // game.save();
-    console.log(`game id ${game.id} did play optimally ${didPlayOptimally}`);
+    console.log(
+      `start: game id ${game.id} did play optimally ${didPlayOptimally}`
+    );
+    game
+      .save()
+      .then(() => {
+        console.log(
+          `success: game id ${game.id} did play optimally ${didPlayOptimally}`
+        );
+      })
+      .catch(() =>
+        console.log(
+          `fail: game id ${game.id} did play optimally ${didPlayOptimally}`
+        )
+      );
   });
 }
-// addDidPlayOptimally();
+addDidPlayOptimally();
