@@ -1,7 +1,15 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { TilePosition } from "../constants";
-import { wrap, getScoreBlock, boardLineText, tileChar } from "./util";
+import {
+  wrap,
+  code,
+  bold,
+  italic,
+  getScoreBlock,
+  boardLineText,
+  tileChar,
+} from "./util";
 import * as S from "./slack";
 
 interface SummaryWithUser extends Summary {
@@ -11,7 +19,7 @@ interface SummaryWithUser extends Summary {
 
 export function roundEndView(games: SummaryWithUser[]): any[] {
   const optimalUsers: any[] = games
-    .filter(({ playedOptimally }) => playedOptimally)
+    .filter(({ didPlayOptimally }) => didPlayOptimally)
     .map(({ name, image }) =>
       S.Image({
         image_url: image,
@@ -74,12 +82,9 @@ function renderGame({
               const selectedTile =
                 lineChoice &&
                 Board.positionsFromBoardLine(lineChoice).includes(value);
-              const char = wrap(wrap(tileChar(tile), " "), "`");
+              const char = code(wrap(tileChar(tile), " "));
 
-              return wrap(
-                selectedTile ? wrap(wrap(char, "*"), "_") : char,
-                " "
-              );
+              return wrap(selectedTile ? italic(bold(char)) : char, " ");
             })
             .join(" ")
         )
@@ -106,12 +111,11 @@ function getScoreBlocks(
     ":dingus:",
   ];
   return Object.entries(scoreMap)
-    .sort(([scoreA], [scoreB]) => parseInt(scoreB) - parseInt(scoreA))
+    .map(([score, users]) => [parseInt(score), users] as const)
+    .sort(([scoreA], [scoreB]) => scoreB - scoreA)
     .map(([score, users], i) =>
       S.Context(
-        S.Markdown(
-          `${placementEmojis[i]} ${wrap(score.toLocaleString(), "*")}`
-        ),
+        S.Markdown(`${placementEmojis[i]} ${bold(score.toLocaleString())}`),
         ...users.map(({ name, image }) =>
           S.Image({
             image_url: image,

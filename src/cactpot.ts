@@ -21,7 +21,7 @@ export interface Summary {
   reveals: TilePosition[];
   revealValues: number[];
   lineChoice?: BoardLine;
-  playedOptimally?: boolean;
+  didPlayOptimally?: boolean;
   userId: string;
 }
 
@@ -142,8 +142,10 @@ export class Cactpot {
     const turn = this.getCurrentTurn();
     const isDone = turn === Turn.FINAL;
     let optimalLines: BoardLine[] = [];
+    let didPlayOptimally: boolean | undefined;
     try {
       optimalLines = this.getOptimalLines();
+      didPlayOptimally = optimalLines.includes(this.lineChoice!);
     } catch (e) {}
     return {
       board: this.board.display(isDone),
@@ -158,7 +160,7 @@ export class Cactpot {
       revealValues: this.reveals.map((pos) => this.board.getTile(pos).value),
       lineChoice: this.lineChoice,
       userId: this.userId,
-      playedOptimally: optimalLines.includes(this.lineChoice as BoardLine),
+      didPlayOptimally,
     };
   }
 

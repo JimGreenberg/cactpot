@@ -36,8 +36,18 @@ export function tileEmoji(value: number | typeof Tile.HIDDEN): string {
   }
 }
 
-export function wrap(str: string, bookend: string): string {
+function wrap(str: string, bookend: string): string {
   return `${bookend}${str}${bookend}`;
+}
+
+export function bold(str: string): string {
+  return wrap(str, "*");
+}
+export function italic(str: string): string {
+  return wrap(str, "_");
+}
+export function code(str: string): string {
+  return wrap(str, "`");
 }
 
 export function getScoreBlock(label: string, score = 0) {

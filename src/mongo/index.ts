@@ -54,10 +54,11 @@ export async function takeTurn(gameId: string, turn: TilePosition | BoardLine) {
   if (!game) throw new Errors.NotFound();
   const cactpot = Cactpot.fromMongo(game.toObject());
 
-  const { reveals, lineChoice } = cactpot.takeTurn(turn);
+  const { reveals, lineChoice, didPlayOptimally, score } =
+    cactpot.takeTurn(turn);
   game.reveals = reveals;
+  game.didPlayOptimally = didPlayOptimally;
   if (lineChoice) game.lineChoice = lineChoice;
-  const score = cactpot.getScore();
   if (score) game.score = score;
 
   try {
@@ -158,6 +159,8 @@ export async function getLeaderboard(channelId: string): Promise<
     soloWins: number;
     soloLosses: number;
     dingusAwards: number;
+    didPlayOptimallyCount: number;
+    zags: number;
   }[]
 > {
   const agg = Game.aggregate()
@@ -235,6 +238,22 @@ export async function getLeaderboard(channelId: string): Promise<
           },
         },
       },
+      didPlayOptimallyCount: {
+        $sum: {
+          $toInt: "$didPlayOptimally",
+        },
+      },
+      zags: {
+        $sum: {
+          $toInt: {
+            $and: [
+              { $eq: ["$score", "$round.bestPlayerScore"] },
+              { $eq: ["$round.bestPlayerScoreCount", 1] },
+              { $not: "$didPlayOptimally" },
+            ],
+          },
+        },
+      },
     })
     .addFields({
       userId: "$_id",
@@ -300,16 +319,16 @@ export async function findCheaters(channelId: string): Promise<
   const games = await agg.exec();
   const gamesWithOpti = games.map((game) => {
     const cactpot = Cactpot.fromMongo(game);
-    const { userId, playedOptimally } = cactpot.getSummary();
+    const { userId, didPlayOptimally } = cactpot.getSummary();
     return {
       userId,
-      playedOptimally,
+      didPlayOptimally,
     };
   });
   const usersWithCount = gamesWithOpti.reduce<Record<string, number[]>>(
-    (userMap, { userId, playedOptimally }) => {
+    (userMap, { userId, didPlayOptimally }) => {
       if (!userMap[userId]) userMap[userId] = [];
-      userMap[userId].push(Number(playedOptimally));
+      userMap[userId].push(Number(didPlayOptimally));
       return userMap;
     },
     {}
@@ -322,3 +341,14 @@ export async function findCheaters(channelId: string): Promise<
 }
 
 Game.syncIndexes();
+
+async function addDidPlayOptimally() {
+  const games = await Game.find({}).populate("round");
+  games.forEach((game) => {
+    const cactpot = Cactpot.fromMongo(game.toObject());
+    const { didPlayOptimally } = cactpot.getSummary();
+    game.didPlayOptimally = didPlayOptimally;
+    game.save();
+  });
+}
+addDidPlayOptimally();

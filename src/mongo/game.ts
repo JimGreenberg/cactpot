@@ -23,6 +23,7 @@ const GameSchema = new Schema({
     index: true,
   },
   score: Number,
+  didPlayOptimally: Boolean,
 });
 GameSchema.index({ userId: 1, round: 1 }, { unique: true });
 
