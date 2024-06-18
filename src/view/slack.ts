@@ -108,7 +108,8 @@ export function Context(
 ): any;
 export function Context(...elements: [ContextElement, ContextElement]): any;
 export function Context(...elements: [ContextElement]): any;
-export function Context(...elements: [ContextElement]): any {
+export function Context(...elements: []): any;
+export function Context(...elements: never): any {
   return { type: "context", elements };
 }
 

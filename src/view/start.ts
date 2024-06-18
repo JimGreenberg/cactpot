@@ -32,12 +32,12 @@ export function startView(
       })
     ),
     S.Context(
-      ...currentPlayers.map(({ image, name }) =>
+      ...(currentPlayers.map(({ image, name }) =>
         S.Image({
           image_url: image,
           alt_text: name,
         })
-      )
+      ) as [any])
     ),
     S.Context(S.PlainText(`Round ID: ${roundId}`)),
   ];
