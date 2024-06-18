@@ -5,4 +5,3 @@ export * from "./join";
 export * from "./startEarly";
 export * from "./unfinished";
 export * from "./replay";
-export * from "./checkHonesty";
