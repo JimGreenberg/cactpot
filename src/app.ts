@@ -13,7 +13,8 @@ const main = (app: App) => {
         return await API.leaderboard(app)(args);
       case "unfinished":
         return await API.unfinished(app)(args);
-      default:
+      case "":
+      case "start":
         return await API.newRound(app)(args);
     }
   });
