@@ -342,6 +342,7 @@ export async function findCheaters(channelId: string): Promise<
 
 Game.syncIndexes();
 
+// migration
 export async function addDidPlayOptimally() {
   const games = await Game.find({}).populate("round");
   games.forEach((game) => {
@@ -365,4 +366,3 @@ export async function addDidPlayOptimally() {
       );
   });
 }
-addDidPlayOptimally();
