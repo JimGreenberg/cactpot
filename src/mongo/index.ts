@@ -342,13 +342,14 @@ export async function findCheaters(channelId: string): Promise<
 
 Game.syncIndexes();
 
-async function addDidPlayOptimally() {
+export async function addDidPlayOptimally() {
   const games = await Game.find({}).populate("round");
   games.forEach((game) => {
     const cactpot = Cactpot.fromMongo(game.toObject());
     const { didPlayOptimally } = cactpot.getSummary();
     game.didPlayOptimally = didPlayOptimally;
-    game.save();
+    // game.save();
+    console.log(`game id ${game.id} did play optimally ${didPlayOptimally}`);
   });
 }
-addDidPlayOptimally();
+// addDidPlayOptimally();
