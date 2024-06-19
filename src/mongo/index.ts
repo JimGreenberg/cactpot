@@ -109,8 +109,8 @@ function _roundsWithWinningScore(
     .addFields({
       scores: {
         $sortArray: {
-          $input: "$games.score",
-          $sortBy: -1,
+          input: "$games.score",
+          sortBy: -1,
         },
       },
       // the best/worst score a player achieved
