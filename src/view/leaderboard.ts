@@ -7,19 +7,17 @@ interface LeaderboardInfo {
   countGames: number;
   cactpots: number;
   cactpotsMissed: number;
-  wins: number;
   soloWins: number;
   soloLosses: number;
   bestsAchieved: number;
   totalScore: number;
-  /** a dingus award is the ultimate humiliation */
-  dingusAwards: number;
   didPlayOptimallyCount: number;
   zags: number;
   firstPlaceMedals: number;
   secondPlaceMedals: number;
   thirdPlaceMedals: number;
-  fourthPlaceMedals: number;
+  /** a dingus award is the ultimate humiliation */
+  dingusAwards: number;
 }
 
 export function leaderboardView(users: LeaderboardInfo[]) {
@@ -36,19 +34,17 @@ function leaderboardUserView({
   image,
   cactpots,
   cactpotsMissed,
-  wins,
   soloWins,
   soloLosses,
   totalScore,
   bestsAchieved,
   countGames,
-  dingusAwards,
   didPlayOptimallyCount,
   zags,
   firstPlaceMedals,
   secondPlaceMedals,
   thirdPlaceMedals,
-  fourthPlaceMedals,
+  dingusAwards,
 }: LeaderboardInfo) {
   return [
     S.Context(
@@ -57,7 +53,7 @@ function leaderboardUserView({
       S.Markdown(getScoreBlock(":first_place_medal:", firstPlaceMedals)),
       S.Markdown(getScoreBlock(":second_place_medal:", secondPlaceMedals)),
       S.Markdown(getScoreBlock(":third_place_medal:", thirdPlaceMedals)),
-      S.Markdown(getScoreBlock(":dingus:", fourthPlaceMedals))
+      S.Markdown(getScoreBlock(":dingus:", dingusAwards))
     ),
     S.Context(
       S.Markdown(getScoreBlock("Cactpots", cactpots)),

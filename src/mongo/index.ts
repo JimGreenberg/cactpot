@@ -135,9 +135,6 @@ function _roundsWithWinningScore(
           },
         },
       },
-      isAllUniqueScores: {
-        $eq: [{ $size: { $setUnion: ["$games.score"] } }, { $size: "$games" }],
-      },
     })
     .project({
       _id: 1,
@@ -148,7 +145,6 @@ function _roundsWithWinningScore(
       worstPlayerScore: 1,
       worstPlayerScoreCount: 1,
       cactpotPossible: 1,
-      isAllUniqueScores: 1,
     });
 
   return agg.pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
@@ -162,16 +158,14 @@ export async function getLeaderboard(channelId: string): Promise<
     cactpotsMissed: number;
     bestsAchieved: number;
     totalScore: number;
-    wins: number;
     soloWins: number;
     soloLosses: number;
-    dingusAwards: number;
     didPlayOptimallyCount: number;
     zags: number;
     firstPlaceMedals: number;
     secondPlaceMedals: number;
     thirdPlaceMedals: number;
-    fourthPlaceMedals: number;
+    dingusAwards: number;
   }[]
 > {
   const agg = Game.aggregate()
@@ -211,13 +205,6 @@ export async function getLeaderboard(channelId: string): Promise<
           },
         },
       },
-      wins: {
-        $sum: {
-          $toInt: {
-            $eq: ["$score", "$round.bestPlayerScore"],
-          },
-        },
-      },
       soloWins: {
         $sum: {
           $toInt: {
@@ -234,17 +221,6 @@ export async function getLeaderboard(channelId: string): Promise<
             $and: [
               { $eq: ["$score", "$round.worstPlayerScore"] },
               { $eq: ["$round.worstPlayerScoreCount", 1] },
-            ],
-          },
-        },
-      },
-      dingusAwards: {
-        $sum: {
-          $toInt: {
-            $and: [
-              { $eq: ["$score", "$round.worstPlayerScore"] },
-              { $eq: ["$round.worstPlayerScoreCount", 1] },
-              "$round.isAllUniqueScores",
             ],
           },
         },
@@ -286,7 +262,7 @@ export async function getLeaderboard(channelId: string): Promise<
           },
         },
       },
-      fourthPlaceMedals: {
+      dingusAwards: {
         $sum: {
           $toInt: {
             $eq: ["$score", { $arrayElemAt: ["$round.scores", 3] }],
