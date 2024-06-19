@@ -62,8 +62,7 @@ function leaderboardUserView({
       S.Markdown(getScoreBlock("Total Score", totalScore)),
       S.Markdown(getScoreBlock("Solo Wins", soloWins)),
       S.Markdown(getScoreBlock("Zags*", zags)),
-      S.Markdown(getScoreBlock(":spicy_keychain:", soloLosses)),
-      S.Markdown(getScoreBlock(":dingus:", dingusAwards))
+      S.Markdown(getScoreBlock(":spicy_keychain:", soloLosses))
     ),
     S.Context(
       S.Markdown(getScoreBlock("Cactpots", cactpots)),
