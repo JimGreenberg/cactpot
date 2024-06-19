@@ -51,18 +51,13 @@ function leaderboardUserView({
   fourthPlaceMedals,
 }: LeaderboardInfo) {
   return [
-    S.Context(S.Image({ image_url: image, alt_text: name }), S.PlainText(name)),
     S.Context(
+      S.Image({ image_url: image, alt_text: name }),
+      S.PlainText(name),
       S.Markdown(getScoreBlock(":first_place_medal:", firstPlaceMedals)),
       S.Markdown(getScoreBlock(":second_place_medal:", secondPlaceMedals)),
       S.Markdown(getScoreBlock(":third_place_medal:", thirdPlaceMedals)),
       S.Markdown(getScoreBlock(":dingus:", fourthPlaceMedals))
-    ),
-    S.Context(
-      S.Markdown(getScoreBlock("Total Score", totalScore)),
-      S.Markdown(getScoreBlock("Solo Wins", soloWins)),
-      S.Markdown(getScoreBlock("Zags*", zags)),
-      S.Markdown(getScoreBlock(":spicy_keychain:", soloLosses))
     ),
     S.Context(
       S.Markdown(getScoreBlock("Cactpots", cactpots)),
@@ -73,6 +68,10 @@ function leaderboardUserView({
       )
     ),
     S.Context(
+      S.Markdown(getScoreBlock("Total Score", totalScore)),
+      S.Markdown(getScoreBlock("Solo Wins", soloWins)),
+      S.Markdown(getScoreBlock("Zags*", zags)),
+      S.Markdown(getScoreBlock(":spicy_keychain:", soloLosses)),
       S.Markdown(
         `Best Score Rate: *${Math.floor((100 * bestsAchieved) / countGames)}%*`
       ),
