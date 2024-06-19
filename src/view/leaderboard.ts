@@ -45,9 +45,8 @@ function leaderboardUserView({
   return [
     S.Context(S.Image({ image_url: image, alt_text: name }), S.PlainText(name)),
     S.Context(
-      S.Markdown(getScoreBlock("Wins", wins)),
-      S.Markdown(getScoreBlock("Solo Wins", soloWins)),
-      S.Markdown(getScoreBlock("Zags", zags)),
+      S.Markdown(getScoreBlock("Wins / Solo Wins", wins + " / " + soloWins)),
+      S.Markdown(getScoreBlock("Zags*", zags)),
       S.Markdown(getScoreBlock("Spicy Keychains", soloLosses)),
       S.Markdown(getScoreBlock(":dingus: Awards", dingusAwards)),
       S.Markdown(getScoreBlock("Total Score", totalScore)),
@@ -59,8 +58,7 @@ function leaderboardUserView({
           (100 * didPlayOptimallyCount) / countGames
         )}%*`
       ),
-      S.Markdown(getScoreBlock("Cactpots", cactpots)),
-      S.Markdown(getScoreBlock("Cactpots Missed", cactpotsMissed))
+      S.Markdown(getScoreBlock("Cactpots / Missed", cactpots + " / " cactpotsMissed))
     ),
     S.Divider(),
   ];
