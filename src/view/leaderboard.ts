@@ -43,15 +43,20 @@ function leaderboardUserView({
   zags,
 }: LeaderboardInfo) {
   return [
-    S.Context(S.Image({ image_url: image, alt_text: name }), S.PlainText(name)),
     S.Context(
+      S.Image({ image_url: image, alt_text: name }),
+      S.PlainText(name),
       S.Markdown(
-        `Wins: *${wins.toLocaleString()} (${soloWins.toLocaleString()} solo)*`
-      ),
+        `Wins: *${wins.toLocaleString()}* (${soloWins.toLocaleString()} solo)`
+      )
+    ),
+    S.Context(
+      S.Markdown(getScoreBlock("Total Score", totalScore)),
       S.Markdown(getScoreBlock("Zags*", zags)),
       S.Markdown(getScoreBlock(":spicy_keychain:", soloLosses)),
-      S.Markdown(getScoreBlock(":dingus: Awards", dingusAwards)),
-      S.Markdown(getScoreBlock("Total Score", totalScore)),
+      S.Markdown(getScoreBlock(":dingus:", dingusAwards))
+    ),
+    S.Context(
       S.Markdown(
         `Best Score Rate: *${Math.floor((100 * bestsAchieved) / countGames)}%*`
       ),
@@ -59,13 +64,15 @@ function leaderboardUserView({
         `Optimal* Play Rate: *${Math.floor(
           (100 * didPlayOptimallyCount) / countGames
         )}%*`
-      ),
+      )
+    ),
+    S.Context(
       S.Markdown(
-        `Cactpots: *achieved ${cactpots} cactpots out of a possible ${
+        `Achieved *${cactpots}* cactpots out of a possible *${
           cactpots + cactpotsMissed
-        }, meaning he ${
+        }*, meaning he ${
           cactpotsMissed > 0 ? "embarassingly " : ""
-        }missed ${cactpotsMissed}*`
+        }missed *${cactpotsMissed}*`
       )
     ),
     S.Divider(),
