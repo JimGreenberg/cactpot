@@ -45,9 +45,11 @@ function leaderboardUserView({
   return [
     S.Context(S.Image({ image_url: image, alt_text: name }), S.PlainText(name)),
     S.Context(
-      S.Markdown(getScoreBlock("Wins / Solo Wins", wins + " / " + soloWins)),
+      S.Markdown(
+        `Wins: *${wins.toLocaleString()} (${soloWins.toLocaleString()} solo)*`
+      ),
       S.Markdown(getScoreBlock("Zags*", zags)),
-      S.Markdown(getScoreBlock("Spicy Keychains", soloLosses)),
+      S.Markdown(getScoreBlock(":spicy_keychain:", soloLosses)),
       S.Markdown(getScoreBlock(":dingus: Awards", dingusAwards)),
       S.Markdown(getScoreBlock("Total Score", totalScore)),
       S.Markdown(
@@ -58,7 +60,13 @@ function leaderboardUserView({
           (100 * didPlayOptimallyCount) / countGames
         )}%*`
       ),
-      S.Markdown(getScoreBlock("Cactpots / Missed", cactpots + " / " cactpotsMissed))
+      S.Markdown(
+        `Cactpots: *achieved ${cactpots} cactpots out of a possible ${
+          cactpots + cactpotsMissed
+        }, meaning he ${
+          cactpotsMissed > 0 ? "embarassingly " : ""
+        }missed ${cactpotsMissed}*`
+      )
     ),
     S.Divider(),
   ];
