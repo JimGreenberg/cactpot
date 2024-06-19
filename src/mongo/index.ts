@@ -107,6 +107,12 @@ function _roundsWithWinningScore(
     })
     .match({ "games.0": { $exists: true } })
     .addFields({
+      scores: {
+        $sortArray: {
+          $input: "$games.score",
+          $sortBy: -1,
+        },
+      },
       // the best/worst score a player achieved
       bestPlayerScore: { $max: "$games.score" },
       worstPlayerScore: { $min: "$games.score" },
@@ -135,6 +141,7 @@ function _roundsWithWinningScore(
     })
     .project({
       _id: 1,
+      scores: 1,
       bestScore: 1,
       bestPlayerScore: 1,
       bestPlayerScoreCount: 1,
@@ -161,6 +168,10 @@ export async function getLeaderboard(channelId: string): Promise<
     dingusAwards: number;
     didPlayOptimallyCount: number;
     zags: number;
+    firstPlaceMedals: number;
+    secondPlaceMedals: number;
+    thirdPlaceMedals: number;
+    fourthPlaceMedals: number;
   }[]
 > {
   const agg = Game.aggregate()
@@ -251,6 +262,34 @@ export async function getLeaderboard(channelId: string): Promise<
               { $eq: ["$round.bestPlayerScoreCount", 1] },
               { $not: "$didPlayOptimally" },
             ],
+          },
+        },
+      },
+      firstPlaceMedals: {
+        $sum: {
+          $toInt: {
+            $eq: ["$score", "$round.scores.0"],
+          },
+        },
+      },
+      secondPlaceMedals: {
+        $sum: {
+          $toInt: {
+            $eq: ["$score", "$round.scores.1"],
+          },
+        },
+      },
+      thirdPlaceMedals: {
+        $sum: {
+          $toInt: {
+            $eq: ["$score", "$round.scores.2"],
+          },
+        },
+      },
+      fourthPlaceMedals: {
+        $sum: {
+          $toInt: {
+            $eq: ["$score", "$round.scores.3"],
           },
         },
       },
