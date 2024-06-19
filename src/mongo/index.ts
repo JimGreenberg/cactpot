@@ -109,7 +109,7 @@ function _roundsWithWinningScore(
     .addFields({
       scores: {
         $sortArray: {
-          input: "$games.score",
+          input: { $setUnion: ["$games.score"] },
           sortBy: -1,
         },
       },
