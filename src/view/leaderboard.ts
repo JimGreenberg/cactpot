@@ -68,7 +68,7 @@ function leaderboardUserView({
     ),
     S.Context(
       S.Markdown(
-        `Achieved *${cactpots}* cactpots out of a possible *${
+        `Achieved *${cactpots}* Cactpots out of a possible *${
           cactpots + cactpotsMissed
         }*, meaning he ${
           cactpotsMissed > 0 ? "embarassingly " : ""
