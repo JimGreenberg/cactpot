@@ -26,7 +26,15 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         alt_text: name,
       })
     );
-  const mostFunHad = games.sample();
+  let mostFunHad = games[0],
+      mostFunScore = -100;
+  games.forEach(game => {
+    const newFun = Math.floor(Math.random() * 101);
+    if (newFun > mostFunScore) {
+      mostFunHad = game;
+      mostFunScore = newFun;
+    }
+  });
   if (!optimalUsers.length) optimalUsers.push(S.Markdown(":dingus:"));
 
   const blocks = [
@@ -44,9 +52,7 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         alt_text: mostFunHad.name,
       }),
       S.Markdown(
-        ` ${mostFunHad.name} had the most fun (*${Math.floor(
-          Math.random() * 101
-        )}%*)`
+        ` ${mostFunHad.name} had the most fun (*${mostFunScore}%*)`
       )
     ),
     S.Divider(),
