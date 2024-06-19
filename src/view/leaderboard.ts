@@ -57,6 +57,14 @@ function leaderboardUserView({
       S.Markdown(getScoreBlock(":dingus:", dingusAwards))
     ),
     S.Context(
+      S.Markdown(getScoreBlock("Cactpots", cactpots)),
+      S.Markdown(
+        `${getScoreBlock("Cactpots Missed", cactpotsMissed)}${
+          cactpotsMissed > 0 ? " (embarassing)" : ""
+        }`
+      )
+    ),
+    S.Context(
       S.Markdown(
         `Best Score Rate: *${Math.floor((100 * bestsAchieved) / countGames)}%*`
       ),
@@ -64,15 +72,6 @@ function leaderboardUserView({
         `Optimal* Play Rate: *${Math.floor(
           (100 * didPlayOptimallyCount) / countGames
         )}%*`
-      )
-    ),
-    S.Context(
-      S.Markdown(
-        `Achieved *${cactpots}* Cactpots out of a possible *${
-          cactpots + cactpotsMissed
-        }*, meaning he ${
-          cactpotsMissed > 0 ? "embarassingly " : ""
-        }missed *${cactpotsMissed}*`
       )
     ),
     S.Divider(),
