@@ -268,28 +268,28 @@ export async function getLeaderboard(channelId: string): Promise<
       firstPlaceMedals: {
         $sum: {
           $toInt: {
-            $eq: ["$score", "$round.scores.0"],
+            $eq: ["$score", { $arrayElemAt: ["$round.scores", 0] }],
           },
         },
       },
       secondPlaceMedals: {
         $sum: {
           $toInt: {
-            $eq: ["$score", "$round.scores.1"],
+            $eq: ["$score", { $arrayElemAt: ["$round.scores", 1] }],
           },
         },
       },
       thirdPlaceMedals: {
         $sum: {
           $toInt: {
-            $eq: ["$score", "$round.scores.2"],
+            $eq: ["$score", { $arrayElemAt: ["$round.scores", 2] }],
           },
         },
       },
       fourthPlaceMedals: {
         $sum: {
           $toInt: {
-            $eq: ["$score", "$round.scores.3"],
+            $eq: ["$score", { $arrayElemAt: ["$round.scores", 3] }],
           },
         },
       },
