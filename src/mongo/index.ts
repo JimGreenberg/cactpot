@@ -309,52 +309,6 @@ export async function getLastUnfinishedGame(
   return results.length ? Cactpot.fromMongo(results[0]) : undefined;
 }
 
-export async function findCheaters(channelId: string): Promise<
-  {
-    userId: string;
-    countGames: number;
-    numOptimalChoices: number;
-  }[]
-> {
-  const agg = Game.aggregate()
-    .match({
-      reveals: { $size: 3 },
-    })
-    .lookup({
-      from: Round.collection.name,
-      localField: "round",
-      foreignField: "_id",
-      as: "round",
-    })
-    .unwind("round")
-    .match({
-      "round.channelId": channelId,
-      "round.leaderboardEnabled": true,
-    });
-  const games = await agg.exec();
-  const gamesWithOpti = games.map((game) => {
-    const cactpot = Cactpot.fromMongo(game);
-    const { userId, didPlayOptimally } = cactpot.getSummary();
-    return {
-      userId,
-      didPlayOptimally,
-    };
-  });
-  const usersWithCount = gamesWithOpti.reduce<Record<string, number[]>>(
-    (userMap, { userId, didPlayOptimally }) => {
-      if (!userMap[userId]) userMap[userId] = [];
-      userMap[userId].push(Number(didPlayOptimally));
-      return userMap;
-    },
-    {}
-  );
-  return Object.entries(usersWithCount).map(([userId, arr]) => ({
-    userId,
-    countGames: arr.length,
-    numOptimalChoices: arr.reduce((a, b) => a + b, 0),
-  }));
-}
-
 Game.syncIndexes();
 
 // migration
