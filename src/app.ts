@@ -3,6 +3,8 @@ dotenv.config();
 import { App } from "@slack/bolt";
 import * as API from "./api";
 
+import { SlackService } from "./slackService";
+
 const BOT_TEST = "C03LZF604RG";
 
 const main = (app: App) => {
@@ -16,6 +18,9 @@ const main = (app: App) => {
       case "":
       case "start":
         return await API.newRound(app)(args);
+      case "test":
+        const service = new SlackService(app);
+        service.getStreaks(args.body.channel_id).then(console.log);
     }
   });
 
