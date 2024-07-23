@@ -75,12 +75,14 @@ export class SlackService {
     const fields = [
       "soloWins",
       "soloLosses",
-      "firstPlaceMedals",
+      "wins",
+      "losses",
     ] satisfies (keyof LeaderboardInfo)[];
     const fieldNames: Record<(typeof fields)[number], string> = {
       soloWins: "solo dub",
       soloLosses: ":spicy_keychain:",
-      firstPlaceMedals: "win",
+      wins: "win",
+      losses: "losing",
     };
     const streaks: ({
       userId: string;

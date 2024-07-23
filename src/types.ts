@@ -5,6 +5,8 @@ export interface LeaderboardInfo {
   cactpotsMissed: number;
   bestsAchieved: number;
   totalScore: number;
+  wins: number;
+  losses: number;
   soloWins: number;
   soloLosses: number;
   didPlayOptimallyCount: number;

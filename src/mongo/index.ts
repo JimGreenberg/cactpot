@@ -206,6 +206,20 @@ export async function getLeaderboard(
           },
         },
       },
+      wins: {
+        $sum: {
+          $toInt: {
+            $eq: ["$score", "$round.bestPlayerScore"],
+          },
+        },
+      },
+      losses: {
+        $sum: {
+          $toInt: {
+            $eq: ["$score", "$round.worstPlayerScore"],
+          },
+        },
+      },
       soloWins: {
         $sum: {
           $toInt: {
@@ -275,7 +289,7 @@ export async function getLeaderboard(
       userId: "$_id",
     })
     .sort({
-      wins: -1,
+      firstPlaceMedals: -1,
       totalScore: -1,
     });
 
