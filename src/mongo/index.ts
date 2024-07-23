@@ -166,7 +166,6 @@ export async function getLeaderboard(
         .group({ _id: "$_id" })
     ).map(({ _id }) => _id);
 
-    console.log(rounds);
     agg = agg.sort({ round: -1 }).match({ round: { $in: rounds } });
   }
 
