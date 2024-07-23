@@ -58,7 +58,7 @@ export class SlackService {
     const users = await this.getUsers(channelId);
     if (!users?.length) throw new Error();
 
-    const leaderboard = await DB.getLeaderboard(channelId);
+    const leaderboard = await DB.getLeaderboard(channelId, limit);
     return leaderboard.map(({ userId, ...rest }) => {
       const user = users.find(({ id }) => id === userId)!;
       return { ...rest, userId, name: user.name, image: user.image };
