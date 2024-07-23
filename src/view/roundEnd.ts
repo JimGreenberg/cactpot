@@ -66,7 +66,9 @@ export function roundEndView(
           image_url: streak.image,
           alt_text: streak.name,
         }),
-        S.Markdown(`is on a ${streak.fieldName} streak of ${streak.count}`),
+        S.Markdown(
+          ` ${streak.name} is on a ${streak.fieldName} streak of ${streak.count}`
+        ),
         S.Markdown(":fire::fire::fire:")
       )
     ),

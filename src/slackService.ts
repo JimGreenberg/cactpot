@@ -108,7 +108,7 @@ export class SlackService {
       try {
         more = await this.getStreaks(channelId, limit + 1);
       } catch {
-        const i = streaks.findIndex(({ count }) => count === MAX_LIMIT);
+        const i = streaks.findIndex(({ count }) => count >= MAX_LIMIT);
         if (streaks[i]) {
           streaks[i].count = "10+" as any;
         }
@@ -117,8 +117,6 @@ export class SlackService {
     // more always has a better streak since the query limit will be higher
     // a streak is only a streak if the number is === to the query limit
     more.forEach((betterStreak) => {
-      console.log(streaks);
-      console.log(betterStreak);
       const i = streaks.findIndex(
         (streak) =>
           streak.field === betterStreak.field &&
