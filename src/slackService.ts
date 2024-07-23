@@ -125,10 +125,10 @@ export class SlackService {
           streak.userId === betterStreak.userId
       );
       if (streaks[i]) {
-        delete streaks[i];
+        streaks.splice(i, 1, betterStreak);
       }
     });
 
-    return [...streaks, ...more];
+    return streaks;
   }
 }
