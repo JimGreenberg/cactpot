@@ -20,7 +20,13 @@ const main = (app: App) => {
         return await API.newRound(app)(args);
       case "test":
         const service = new SlackService(app);
-        service.getStreaks(args.body.channel_id).then(console.log);
+        const streaks = await service.getStreaks(args.body.channel_id);
+        console.log(streaks);
+        app.client.chat.postEphemeral({
+          text: JSON.stringify(streaks),
+          user: args.command.user_id,
+          channel: args.command.channel_id,
+        });
     }
   });
 
