@@ -114,13 +114,19 @@ export class SlackService {
         }
       }
     }
+    // more always has a better streak since the query limit will be higher
+    // a streak is only a streak if the number is === to the query limit
     more.forEach((betterStreak) => {
+      console.log(streaks);
+      console.log(betterStreak);
       const i = streaks.findIndex(
         (streak) =>
           streak.field === betterStreak.field &&
           streak.userId === betterStreak.userId
       );
-      delete streaks[i];
+      if (streaks[i]) {
+        delete streaks[i];
+      }
     });
 
     return [...streaks, ...more];
