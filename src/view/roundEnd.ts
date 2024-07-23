@@ -59,7 +59,7 @@ export function roundEndView(
       }),
       S.Markdown(` ${mostFunHad.name} had the most fun (*${mostFunScore}%*)`)
     ),
-    streaks.map((streak) =>
+    ...streaks.map((streak) =>
       S.Context(
         S.Markdown(":fire::fire::fire:"),
         S.Image({
