@@ -88,25 +88,23 @@ export class SlackService {
       fieldName: string;
       count: number;
     } & Avatar)[] = [];
-    let refetch = false;
     fields.forEach((field) => {
       leaderboard.forEach(({ userId, name, image, ...rest }) => {
         if (rest[field] >= limit) {
-          refetch = true;
+          streaks.push({
+            userId,
+            field,
+            fieldName: fieldNames[field],
+            count: rest[field],
+            name,
+            image,
+          });
         }
-        streaks.push({
-          userId,
-          field,
-          fieldName: fieldNames[field],
-          count: rest[field],
-          name,
-          image,
-        });
       });
     });
 
     let more: typeof streaks = [];
-    if (refetch) {
+    if (streaks.length) {
       try {
         more = await this.getStreaks(channelId, limit + 1);
       } catch {
