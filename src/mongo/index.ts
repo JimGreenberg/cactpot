@@ -96,7 +96,7 @@ export async function enableLeaderboardForRound(roundId: string) {
   await Round.findByIdAndUpdate(roundId, { leaderboardEnabled: true });
 }
 
-function _roundsWithWinningScore(
+function _roundsWithGameAggs(
   channelId: string
 ): PipelineStage.Lookup["$lookup"]["pipeline"] {
   const agg = Round.aggregate()
@@ -161,6 +161,7 @@ export async function getLeaderboard(
   if (limit) {
     const rounds: string[] = (
       await Round.aggregate()
+        .match({ channelId, leaderboardEnabled: true })
         .sort({ _id: -1 })
         .limit(limit)
         .group({ _id: "$_id" })
@@ -174,7 +175,7 @@ export async function getLeaderboard(
       from: Round.collection.name,
       localField: "round",
       foreignField: "_id",
-      pipeline: _roundsWithWinningScore(channelId),
+      pipeline: _roundsWithGameAggs(channelId),
       as: "round",
     })
     .unwind("round")
