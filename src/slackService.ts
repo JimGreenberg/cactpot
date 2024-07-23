@@ -100,7 +100,9 @@ export class SlackService {
         more = await this.getStreaks(channelId, limit + 1);
       } catch {
         const i = streaks.findIndex(({ count }) => count === MAX_LIMIT);
-        streaks[i].count = "10+" as any;
+        if (streaks[i]) {
+          streaks[i].count = "10+" as any;
+        }
       }
     }
     more.forEach((betterStreak) => {
