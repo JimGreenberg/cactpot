@@ -61,10 +61,11 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
 
     if (games.every((game) => game.getCurrentTurn() === Turn.FINAL)) {
       const users = await service.getUsers(channelId);
+      let streaks: Awaited<ReturnType<typeof service.getStreaks>> = [];
       if (games.length === users.length) {
         await DB.enableLeaderboardForRound(game.roundId);
+        streaks = await service.getStreaks(channelId);
       }
-      const streaks = await service.getStreaks(channelId);
 
       const blocks = roundEndView(
         games.map((g) => {
