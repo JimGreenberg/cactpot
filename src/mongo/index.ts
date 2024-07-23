@@ -8,6 +8,8 @@ import * as Errors from "../error";
 import Game from "./game";
 import Round from "./round";
 
+import type { LeaderboardInfo } from "../types";
+
 if (!process.env.MONGO_URL) throw new Error("No mongo url");
 connect(process.env.MONGO_URL);
 
@@ -150,25 +152,25 @@ function _roundsWithWinningScore(
   return agg.pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
 }
 
-export async function getLeaderboard(channelId: string): Promise<
-  {
-    userId: string;
-    countGames: number;
-    cactpots: number;
-    cactpotsMissed: number;
-    bestsAchieved: number;
-    totalScore: number;
-    soloWins: number;
-    soloLosses: number;
-    didPlayOptimallyCount: number;
-    zags: number;
-    firstPlaceMedals: number;
-    secondPlaceMedals: number;
-    thirdPlaceMedals: number;
-    dingusAwards: number;
-  }[]
-> {
-  const agg = Game.aggregate()
+export async function getLeaderboard(
+  channelId: string,
+  limit?: number
+): Promise<LeaderboardInfo[]> {
+  let agg = Game.aggregate();
+
+  if (limit) {
+    const rounds: string[] = (
+      await Round.aggregate()
+        .sort({ _id: -1 })
+        .limit(limit)
+        .group({ _id: "$_id" })
+    ).map(({ _id }) => _id);
+
+    console.log(rounds);
+    agg = agg.sort({ round: -1 }).match({ round: { $in: rounds } });
+  }
+
+  agg = agg
     .lookup({
       from: Round.collection.name,
       localField: "round",

@@ -64,6 +64,8 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
       if (games.length === users.length) {
         await DB.enableLeaderboardForRound(game.roundId);
       }
+      const streaks = await service.getStreaks(channelId);
+
       const blocks = roundEndView(
         games.map((g) => {
           const { name, image } = users.find(({ id }) => id === g.userId)!;
@@ -72,7 +74,8 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
             image,
             ...g.getSummary(),
           };
-        })
+        }),
+        streaks
       );
       await app.client.chat.postMessage({
         channel: channelId,

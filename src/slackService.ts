@@ -1,6 +1,8 @@
 import { App, RespondFn } from "@slack/bolt";
+import * as DB from "./mongo";
 import { Cactpot } from "./cactpot";
 import { cactpotFullWidth } from "./view/cactpotFullWidth";
+import type { Avatar, LeaderboardInfo } from "./types";
 
 export class SlackService {
   constructor(private app: App) {}
@@ -36,5 +38,80 @@ export class SlackService {
       }),
       respond({ delete_original: true }),
     ]);
+  }
+
+  async getLeaderboard(
+    channelId: string,
+    limit?: number
+  ): Promise<(LeaderboardInfo & Avatar)[]> {
+    const users = await this.getUsers(channelId);
+    if (!users?.length) throw new Error();
+
+    const leaderboard = await DB.getLeaderboard(channelId);
+    return leaderboard.map(({ userId, ...rest }) => {
+      const user = users.find(({ id }) => id === userId)!;
+      return { ...rest, userId, name: user.name, image: user.image };
+    });
+  }
+
+  // this is hot garbage
+  async getStreaks(channelId: string, limit: number = 3) {
+    const MAX_LIMIT = 10;
+    if (limit > MAX_LIMIT) {
+      throw new Error("max limit");
+    }
+    const leaderboard = await this.getLeaderboard(channelId, limit);
+    const fields = [
+      "soloWins",
+      "soloLosses",
+      "firstPlaceMedals",
+    ] satisfies (keyof LeaderboardInfo)[];
+    const fieldNames: Record<(typeof fields)[number], string> = {
+      soloWins: "solo dub",
+      soloLosses: ":spicy_keychain:",
+      firstPlaceMedals: "win",
+    };
+    const streaks: ({
+      userId: string;
+      field: (typeof fields)[number];
+      fieldName: string;
+      count: number;
+    } & Avatar)[] = [];
+    let refetch = false;
+    fields.forEach((field) => {
+      leaderboard.forEach(({ userId, name, image, ...rest }) => {
+        if (rest[field] >= limit) {
+          refetch = true;
+        }
+        streaks.push({
+          userId,
+          field,
+          fieldName: fieldNames[field],
+          count: rest[field],
+          name,
+          image,
+        });
+      });
+    });
+
+    let more: typeof streaks = [];
+    if (refetch) {
+      try {
+        more = await this.getStreaks(channelId, limit + 1);
+      } catch {
+        const i = streaks.findIndex(({ count }) => count === MAX_LIMIT);
+        streaks[i].count = "10+" as any;
+      }
+    }
+    more.forEach((betterStreak) => {
+      const i = streaks.findIndex(
+        (streak) =>
+          streak.field === betterStreak.field &&
+          streak.userId === betterStreak.userId
+      );
+      delete streaks[i];
+    });
+
+    return [...streaks, ...more];
   }
 }

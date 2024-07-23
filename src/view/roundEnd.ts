@@ -11,13 +11,19 @@ import {
   tileChar,
 } from "./util";
 import * as S from "./slack";
+import type { Avatar } from "../types";
 
-interface SummaryWithUser extends Summary {
-  name: string;
-  image: string;
+interface SummaryWithUser extends Summary, Avatar {}
+
+interface Streak extends Avatar {
+  fieldName: string;
+  count: number;
 }
 
-export function roundEndView(games: SummaryWithUser[]): any[] {
+export function roundEndView(
+  games: SummaryWithUser[],
+  streaks: Streak[]
+): any[] {
   const optimalUsers: any[] = games
     .filter(({ didPlayOptimally }) => didPlayOptimally)
     .map(({ name, image }) =>
@@ -27,8 +33,8 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
       })
     );
   let mostFunHad = games[0],
-      mostFunScore = -100;
-  games.forEach(game => {
+    mostFunScore = -100;
+  games.forEach((game) => {
     const newFun = Math.floor(Math.random() * 101);
     if (newFun > mostFunScore) {
       mostFunHad = game;
@@ -51,8 +57,17 @@ export function roundEndView(games: SummaryWithUser[]): any[] {
         image_url: mostFunHad.image,
         alt_text: mostFunHad.name,
       }),
-      S.Markdown(
-        ` ${mostFunHad.name} had the most fun (*${mostFunScore}%*)`
+      S.Markdown(` ${mostFunHad.name} had the most fun (*${mostFunScore}%*)`)
+    ),
+    streaks.map((streak) =>
+      S.Context(
+        S.Markdown(":fire::fire::fire:"),
+        S.Image({
+          image_url: streak.image,
+          alt_text: streak.name,
+        }),
+        S.Markdown(`is on a ${streak.fieldName} streak of ${streak.count}`),
+        S.Markdown(":fire::fire::fire:")
       )
     ),
     S.Divider(),

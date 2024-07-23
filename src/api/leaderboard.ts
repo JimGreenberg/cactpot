@@ -10,14 +10,7 @@ export const leaderboard: (
   async ({ command, respond }) => {
     const channelId = command.channel_id;
     const service = new SlackService(app);
-    const users = await service.getUsers(channelId);
-    if (!users?.length) throw new Error();
-
-    const leaderboard = await DB.getLeaderboard(channelId);
-    const leaderboardWithUsers = leaderboard.map(({ userId, ...rest }) => {
-      const user = users.find(({ id }) => id === userId)!;
-      return { ...rest, name: user.name, image: user.image };
-    });
+    const leaderboardWithUsers = await service.getLeaderboard(channelId);
 
     if (!leaderboardWithUsers.length) {
       return await respond({
