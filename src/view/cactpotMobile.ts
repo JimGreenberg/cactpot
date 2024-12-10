@@ -12,7 +12,15 @@ import { getScoreInfoBlocks, getJsonStringValue } from "./game";
 import * as S from "./slack";
 
 export function cactpotMobile(summary: Summary) {
-  const { score, bestScore, turn, gameId, initialReveal, reveals } = summary;
+  const {
+    score,
+    bestScore,
+    turn,
+    gameId,
+    initialReveal,
+    reveals,
+    didPlayOptimally,
+  } = summary;
   const blocks: any[] = [];
 
   blocks.push(...getBoardBlocks(summary));
@@ -28,7 +36,10 @@ export function cactpotMobile(summary: Summary) {
   }
 
   if (score) {
-    blocks.push(S.Section(S.Markdown(getScoreBlock("You scored", score))));
+    const scoreString = didPlayOptimally
+      ? "You played optimally and scored"
+      : "You scored";
+    blocks.push(S.Section(S.Markdown(getScoreBlock(scoreString, score))));
   }
 
   if (bestScore) {

@@ -6,7 +6,7 @@ import { getHeaderCopy, getScoreInfoBlocks, getJsonStringValue } from "./game";
 import * as S from "./slack";
 
 export function cactpotFullWidth(summary: Summary) {
-  const { score, bestScore, turn, gameId } = summary;
+  const { score, bestScore, turn, gameId, didPlayOptimally } = summary;
   const blocks: any[] = [];
 
   blocks.push(S.Header(S.PlainText(getHeaderCopy(turn))));
@@ -14,7 +14,10 @@ export function cactpotFullWidth(summary: Summary) {
   blocks.push(...getBoardBlocks(summary));
 
   if (score) {
-    blocks.push(S.Section(S.Markdown(getScoreBlock("You scored", score))));
+    const scoreString = didPlayOptimally
+      ? "You played optimally and scored"
+      : "You scored";
+    blocks.push(S.Section(S.Markdown(getScoreBlock(scoreString, score))));
   }
 
   if (bestScore) {
