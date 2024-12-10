@@ -13,6 +13,7 @@ export interface Summary {
   board: ReturnType<Board["display"]>;
   score: number;
   bestScore: number;
+  bestScoreLines: BoardLine[];
   turn: Turn;
   seedString: string;
   gameId: string;
@@ -151,6 +152,7 @@ export class Cactpot {
       board: this.board.display(isDone),
       score: this.getScore(),
       bestScore: isDone ? this.board.bestScore : 0,
+      bestScoreLines: isDone ? this.board.bestScoreLines : [],
       turn,
       seedString: this.board.seedString,
       gameId: this.gameId,

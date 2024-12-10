@@ -135,6 +135,12 @@ export class Board {
     );
   }
 
+  public get bestScoreLines(): BoardLine[] {
+    return Object.values(BoardLine).filter(
+      (line) => this.getScore(line) === this.bestScore
+    );
+  }
+
   public get cactpotPossible(): boolean {
     return this.bestScore === Board.cactpot;
   }

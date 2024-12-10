@@ -15,6 +15,7 @@ export function cactpotMobile(summary: Summary) {
   const {
     score,
     bestScore,
+    bestScoreLines,
     turn,
     gameId,
     initialReveal,
@@ -45,7 +46,10 @@ export function cactpotMobile(summary: Summary) {
   if (bestScore) {
     blocks.push(
       S.Section(
-        S.Markdown(getScoreBlock("The best score on this board is", bestScore))
+        S.Markdown(
+          getScoreBlock("The best score on this board is", bestScore) +
+            `(${bestScoreLines.map(boardLineText).join(", ")})`
+        )
       )
     );
   }

@@ -1,12 +1,18 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { TilePosition, BoardLine } from "../constants";
-import { tileButtonText, tileEmoji, getScoreBlock } from "./util";
+import {
+  tileButtonText,
+  tileEmoji,
+  getScoreBlock,
+  boardLineText,
+} from "./util";
 import { getHeaderCopy, getScoreInfoBlocks, getJsonStringValue } from "./game";
 import * as S from "./slack";
 
 export function cactpotFullWidth(summary: Summary) {
-  const { score, bestScore, turn, gameId, didPlayOptimally } = summary;
+  const { score, bestScore, bestScoreLines, turn, gameId, didPlayOptimally } =
+    summary;
   const blocks: any[] = [];
 
   blocks.push(S.Header(S.PlainText(getHeaderCopy(turn))));
@@ -23,7 +29,10 @@ export function cactpotFullWidth(summary: Summary) {
   if (bestScore) {
     blocks.push(
       S.Section(
-        S.Markdown(getScoreBlock("The best score on this board is", bestScore))
+        S.Markdown(
+          getScoreBlock("The best score on this board is", bestScore) +
+            `(${bestScoreLines.map(boardLineText).join(", ")})`
+        )
       )
     );
   }
