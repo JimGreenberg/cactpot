@@ -109,6 +109,7 @@ function _roundsWithGameAggs(
     })
     .match({ "games.0": { $exists: true } })
     .addFields({
+      gamesCount: { $size: "$games" },
       scores: {
         $sortArray: {
           input: { $setUnion: ["$games.score"] },
@@ -140,6 +141,7 @@ function _roundsWithGameAggs(
     })
     .project({
       _id: 1,
+      gamesCount: 1,
       scores: 1,
       bestScore: 1,
       bestPlayerScore: 1,
@@ -167,7 +169,7 @@ export async function getLeaderboard(
         .group({ _id: "$_id" })
     ).map(({ _id }) => _id);
 
-    agg = agg.sort({ round: -1 }).match({ round: { $in: rounds } });
+    agg = agg.match({ round: { $in: rounds } }).sort({ round: -1 });
   }
 
   agg = agg
@@ -217,7 +219,17 @@ export async function getLeaderboard(
       losses: {
         $sum: {
           $toInt: {
-            $eq: ["$score", "$round.worstPlayerScore"],
+            $and: [
+              { $eq: ["$score", "$round.worstPlayerScore"] },
+              // if bestPlayerScoreCount is the same as the number of games (players)
+              // then that means this is an n-way tie and shouldn't count as a loss
+              {
+                $ne: [
+                  { $size: "$round.gamesCount" },
+                  "$round.bestPlayerScoreCount",
+                ],
+              },
+            ],
           },
         },
       },
