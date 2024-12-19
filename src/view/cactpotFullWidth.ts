@@ -31,7 +31,7 @@ export function cactpotFullWidth(summary: Summary) {
       S.Section(
         S.Markdown(
           getScoreBlock("The best score on this board is", bestScore) +
-            `(${bestScoreLines.map(boardLineText).join(", ")})`
+            ` (${bestScoreLines.map(boardLineText).join(", ")})`
         )
       )
     );
