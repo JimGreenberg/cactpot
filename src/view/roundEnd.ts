@@ -49,7 +49,7 @@ export function roundEndView(
     S.Context(
       S.Markdown(
         getScoreBlock("The best score on this board was", games[0].bestScore) +
-          `(${games[0].bestScoreLines.map(boardLineText).join(", ")})`
+          ` (${games[0].bestScoreLines.map(boardLineText).join(", ")})`
       )
     ),
     S.Context(S.Markdown("Played optimally: "), ...(optimalUsers as [any])),
