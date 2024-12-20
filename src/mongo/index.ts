@@ -224,10 +224,7 @@ export async function getLeaderboard(
               // if bestPlayerScoreCount is the same as the number of games (players)
               // then that means this is an n-way tie and shouldn't count as a loss
               {
-                $ne: [
-                  { $size: "$round.gamesCount" },
-                  "$round.bestPlayerScoreCount",
-                ],
+                $ne: ["$round.gamesCount", "$round.bestPlayerScoreCount"],
               },
             ],
           },
