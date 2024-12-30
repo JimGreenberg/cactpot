@@ -1,7 +1,7 @@
 import { Summary } from "../cactpot";
 import { Board } from "../board";
 import { TilePosition } from "../constants";
-import { tileChar, wrap } from "./util";
+import { tileChar, wrap, boardLineText } from "./util";
 import * as S from "./slack";
 
 export function beginReplayButton({
@@ -67,6 +67,9 @@ export function replayView({
     ),
   ];
   if (lineChoice) {
+    blocks.push(
+      S.Section(S.PlainText(`${name} selected: *${boardLineText(lineChoice)}*`))
+    );
     blocks.push(S.Actions(S.Button({ text: "Dismiss", action_id: "delete" })));
   }
   return blocks;
