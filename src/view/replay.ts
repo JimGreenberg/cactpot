@@ -68,7 +68,7 @@ export function replayView({
   ];
   if (lineChoice) {
     blocks.push(
-      S.Section(S.PlainText(`${name} selected: *${boardLineText(lineChoice)}*`))
+      S.Section(S.Markdown(`${name} selected: *${boardLineText(lineChoice)}*`))
     );
     blocks.push(S.Actions(S.Button({ text: "Dismiss", action_id: "delete" })));
   }
