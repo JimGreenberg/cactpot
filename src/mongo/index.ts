@@ -168,8 +168,8 @@ export async function getLeaderboard(
           channelId,
           leaderboardEnabled: true,
           date: {
-            $gte: new Date(`1-1-${year}`),
-            $lt: new Date(`1-1-${year + 1}`),
+            $gte: `${year}-1-1`,
+            $lt: `${year + 1}-1-1`,
           },
         })
         .sort({ _id: -1 })
