@@ -53,12 +53,13 @@ export class SlackService {
 
   async getLeaderboard(
     channelId: string,
+    year?: number,
     limit?: number
   ): Promise<(LeaderboardInfo & Avatar)[]> {
     const users = await this.getUsers(channelId);
     if (!users?.length) throw new Error();
 
-    const leaderboard = await DB.getLeaderboard(channelId, limit);
+    const leaderboard = await DB.getLeaderboard(channelId, year, limit);
     return leaderboard.map(({ userId, ...rest }) => {
       const user = users.find(({ id }) => id === userId)!;
       return { ...rest, userId, name: user.name, image: user.image };
@@ -66,12 +67,12 @@ export class SlackService {
   }
 
   // this is hot garbage
-  async getStreaks(channelId: string, limit: number = 3) {
+  async getStreaks(channelId: string, year?: number, limit: number = 3) {
     const MAX_LIMIT = 10;
     if (limit > MAX_LIMIT) {
       throw new Error("max limit");
     }
-    const leaderboard = await this.getLeaderboard(channelId, limit);
+    const leaderboard = await this.getLeaderboard(channelId, year, limit);
     const fields = [
       "soloWins",
       "soloLosses",

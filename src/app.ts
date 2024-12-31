@@ -8,7 +8,8 @@ const BOT_TEST = "C03LZF604RG";
 const main = (app: App) => {
   app.command("/cactpot", async (args) => {
     await args.ack();
-    switch (args.command.text) {
+    const first = args.command.text.split(" ")[0];
+    switch (first) {
       case "leaderboard":
         return await API.leaderboard(app)(args);
       case "unfinished":

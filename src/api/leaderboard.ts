@@ -9,8 +9,10 @@ export const leaderboard: (
   (app: App) =>
   async ({ command, respond }) => {
     const channelId = command.channel_id;
+    const result = /^leaderboard\s(\d{4})$/.exec(command.text);
+    const year = result && result[1] ? parseInt(result[1]) : undefined;
     const service = new SlackService(app);
-    const leaderboardWithUsers = await service.getLeaderboard(channelId);
+    const leaderboardWithUsers = await service.getLeaderboard(channelId, year);
 
     if (!leaderboardWithUsers.length) {
       return await respond({
