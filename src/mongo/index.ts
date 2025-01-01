@@ -163,19 +163,21 @@ export async function getLeaderboard(
 
   if (limit) {
     const rounds: string[] = (
-      await Round.aggregate()
-        .match({
+      await Round.find(
+        {
           channelId,
           leaderboardEnabled: true,
           date: {
             $gte: `${year}-1-1`,
             $lt: `${year + 1}-1-1`,
           },
-        })
+        },
+        { _id: 1 },
+        { lean: true }
+      )
         .sort({ _id: -1 })
         .limit(limit)
-        .group({ _id: "$_id" })
-    ).map(({ _id }) => _id);
+    ).map(({ _id }) => _id.toString());
 
     agg = agg.match({ round: { $in: rounds } }).sort({ round: -1 });
   }
