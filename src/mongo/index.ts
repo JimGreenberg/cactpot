@@ -320,7 +320,8 @@ export async function getLeaderboard(
 
   try {
     return agg.exec();
-  } catch {
+  } catch (e) {
+    console.error(e);
     throw new Errors.NotFound();
   }
 }
