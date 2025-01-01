@@ -97,10 +97,18 @@ export async function enableLeaderboardForRound(roundId: string) {
 }
 
 function _roundsWithGameAggs(
-  channelId: string
+  channelId: string,
+  year: number
 ): PipelineStage.Lookup["$lookup"]["pipeline"] {
   const agg = Round.aggregate()
-    .match({ channelId, leaderboardEnabled: true })
+    .match({
+      channelId,
+      leaderboardEnabled: true,
+      date: {
+        $gte: `${year}-1-1`,
+        $lt: `${year + 1}-1-1`,
+      },
+    })
     .lookup({
       from: Game.collection.name,
       localField: "_id",
@@ -167,16 +175,13 @@ export async function getLeaderboard(
         {
           channelId,
           leaderboardEnabled: true,
-          date: {
-            $gte: `${year}-1-1`,
-            $lt: `${year + 1}-1-1`,
-          },
         },
         { _id: 1 },
         { lean: true }
       )
         .sort({ _id: -1 })
         .limit(limit)
+        .exec()
     ).map(({ _id }) => _id.toString());
 
     agg = agg.match({ round: { $in: rounds } }).sort({ round: -1 });
@@ -187,7 +192,7 @@ export async function getLeaderboard(
       from: Round.collection.name,
       localField: "round",
       foreignField: "_id",
-      pipeline: _roundsWithGameAggs(channelId),
+      pipeline: _roundsWithGameAggs(channelId, year),
       as: "round",
     })
     .unwind("round")
