@@ -169,23 +169,28 @@ export async function getLeaderboard(
 ): Promise<LeaderboardInfo[]> {
   let agg = Game.aggregate();
 
-  if (limit) {
-    const rounds: string[] = (
-      await Round.find(
-        {
-          channelId,
-          leaderboardEnabled: true,
-        },
-        { _id: 1 },
-        { lean: true }
-      )
-        .sort({ _id: -1 })
-        .limit(limit)
-        .exec()
-    ).map(({ _id }) => _id.toString());
+  let roundsQuery = Round.find(
+    {
+      channelId,
+      leaderboardEnabled: true,
+      date: {
+        $gte: `${year}-1-1`,
+        $lt: `${year + 1}-1-1`,
+      },
+    },
+    { _id: 1 },
+    { lean: true }
+  ).sort({ _id: -1 });
 
-    agg = agg.match({ round: { $in: rounds } }).sort({ round: -1 });
+  if (limit) {
+    roundsQuery = roundsQuery.limit(limit);
   }
+
+  const rounds: string[] = (await roundsQuery.exec()).map(({ _id }) =>
+    _id.toString()
+  );
+
+  agg = agg.match({ round: { $in: rounds } }).sort({ round: -1 });
 
   agg = agg
     .lookup({
