@@ -109,7 +109,7 @@ export class SlackService {
     let more: typeof streaks = [];
     if (streaks.length) {
       try {
-        more = await this.getStreaks(channelId, limit + 1);
+        more = await this.getStreaks(channelId, year, limit + 1);
       } catch {
         const i = streaks.findIndex(({ count }) => count >= MAX_LIMIT);
         if (streaks[i]) {

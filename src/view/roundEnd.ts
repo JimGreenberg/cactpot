@@ -62,7 +62,7 @@ export function roundEndView(
     ),
     ...streaks.map((streak) =>
       S.Context(
-        S.Markdown(":fire::fire::fire:"),
+        S.Markdown(":fire:"),
         S.Image({
           image_url: streak.image,
           alt_text: streak.name,
@@ -70,7 +70,7 @@ export function roundEndView(
         S.Markdown(
           ` ${streak.name} is on a ${streak.fieldName} streak of ${streak.count}`
         ),
-        S.Markdown(":fire::fire::fire:")
+        S.Markdown(":fire:")
       )
     ),
     S.Divider(),
@@ -84,50 +84,6 @@ export function roundEndView(
     S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)),
   ];
   return blocks;
-}
-
-function renderGame({
-  board,
-  revealValues,
-  lineChoice,
-  gameId,
-  name,
-  image,
-}: SummaryWithUser) {
-  let tilePosition = 0;
-  return [
-    S.Context(
-      S.Image({
-        image_url: image,
-        alt_text: name,
-      }),
-      S.PlainText(name),
-      S.PlainText(
-        `Revealed ${revealValues[0]}, ${revealValues[1]} and ${
-          revealValues[2]
-        }, then chose the ${boardLineText(lineChoice!)}`
-      ),
-      S.PlainText(`Game ID: ${gameId}`)
-    ),
-    ...board.map((row) =>
-      S.Section(
-        S.Markdown(
-          row
-            .map((tile) => {
-              const value = Object.values(TilePosition)[tilePosition++];
-              const selectedTile =
-                lineChoice &&
-                Board.positionsFromBoardLine(lineChoice).includes(value);
-              const char = code(wrap(tileChar(tile), " "));
-
-              return wrap(selectedTile ? italic(bold(char)) : char, " ");
-            })
-            .join(" ")
-        )
-      )
-    ),
-    S.Divider(),
-  ];
 }
 
 function getScoreBlocks(
