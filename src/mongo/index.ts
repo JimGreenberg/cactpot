@@ -159,19 +159,24 @@ function _roundsWithGameAggs(
 
 export async function getLeaderboard(
   channelId: string,
-  year: number = new Date().getFullYear(),
+  year: number | "all" = new Date().getFullYear(),
   limit?: number
 ): Promise<LeaderboardInfo[]> {
   let agg = Game.aggregate();
+
+  const dateQuery =
+    year === "all"
+      ? {}
+      : {
+          $gte: `${year}-1-1`,
+          $lt: `${year + 1}-1-1`,
+        };
 
   let roundsQuery = Round.find(
     {
       channelId,
       leaderboardEnabled: true,
-      date: {
-        $gte: `${year}-1-1`,
-        $lt: `${year + 1}-1-1`,
-      },
+      date: dateQuery,
     },
     { _id: 1 },
     { lean: true }

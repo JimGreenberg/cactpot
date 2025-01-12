@@ -53,7 +53,7 @@ export class SlackService {
 
   async getLeaderboard(
     channelId: string,
-    year?: number,
+    year?: number | "all",
     limit?: number
   ): Promise<(LeaderboardInfo & Avatar)[]> {
     const users = await this.getUsers(channelId);

@@ -9,8 +9,12 @@ export const leaderboard: (
   (app: App) =>
   async ({ command, respond }) => {
     const channelId = command.channel_id;
-    const result = /^leaderboard\s(\d{4})$/.exec(command.text);
-    const year = result && result[1] ? parseInt(result[1]) : undefined;
+    const result = /^leaderboard\s(\d{4}|all)$/.exec(command.text);
+    let year;
+    if (result && result[1]) {
+      if (result[1] === "all") year = "all" as const;
+      else year = parseInt(result[1]);
+    }
     const service = new SlackService(app);
     const leaderboardWithUsers = await service.getLeaderboard(channelId, year);
 
@@ -23,6 +27,6 @@ export const leaderboard: (
 
     return await respond({
       response_type: "in_channel",
-      blocks: leaderboardView(leaderboardWithUsers),
+      blocks: leaderboardView(leaderboardWithUsers, year),
     });
   };
