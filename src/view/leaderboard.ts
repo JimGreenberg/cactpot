@@ -65,7 +65,7 @@ function leaderboardUserView({
       S.Markdown(getScoreBlock("Cactpots", cactpots)),
       S.Markdown(
         `${getScoreBlock("Cactpots Missed", cactpotsMissed)}${
-          cactpotsMissed > 0 ? " (brave)" : ""
+          cactpotsMissed > 0 ? " (lmao)" : ""
         }`
       )
     ),
