@@ -51,6 +51,11 @@ const main = (app: App) => {
     await ack();
     await respond({ delete_original: true });
   });
+
+  app.action("unfinished", async (args) => {
+    await args.ack();
+    return await API.unfinished(app)(args);
+  });
 };
 
 const newApp = () =>

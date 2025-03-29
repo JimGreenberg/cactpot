@@ -2,6 +2,7 @@ import { App, RespondFn } from "@slack/bolt";
 import * as DB from "./mongo";
 import { Cactpot } from "./cactpot";
 import { cactpotFullWidth } from "./view/cactpotFullWidth";
+import { gameHasBegun } from "./view/gameHasBegun";
 import type { Avatar, LeaderboardInfo } from "./types";
 
 interface User {
@@ -47,7 +48,11 @@ export class SlackService {
           channel: channelId,
         });
       }),
-      respond({ delete_original: true }),
+      respond({
+        delete_original: true,
+        text: "<!channel> The game has begun",
+        blocks: gameHasBegun("<!channel> The game has begun"),
+      }),
     ]);
   }
 

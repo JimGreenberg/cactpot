@@ -32,7 +32,7 @@ export const joinGame: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     if (!games?.length) throw new Error();
     const users = await service.getUsers(channelId);
     if (games.length >= users.length) {
-      await service.beginRound(respond, channelId, games);
+      return await service.beginRound(respond, channelId, games);
     } else {
       await respond({
         blocks: startView(

@@ -10,6 +10,7 @@ import { SlackService } from "../slackService";
 import { cactpotFullWidth } from "../view/cactpotFullWidth";
 import { cactpotMobile } from "../view/cactpotMobile";
 import { roundEndView } from "../view/roundEnd";
+import { gameHasBegun } from "../view/gameHasBegun";
 import { Turn } from "../constants";
 
 export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
@@ -52,9 +53,15 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
         (game) => game.getCurrentTurn() !== Turn.FINAL
       );
       if (unfinished && unfinished.userId !== userId) {
+        const users = await service.getUsers(channelId);
+        const unfinishedUser = users.find(({ id }) => id === unfinished.userId);
         await app.client.chat.postMessage({
           channel: channelId,
           text: `Everyone is done except <@${unfinished.userId}>`,
+          blocks: gameHasBegun(
+            `Everyone is done except <@${unfinished.userId}>`,
+            `Play (${unfinishedUser?.name || "Losers"} only)`
+          ),
         });
       }
     }
