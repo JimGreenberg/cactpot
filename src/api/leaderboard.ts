@@ -9,7 +9,7 @@ export const leaderboard: (
   (app: App) =>
   async ({ command, respond }) => {
     const channelId = command.channel_id;
-    const result = /^leaderboard\s(\d{4}|all)$/.exec(command.text);
+    const result = /leaderboard\s(\d{4}|all)$/.exec(command.text);
     let year;
     if (result && result[1]) {
       if (result[1] === "all") year = "all" as const;
