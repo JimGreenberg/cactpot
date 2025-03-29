@@ -20,12 +20,9 @@ interface LeaderboardInfo {
   dingusAwards: number;
 }
 
-export function leaderboardView(
-  users: LeaderboardInfo[],
-  year?: number | "all"
-) {
-  let leaderboardText = year ? year.toString() : "Current Season";
-  if (year === "all") leaderboardText = "All Time";
+export function leaderboardView(users: LeaderboardInfo[], result?: string) {
+  let leaderboardText = result ? result : "Current Season";
+  if (result === "all") leaderboardText = "All Time";
 
   return [
     S.Header(S.PlainText(`Leaderboard: ${leaderboardText}`)),

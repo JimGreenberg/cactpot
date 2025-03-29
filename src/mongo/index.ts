@@ -156,31 +156,35 @@ function _roundsWithGameAggs(
 
   return agg.pipeline() as PipelineStage.Lookup["$lookup"]["pipeline"];
 }
-
+export interface GetLeaderboardOptions {
+  year?: number;
+  month?: number;
+  all?: boolean;
+  limit?: number;
+}
 export async function getLeaderboard(
   channelId: string,
-  year: number | "all" = new Date().getFullYear(),
-  limit?: number
+  { year, month, all, limit }: GetLeaderboardOptions
 ): Promise<LeaderboardInfo[]> {
   let agg = Game.aggregate();
+  let query: any = { channelId, leaderboardEnabled: true };
+  if (!all && year && month) {
+    query["$gte"] = `${year}-${month}-1`;
+    query["$lt"] = `${year}-${month + 1}-1`;
+  }
+  if (!all && year && !month) {
+    query["$gte"] = `${year}-1-1`;
+    query["$lt"] = `${year + 1}-1-1`;
+  }
+  if (!all && !year && month) {
+    const y = new Date().getFullYear();
+    query["$gte"] = `${y}-${month}-1`;
+    query["$lt"] = `${y}-${month + 1}-1`;
+  }
 
-  const dateQuery =
-    year === "all"
-      ? {}
-      : {
-          $gte: `${year}-1-1`,
-          $lt: `${year + 1}-1-1`,
-        };
-
-  let roundsQuery = Round.find(
-    {
-      channelId,
-      leaderboardEnabled: true,
-      date: dateQuery,
-    },
-    { _id: 1 },
-    { lean: true }
-  ).sort({ _id: -1 });
+  let roundsQuery = Round.find(query, { _id: 1 }, { lean: true }).sort({
+    _id: -1,
+  });
 
   if (limit) {
     roundsQuery = roundsQuery.limit(limit);

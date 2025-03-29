@@ -58,13 +58,65 @@ export class SlackService {
 
   async getLeaderboard(
     channelId: string,
-    year?: number | "all",
+    text: string,
     limit?: number
   ): Promise<(LeaderboardInfo & Avatar)[]> {
+    function getMonthYear(
+      text: string
+    ): [number | undefined, number | undefined] {
+      const months = [
+        "january",
+        "february",
+        "march",
+        "april",
+        "may",
+        "june",
+        "july",
+        "august",
+        "september",
+        "october",
+        "november",
+        "december",
+      ];
+      let month: number | undefined;
+      let year: number | undefined;
+      const splitted = text.split(" ");
+      if (splitted.length === 2) {
+        const [maybeMonth, maybeYear] = splitted;
+        month = months.findIndex((month) =>
+          new RegExp(`^${maybeMonth}`).test(month)
+        );
+        if (month === -1) {
+          month = undefined;
+        }
+        year = /\d{4}/.test(maybeYear) ? parseInt(maybeYear) : undefined;
+      }
+      return [month, year];
+    }
     const users = await this.getUsers(channelId);
     if (!users?.length) throw new Error();
-
-    const leaderboard = await DB.getLeaderboard(channelId, year, limit);
+    let options: DB.GetLeaderboardOptions = { limit };
+    if (text === "all") {
+      options = {
+        all: true,
+        limit,
+      };
+    } else if (/\d{4}/.test(text)) {
+      options = {
+        year: parseInt(text),
+        limit,
+      };
+    } else {
+      const [month, year] = getMonthYear(text);
+      if (typeof month === "number" && typeof year === "number") {
+        options = {
+          month,
+          year,
+          limit,
+        };
+      }
+    }
+    const leaderboard = await DB.getLeaderboard(channelId, options);
     return leaderboard.map(({ userId, ...rest }) => {
       const user = users.find(({ id }) => id === userId)!;
       return { ...rest, userId, name: user.name, image: user.image };
@@ -77,7 +129,11 @@ export class SlackService {
     if (limit > MAX_LIMIT) {
       throw new Error("max limit");
     }
-    const leaderboard = await this.getLeaderboard(channelId, year, limit);
+    const leaderboard = await this.getLeaderboard(
+      channelId,
+      `${new Date().getFullYear()}`,
+      limit
+    );
     const fields = [
       "soloWins",
       "soloLosses",
