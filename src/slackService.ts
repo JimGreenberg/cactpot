@@ -49,7 +49,7 @@ export class SlackService {
         });
       }),
       respond({
-        delete_original: true,
+        replace_original: true,
         text: "<!channel> The game has begun",
         blocks: gameHasBegun("<!channel> The game has begun"),
       }),
