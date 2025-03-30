@@ -168,19 +168,21 @@ export async function getLeaderboard(
 ): Promise<LeaderboardInfo[]> {
   let agg = Game.aggregate();
   let query: any = { channelId, leaderboardEnabled: true };
+  let date: any = {};
   if (!all && year && month) {
-    query["$gte"] = `${year}-${month}-1`;
-    query["$lt"] = `${year}-${month + 1}-1`;
+    date["$gte"] = `${year}-${month}-1`;
+    date["$lt"] = `${year}-${month + 1}-1`;
   }
   if (!all && year && !month) {
-    query["$gte"] = `${year}-1-1`;
-    query["$lt"] = `${year + 1}-1-1`;
+    date["$gte"] = `${year}-1-1`;
+    date["$lt"] = `${year + 1}-1-1`;
   }
   if (!all && !year && month) {
     const y = new Date().getFullYear();
-    query["$gte"] = `${y}-${month}-1`;
-    query["$lt"] = `${y}-${month + 1}-1`;
+    date["$gte"] = `${y}-${month}-1`;
+    date["$lt"] = `${y}-${month + 1}-1`;
   }
+  if (Object.keys(date).length) query.date = date;
 
   let roundsQuery = Round.find(query, { _id: 1 }, { lean: true }).sort({
     _id: -1,
