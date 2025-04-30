@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { App, BlockButtonAction } from "@slack/bolt";
+import { App, BlockButtonAction, BlockStaticSelectAction } from "@slack/bolt";
 import * as API from "./api";
 
 const BOT_TEST = "C03LZF604RG";
@@ -36,7 +36,7 @@ const main = (app: App) => {
   });
 
   // action on results page to send ephemeral message with begin replay button
-  app.action("send-replay-message", async (args) => {
+  app.action<BlockStaticSelectAction>("send-replay-message", async (args) => {
     await args.ack();
     await API.sendReplayMessage(app)(args);
   });
