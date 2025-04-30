@@ -107,7 +107,11 @@ function getScoreBlocks(
     .sort(([scoreA], [scoreB]) => scoreB - scoreA)
     .map(([score, users], i) =>
       S.Context(
-        S.Markdown(`${placementEmojis[i]} ${bold(score.toLocaleString())}`),
+        S.Markdown(
+          `${
+            placementEmojis[i] || placementEmojis[placementEmojis.length - 1]
+          } ${bold(score.toLocaleString())}`
+        ),
         ...(users.map(({ name, image }) =>
           S.Image({
             image_url: image,

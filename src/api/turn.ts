@@ -85,6 +85,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
         }),
         streaks
       );
+      console.log(blocks);
       await app.client.chat.postMessage({
         channel: channelId,
         blocks,
