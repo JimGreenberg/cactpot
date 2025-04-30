@@ -2,13 +2,14 @@ import {
   App,
   Middleware,
   SlackActionMiddlewareArgs,
-  ButtonAction,
+  BlockAction,
   StaticSelectAction,
 } from "@slack/bolt";
 import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
 import { Board } from "../board";
 import { replayView, beginReplayButton } from "../view/replay";
+import { SlackService } from "../slackService";
 
 async function delay(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
@@ -29,12 +30,20 @@ export const sendReplayMessage: (
     });
   };
 
-export const beginReplay: (app: App) => Middleware<SlackActionMiddlewareArgs> =
+export const beginReplay: (
+  app: App
+) => Middleware<SlackActionMiddlewareArgs<BlockAction<StaticSelectAction>>> =
   (app: App) =>
   async ({ action, body, respond }) => {
-    const { gameId, name, image } = JSON.parse((action as ButtonAction).value);
+    const channelId = body?.channel?.id!;
+    const { gameId, userId } = JSON.parse(action.selected_option.value);
     const game = await DB.getGameById(gameId);
     if (!game) throw new Error();
+    const user = (await new SlackService(app).getUsers(channelId)).find(
+      ({ id }) => id === userId
+    );
+    if (!user) throw new Error();
+    const { name, image } = user;
 
     const freshGame = new Cactpot(
       new Board(game.seedString, game.initialReveal),

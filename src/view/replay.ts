@@ -13,7 +13,7 @@ export function beginReplayButton({
   image: string;
   gameId: string;
 }) {
-  const value = JSON.stringify({ gameId, name, image });
+  const value = JSON.stringify({ gameId, name });
   return [
     S.Section(S.PlainText("Now watching:")),
     S.Context(

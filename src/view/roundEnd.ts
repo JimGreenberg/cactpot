@@ -125,12 +125,12 @@ function getScoreBlocks(
 function getPlayerOption({
   gameId,
   name,
-  image,
+  userId,
 }: {
   gameId: string;
   name: string;
-  image: string;
+  userId: string;
 }) {
-  const value = JSON.stringify({ gameId, name, image });
+  const value = JSON.stringify({ gameId, userId });
   return S.Option({ value, text: name });
 }
