@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { App } from "@slack/bolt";
+import { App, BlockButtonAction } from "@slack/bolt";
 import * as API from "./api";
 
 const BOT_TEST = "C03LZF604RG";
@@ -42,7 +42,7 @@ const main = (app: App) => {
   });
 
   // button on the replay message to kick off the animation
-  app.action("begin-replay", async (args) => {
+  app.action<BlockButtonAction>("begin-replay", async (args) => {
     await args.ack();
     await API.beginReplay(app)(args);
   });
