@@ -21,12 +21,12 @@ export class SlackService {
     const { members } = await this.app.client.conversations.members({
       channel: channelId,
     });
-    console.log(members);
+    // console.log(members);
     if (!members?.length) throw new Error();
 
     const { members: users } = await this.app.client.users.list();
     if (!users?.length) throw new Error();
-    console.log(users);
+    // console.log(users);
 
     this.users = users
       .filter(({ is_bot }) => !is_bot)
