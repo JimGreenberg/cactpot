@@ -2,9 +2,8 @@ import {
   App,
   Middleware,
   SlackActionMiddlewareArgs,
-  BlockAction,
-  StaticSelectAction,
-  ButtonAction,
+  BlockStaticSelectAction,
+  BlockButtonAction,
 } from "@slack/bolt";
 import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
@@ -18,22 +17,27 @@ async function delay(ms: number) {
 
 export const sendReplayMessage: (
   app: App
-) => Middleware<SlackActionMiddlewareArgs> =
+) => Middleware<SlackActionMiddlewareArgs<BlockStaticSelectAction>> =
   (app: App) =>
-  async ({ action, respond }) => {
-    const { gameId, name, image } = JSON.parse(
-      (action as StaticSelectAction).selected_option.value
+  async ({ action, body, respond }) => {
+    const channelId = body?.channel?.id!;
+    const { gameId, userId } = JSON.parse(action.selected_option.value);
+    const user = (await new SlackService(app).getUsers(channelId)).find(
+      ({ id }) => id === userId
     );
+    if (!user) throw new Error();
+    const { name, image } = user;
+
     await respond({
       text: "",
-      blocks: beginReplayButton({ name, image, gameId }),
+      blocks: beginReplayButton({ name, image, gameId, userId }),
       replace_original: false,
     });
   };
 
 export const beginReplay: (
   app: App
-) => Middleware<SlackActionMiddlewareArgs<BlockAction<ButtonAction>>> =
+) => Middleware<SlackActionMiddlewareArgs<BlockButtonAction>> =
   (app: App) =>
   async ({ action, body, respond }) => {
     const channelId = body?.channel?.id!;

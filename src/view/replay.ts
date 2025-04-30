@@ -8,12 +8,14 @@ export function beginReplayButton({
   name,
   image,
   gameId,
+  userId,
 }: {
   name: string;
   image: string;
   gameId: string;
+  userId: string;
 }) {
-  const value = JSON.stringify({ gameId, name });
+  const value = JSON.stringify({ gameId, userId, name });
   return [
     S.Section(S.PlainText("Now watching:")),
     S.Context(
