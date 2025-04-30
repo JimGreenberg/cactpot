@@ -123,7 +123,7 @@ export function Header(text: Text) {
 
 export function Image({
   image_url,
-  alt_text,
+  alt_text = `image-${new Crypto().randomUUID()}`,
 }: {
   image_url: string;
   alt_text: string;
