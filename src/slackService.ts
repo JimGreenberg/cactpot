@@ -33,7 +33,10 @@ export class SlackService {
       .filter(({ id }) => members.includes(id as string))
       .map((user) => ({
         id: user.id!,
-        name: user.profile?.display_name! || user.profile?.real_name_normalized,
+        name:
+          user.profile?.display_name! ||
+          user.profile?.real_name_normalized ||
+          "name",
         image: user.profile?.image_24!,
       }));
 
