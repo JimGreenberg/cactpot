@@ -113,6 +113,7 @@ export class SlackService {
       };
     } else {
       const [month, year] = getMonthYear(text);
+      console.log(month, year);
       if (typeof month === "number" && typeof year === "number") {
         options = {
           month,

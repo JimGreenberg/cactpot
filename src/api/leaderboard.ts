@@ -11,6 +11,7 @@ export const leaderboard: (
     const channelId = command.channel_id;
     const splitted = command.text.split("leaderboard");
     const result = splitted[splitted.length - 1];
+    console.log(result);
     const service = new SlackService(app);
     const leaderboardWithUsers = await service.getLeaderboard(
       channelId,
