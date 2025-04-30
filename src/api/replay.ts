@@ -4,6 +4,7 @@ import {
   SlackActionMiddlewareArgs,
   BlockAction,
   StaticSelectAction,
+  ButtonAction,
 } from "@slack/bolt";
 import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
@@ -32,11 +33,11 @@ export const sendReplayMessage: (
 
 export const beginReplay: (
   app: App
-) => Middleware<SlackActionMiddlewareArgs<BlockAction<StaticSelectAction>>> =
+) => Middleware<SlackActionMiddlewareArgs<BlockAction<ButtonAction>>> =
   (app: App) =>
   async ({ action, body, respond }) => {
     const channelId = body?.channel?.id!;
-    const { gameId, userId } = JSON.parse(action.selected_option.value);
+    const { gameId, userId } = JSON.parse(action.value);
     const game = await DB.getGameById(gameId);
     if (!game) throw new Error();
     const user = (await new SlackService(app).getUsers(channelId)).find(
