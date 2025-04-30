@@ -106,6 +106,12 @@ export class SlackService {
         all: true,
         limit,
       };
+    } else if (!text) {
+      options = {
+        year: new Date().getFullYear(),
+        month: new Date().getMonth(),
+        limit,
+      };
     } else if (/\d{4}/.test(text)) {
       options = {
         year: parseInt(text),
