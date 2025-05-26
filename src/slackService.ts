@@ -88,8 +88,8 @@ export class SlackService {
       const splitted = text.split(" ");
       if (splitted.length === 2) {
         const [maybeMonth, maybeYear] = splitted;
-        month = months.findIndex((month) =>
-          new RegExp(`^${maybeMonth}`).test(month)
+        month = months.findIndex((_month) =>
+          new RegExp(`^${maybeMonth.toLowerCase()}`).test(_month)
         );
         if (month === -1) {
           month = undefined;
@@ -106,7 +106,7 @@ export class SlackService {
         all: true,
         limit,
       };
-    } else if (!text) {
+    } else if (!text || text === " ") {
       options = {
         year: new Date().getFullYear(),
         month: new Date().getMonth(),
