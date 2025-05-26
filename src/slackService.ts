@@ -128,6 +128,7 @@ export class SlackService {
         };
       }
     }
+    console.log(options);
     const leaderboard = await DB.getLeaderboard(channelId, options);
     return leaderboard.map(({ userId, ...rest }) => {
       const user = users.find(({ id }) => id === userId)!;

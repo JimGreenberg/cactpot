@@ -164,23 +164,20 @@ export interface GetLeaderboardOptions {
 }
 export async function getLeaderboard(
   channelId: string,
-  { year, month, all, limit }: GetLeaderboardOptions
+  { year = new Date().getFullYear(), month, all, limit }: GetLeaderboardOptions
 ): Promise<LeaderboardInfo[]> {
   let agg = Game.aggregate();
   let query: any = { channelId, leaderboardEnabled: true };
   let date: any = {};
-  if (!all && year && month) {
-    date["$gte"] = `${year}-${month}-1`;
-    date["$lt"] = `${year}-${month + 1}-1`;
-  }
-  if (!all && year && !month) {
-    date["$gte"] = `${year}-1-1`;
-    date["$lt"] = `${year + 1}-1-1`;
-  }
-  if (!all && !year && month) {
-    const y = new Date().getFullYear();
-    date["$gte"] = `${y}-${month}-1`;
-    date["$lt"] = `${y}-${month + 1}-1`;
+  if (!all) {
+    if (month) {
+      date["$gte"] = `${year}-${month}-1`;
+      date["$lt"] = `${year}-${month + 1}-1`;
+    }
+    if (!month) {
+      date["$gte"] = `${year}-1-1`;
+      date["$lt"] = `${year + 1}-1-1`;
+    }
   }
   if (Object.keys(date).length) query.date = date;
 
