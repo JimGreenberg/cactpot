@@ -93,6 +93,8 @@ export class SlackService {
         );
         if (month === -1) {
           month = undefined;
+        } else {
+          month += 1;
         }
         year = /\d{4}/.test(maybeYear) ? parseInt(maybeYear) : undefined;
       }

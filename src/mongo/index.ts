@@ -171,16 +171,15 @@ export async function getLeaderboard(
   let date: any = {};
   if (!all) {
     if (month) {
-      date["$gte"] = `${year}-${month}-1`;
-      date["$lt"] = `${year}-${month + 1}-1`;
-    }
-    if (!month) {
-      date["$gte"] = `${year}-1-1`;
-      date["$lt"] = `${year + 1}-1-1`;
+      date["$gte"] = new Date(`${year}-${month}-1`);
+      date["$lt"] = new Date(`${year}-${month + 1}-1`);
+    } else {
+      date["$gte"] = new Date(`${year}-1-1`);
+      date["$lt"] = new Date(`${year + 1}-1-1`);
     }
   }
   if (Object.keys(date).length) query.date = date;
-
+  console.log(date);
   let roundsQuery = Round.find(query, { _id: 1 }, { lean: true }).sort({
     _id: -1,
   });
