@@ -9,8 +9,7 @@ export const leaderboard: (
   (app: App) =>
   async ({ command, respond }) => {
     const channelId = command.channel_id;
-    const splitted = command.text.split("leaderboard");
-    const result = splitted[splitted.length - 1];
+    const result = command.text.replace("leaderboard", "").trim();
     console.log(result);
     const service = new SlackService(app);
     const leaderboardWithUsers = await service.getLeaderboard(

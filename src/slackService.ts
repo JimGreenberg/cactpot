@@ -100,6 +100,7 @@ export class SlackService {
       }
       return [month, year];
     }
+
     const users = await this.getUsers(channelId);
     if (!users?.length) throw new Error();
     let options: DB.GetLeaderboardOptions = { limit };
