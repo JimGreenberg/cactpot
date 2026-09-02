@@ -49,6 +49,9 @@ export function italic(str: string): string {
 export function code(str: string): string {
   return wrap(str, "`");
 }
+export function codeBlock(str: string): string {
+  return wrap(`\n${str}\n`, "```");
+}
 
 export function getScoreBlock(label: string, score = 0) {
   return `${label}: *${score.toLocaleString()}*`;

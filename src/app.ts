@@ -41,6 +41,12 @@ const main = (app: App) => {
     await API.sendReplayMessage(app)(args);
   });
 
+  // action on results page to send ephemeral message with the notation board
+  app.action<BlockStaticSelectAction>("send-notation-message", async (args) => {
+    await args.ack();
+    await API.sendNotationMessage(app)(args);
+  });
+
   // button on the replay message to kick off the animation
   app.action<BlockButtonAction>("begin-replay", async (args) => {
     await args.ack();
