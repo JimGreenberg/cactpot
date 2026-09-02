@@ -84,7 +84,9 @@ function gridRows(
     const cells = [0, 1, 2]
       .map((col) => {
         const i = row * 3 + col;
-        return ` ${seedString[i]}${markers[i]} `;
+        // a seed is always nine tiles; fall back rather than print
+        // "undefined" into a cell and break every column below it
+        return ` ${seedString[i] ?? " "}${markers[i]} `;
       })
       .join("│");
     rows.push(`${gutter}│${cells}│`);
