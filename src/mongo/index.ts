@@ -161,21 +161,35 @@ export interface GetLeaderboardOptions {
   month?: number;
   all?: boolean;
   limit?: number;
+  /** Inclusive lower bound on Round.date (e.g. rolling windows). */
+  from?: Date;
+  /** Exclusive upper bound on Round.date. */
+  to?: Date;
 }
 export async function getLeaderboard(
   channelId: string,
-  { year = new Date().getFullYear(), month, all, limit }: GetLeaderboardOptions
+  {
+    year = new Date().getFullYear(),
+    month,
+    all,
+    limit,
+    from,
+    to,
+  }: GetLeaderboardOptions
 ): Promise<LeaderboardInfo[]> {
   let agg = Game.aggregate();
   let query: any = { channelId, leaderboardEnabled: true };
   let date: any = {};
   if (!all) {
-    if (month) {
-      date["$gte"] = new Date(`${year}-${month}-1`);
-      date["$lt"] = new Date(`${year}-${month + 1}-1`);
+    if (from || to) {
+      if (from) date["$gte"] = from;
+      if (to) date["$lt"] = to;
+    } else if (month) {
+      date["$gte"] = new Date(year, month - 1, 1);
+      date["$lt"] = new Date(year, month, 1);
     } else {
-      date["$gte"] = new Date(`${year}-1-1`);
-      date["$lt"] = new Date(`${year + 1}-1-1`);
+      date["$gte"] = new Date(year, 0, 1);
+      date["$lt"] = new Date(year + 1, 0, 1);
     }
   }
   if (Object.keys(date).length) query.date = date;
@@ -335,6 +349,9 @@ export async function getLastUnfinishedGame(
   userId: string,
   channelId: string
 ): Promise<Cactpot | undefined> {
+  // Lobby games exist with empty reveals before anyone picks a tile.
+  // Require that someone in the round has made a move so unfinished
+  // cannot resume a never-started lobby.
   const results = await Game.aggregate()
     .lookup({
       from: Round.collection.name,
@@ -343,10 +360,17 @@ export async function getLastUnfinishedGame(
       as: "round",
     })
     .unwind("round")
+    .lookup({
+      from: Game.collection.name,
+      localField: "round._id",
+      foreignField: "round",
+      as: "roundGames",
+    })
     .match({
       userId,
       "round.channelId": channelId,
       score: { $exists: false },
+      "roundGames.reveals.0": { $exists: true },
     })
     .sort({ _id: -1 })
     .limit(1)
