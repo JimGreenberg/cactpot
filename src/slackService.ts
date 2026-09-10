@@ -63,74 +63,10 @@ export class SlackService {
 
   async getLeaderboard(
     channelId: string,
-    text: string,
-    limit?: number
+    options: DB.GetLeaderboardOptions = {}
   ): Promise<(LeaderboardInfo & Avatar)[]> {
-    function getMonthYear(
-      text: string
-    ): [number | undefined, number | undefined] {
-      const months = [
-        "january",
-        "february",
-        "march",
-        "april",
-        "may",
-        "june",
-        "july",
-        "august",
-        "september",
-        "october",
-        "november",
-        "december",
-      ];
-      let month: number | undefined;
-      let year: number | undefined;
-      const splitted = text.split(" ");
-      if (splitted.length === 2) {
-        const [maybeMonth, maybeYear] = splitted;
-        month = months.findIndex((_month) =>
-          new RegExp(`^${maybeMonth.toLowerCase()}`).test(_month)
-        );
-        if (month === -1) {
-          month = undefined;
-        } else {
-          month += 1;
-        }
-        year = /\d{4}/.test(maybeYear) ? parseInt(maybeYear) : undefined;
-      }
-      return [month, year];
-    }
-
     const users = await this.getUsers(channelId);
     if (!users?.length) throw new Error();
-    let options: DB.GetLeaderboardOptions = { limit };
-    if (text === "all") {
-      options = {
-        all: true,
-        limit,
-      };
-    } else if (!text || text === " ") {
-      options = {
-        year: new Date().getFullYear(),
-        month: new Date().getMonth() + 1,
-        limit,
-      };
-    } else if (/\d{4}/.test(text)) {
-      options = {
-        year: parseInt(text),
-        limit,
-      };
-    } else {
-      const [month, year] = getMonthYear(text);
-      console.log(month, year);
-      if (typeof month === "number" && typeof year === "number") {
-        options = {
-          month,
-          year,
-          limit,
-        };
-      }
-    }
     console.log(options);
     const leaderboard = await DB.getLeaderboard(channelId, options);
     return leaderboard.map(({ userId, ...rest }) => {
@@ -145,11 +81,10 @@ export class SlackService {
     if (limit > MAX_LIMIT) {
       throw new Error("max limit");
     }
-    const leaderboard = await this.getLeaderboard(
-      channelId,
-      `${new Date().getFullYear()}`,
-      limit
-    );
+    const leaderboard = await this.getLeaderboard(channelId, {
+      year: year ?? new Date().getFullYear(),
+      limit,
+    });
     const fields = [
       "soloWins",
       "soloLosses",

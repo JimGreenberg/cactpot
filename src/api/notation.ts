@@ -14,9 +14,6 @@ export const sendNotationMessage: (
 ) => Middleware<SlackActionMiddlewareArgs<BlockStaticSelectAction>> =
   (app: App) =>
   async ({ action, body, respond }) => {
-    // the round end message is shared and long lived, so a bad game or a
-    // departed user should cost the clicker one ephemeral message, not fail
-    // silently the way an uncaught throw does
     try {
       const channelId = body?.channel?.id!;
       const { gameId, userId } = JSON.parse(action.selected_option.value);
@@ -26,11 +23,13 @@ export const sendNotationMessage: (
         ({ id }) => id === userId
       );
       if (!user) throw new Errors.NotFound("user");
-      const { name, image } = user;
 
       await respond({
         text: "",
-        blocks: notationView({ ...game.getSummary(), name, image }),
+        blocks: notationView(game.getSummary(), {
+          name: user.name,
+          image: user.image,
+        }),
         replace_original: false,
       });
     } catch (e) {

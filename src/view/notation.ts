@@ -5,16 +5,9 @@ import { bold, code, codeBlock, boardLineText } from "./util";
 import * as S from "./slack";
 import type { Avatar } from "../types";
 
-/** marks the tile the player was given for free */
 const INITIAL_REVEAL_MARKER = "°";
-/** marks the three tiles the player chose, in the order they chose them */
 const REVEAL_MARKERS = ["¹", "²", "³"];
 
-/**
- * markers for the scored line, named after the BoardLine each one points at.
- * BoardLine.DIAGONAL runs bottom left to top right (see boardLineText, which
- * calls it the Upwards Diagonal), so its arrow points up and to the right.
- */
 const ROW_MARKER = "►";
 const COL_MARKER = "▼";
 const DIAGONAL_MARKER = "↗";
@@ -36,16 +29,14 @@ const ROW_LINES = [
   BoardLine.BOTTOM_ROW,
 ];
 
-/** position of a tile within seedString */
 function seedIndex(position: TilePosition): number {
   return Object.values(TilePosition).indexOf(position);
 }
 
-/** one marker per tile, in seedString order */
-function revealMarkers({
-  initialReveal,
-  reveals,
-}: Pick<Summary, "initialReveal" | "reveals">): string[] {
+function revealMarkers(
+  initialReveal: TilePosition,
+  reveals: TilePosition[]
+): string[] {
   const markers = new Array(9).fill(" ");
   markers[seedIndex(initialReveal)] = INITIAL_REVEAL_MARKER;
   reveals
@@ -54,24 +45,19 @@ function revealMarkers({
   return markers;
 }
 
-/**
- * the line marker that sits above the grid. columns point down at their
- * column; the two diagonals sit outside the grid at the end they run toward,
- * so they can never be mistaken for a column marker.
- */
 function lineMarkerRow(lineChoice?: BoardLine): string | undefined {
   if (!lineChoice) return;
   if (COL_LINES.includes(lineChoice)) {
     const col = COL_LINES.indexOf(lineChoice);
     return " ".repeat(GUTTER + 2 + col * 5) + COL_MARKER;
   }
-  if (lineChoice === BoardLine.DIAGONAL) {
-    return " ".repeat(GUTTER + TOP.length) + DIAGONAL_MARKER;
-  }
   if (lineChoice === BoardLine.ANTIDIAGONAL) return ANTIDIAGONAL_MARKER;
 }
 
-/** the grid itself, with a row marker in the left gutter when a row was scored */
+function lineMarkerFooter(lineChoice?: BoardLine): string | undefined {
+  if (lineChoice === BoardLine.DIAGONAL) return DIAGONAL_MARKER;
+}
+
 function gridRows(
   seedString: string,
   markers: string[],
@@ -84,8 +70,6 @@ function gridRows(
     const cells = [0, 1, 2]
       .map((col) => {
         const i = row * 3 + col;
-        // a seed is always nine tiles; fall back rather than print
-        // "undefined" into a cell and break every column below it
         return ` ${seedString[i] ?? " "}${markers[i]} `;
       })
       .join("│");
@@ -96,32 +80,27 @@ function gridRows(
   return rows;
 }
 
-/**
- * one fully revealed board carrying the whole game: which tile was free,
- * which three the player chose and in what order, and which line they scored.
- */
-export function notationGrid({
-  seedString,
-  initialReveal,
-  reveals,
-  lineChoice,
-}: Pick<
-  Summary,
-  "seedString" | "initialReveal" | "reveals" | "lineChoice"
->): string {
-  const marker = lineMarkerRow(lineChoice);
+export function notationGrid(
+  seedString: string,
+  initialReveal: TilePosition,
+  reveals: TilePosition[],
+  lineChoice?: BoardLine
+): string {
+  const header = lineMarkerRow(lineChoice);
+  const footer = lineMarkerFooter(lineChoice);
   const rows = gridRows(
     seedString,
-    revealMarkers({ initialReveal, reveals }),
+    revealMarkers(initialReveal, reveals),
     lineChoice
   );
-  return (marker ? [marker, ...rows] : rows).join("\n");
+  return [
+    ...(header ? [header] : []),
+    ...rows,
+    ...(footer ? [footer] : []),
+  ].join("\n");
 }
 
-/**
- * the scored line's values left to right, top to bottom. sorting is required
- * because positionsFromBoardLine returns DIAGONAL bottom up.
- */
+/** DIAGONAL positions come bottom-up; sort into reading order */
 function lineValuesInReadingOrder(
   seedString: string,
   line: BoardLine
@@ -132,12 +111,9 @@ function lineValuesInReadingOrder(
     .map((i) => Number(seedString[i]));
 }
 
-export function notationView({
-  name,
-  image,
-  ...summary
-}: Summary & Avatar): any[] {
-  const { seedString, lineChoice, score, gameId } = summary;
+export function notationView(summary: Summary, { name, image }: Avatar): any[] {
+  const { seedString, initialReveal, reveals, lineChoice, score, gameId } =
+    summary;
 
   const blocks: any[] = [
     S.Section(S.PlainText("Notation:")),
@@ -149,7 +125,13 @@ export function notationView({
       S.PlainText(name),
       S.PlainText(`Game ID: ${gameId}`)
     ),
-    S.Section(S.Markdown(codeBlock(notationGrid(summary)))),
+    S.Section(
+      S.Markdown(
+        codeBlock(
+          notationGrid(seedString, initialReveal, reveals, lineChoice)
+        )
+      )
+    ),
   ];
 
   if (lineChoice) {
@@ -173,7 +155,7 @@ export function notationView({
     S.Context(
       S.Markdown(
         `${code(INITIAL_REVEAL_MARKER)} first look · ` +
-          `${REVEAL_MARKERS.map(code).join("")} picks in order`
+          `${REVEAL_MARKERS.map(code).join(" ")} picks in order`
       )
     )
   );
