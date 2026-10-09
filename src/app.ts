@@ -38,7 +38,7 @@ const main = (app: App) => {
   // action on results page to send ephemeral message with begin replay button
   app.action<BlockStaticSelectAction>("send-replay-message", async (args) => {
     await args.ack();
-    await API.sendReplayMessage(app)(args);
+    await API.uploadReplayGif(app)(args);
   });
 
   // button on the replay message to kick off the animation

@@ -22,7 +22,7 @@ interface Streak extends Avatar {
 
 export function roundEndView(
   games: SummaryWithUser[],
-  streaks: Streak[]
+  streaks: Streak[],
 ): any[] {
   const optimalUsers: any[] = games
     .filter(({ didPlayOptimally }) => didPlayOptimally)
@@ -30,7 +30,7 @@ export function roundEndView(
       S.Image({
         image_url: image,
         alt_text: name,
-      })
+      }),
     );
   let mostFunHad = games[0],
     mostFunScore = -100;
@@ -49,8 +49,8 @@ export function roundEndView(
     S.Context(
       S.Markdown(
         getScoreBlock("The best score on this board was", games[0].bestScore) +
-          ` (${games[0].bestScoreLines.map(boardLineText).join(", ")})`
-      )
+          ` (${games[0].bestScoreLines.map(boardLineText).join(", ")})`,
+      ),
     ),
     S.Context(S.Markdown("Played optimally: "), ...(optimalUsers as [any])),
     S.Context(
@@ -58,7 +58,7 @@ export function roundEndView(
         image_url: mostFunHad.image,
         alt_text: mostFunHad.name,
       }),
-      S.Markdown(` ${mostFunHad.name} had the most fun (*${mostFunScore}%*)`)
+      S.Markdown(` ${mostFunHad.name} had the most fun (*${mostFunScore}%*)`),
     ),
     ...streaks.map((streak) =>
       S.Context(
@@ -68,13 +68,13 @@ export function roundEndView(
           alt_text: streak.name,
         }),
         S.Markdown(
-          ` ${streak.name} is on a ${streak.fieldName} streak of ${streak.count}`
+          ` ${streak.name} is on a ${streak.fieldName} streak of ${streak.count}`,
         ),
-        S.Markdown(":fire:")
-      )
+        S.Markdown(":fire:"),
+      ),
     ),
     S.Divider(),
-    S.Section(S.Markdown("Watch a replay"), {
+    S.Section(S.Markdown(":sparkles: Watch a replay :sparkles:"), {
       accessory: S.StaticSelect({
         placeholder: S.PlainText("Select a player"),
         options: games.map(getPlayerOption),
@@ -87,7 +87,7 @@ export function roundEndView(
 }
 
 function getScoreBlocks(
-  games: { score: number; name: string; image: string }[]
+  games: { score: number; name: string; image: string }[],
 ) {
   const scoreMap: Record<number, { image: string; name: string }[]> = {};
   games.forEach(({ score, name, image }) => {
@@ -110,15 +110,15 @@ function getScoreBlocks(
         S.Markdown(
           `${
             placementEmojis[i] || placementEmojis[placementEmojis.length - 1]
-          } ${bold(score.toLocaleString())}`
+          } ${bold(score.toLocaleString())}`,
         ),
         ...(users.map(({ name, image }) =>
           S.Image({
             image_url: image,
             alt_text: name,
-          })
-        ) as [any])
-      )
+          }),
+        ) as [any]),
+      ),
     );
 }
 

@@ -19,6 +19,7 @@ export interface Summary {
   gameId: string;
   roundId: string;
   initialReveal: TilePosition;
+  initialRevealValue: number;
   reveals: TilePosition[];
   revealValues: number[];
   lineChoice?: BoardLine;
@@ -50,7 +51,7 @@ export class Cactpot {
       String(roundId),
       userId,
       reveals,
-      lineChoice
+      lineChoice,
     );
   }
 
@@ -60,7 +61,7 @@ export class Cactpot {
     public readonly roundId: string = "default",
     public readonly userId: string = "default",
     private reveals: TilePosition[] = [],
-    private lineChoice?: BoardLine
+    private lineChoice?: BoardLine,
   ) {}
 
   public get seedString(): string {
@@ -158,6 +159,7 @@ export class Cactpot {
       gameId: this.gameId,
       roundId: this.roundId,
       initialReveal: this.board.initialReveal,
+      initialRevealValue: this.board.getTile(this.board.initialReveal).value,
       reveals: this.reveals,
       revealValues: this.reveals.map((pos) => this.board.getTile(pos).value),
       lineChoice: this.lineChoice,

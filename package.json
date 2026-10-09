@@ -11,11 +11,16 @@
   },
   "author": "jim",
   "license": "ISC",
+  "overrides": {
+    "canvas": "^3.2.3"
+  },
   "dependencies": {
     "@slack/bolt": "^3.17.0",
     "dotenv": "^16.3.1",
     "mongodb": "^6.3.0",
-    "mongoose": "^8.0.3"
+    "mongoose": "^8.0.3",
+    "gifencoder": "^2.0.1",
+    "canvas": "^3.2.3"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
