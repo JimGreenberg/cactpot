@@ -11,10 +11,7 @@ import { Board } from "../board";
 import { replayView, notationView } from "../view/replay";
 import { SlackService } from "../slackService";
 
-import type { Readable } from "stream";
-// @ts-ignore
-import GIFEncoder from "gifencoder";
-import { SIZE, makeReplayGif } from "../replay-gif/canvas";
+import { makeGameReplay } from "../replay/game";
 
 async function delay(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
@@ -36,28 +33,26 @@ export const uploadReplayGif: (
     const game = await DB.getGameById(gameId);
     if (!game) throw new Error();
 
-    const encoder = new GIFEncoder(SIZE, SIZE);
-    const rs: Readable = encoder.createReadStream();
-    await makeReplayGif(encoder, game);
+    const replayCanvas = await makeGameReplay(game);
+    const png = replayCanvas.toBuffer("image/png");
 
     const elements: any[] = [
-      { type: "mrkdwn", text: `Watch ${name}'s replay!` },
+      { type: "mrkdwn", text: `Look at ${name}'s replay!` },
     ];
     if (image) {
       elements.unshift({ type: "image", image_url: image, alt_text: name });
     }
     await say({
-      text: `Watch ${name}'s replay!`,
+      text: `Look at ${name}'s replay!`,
       blocks: [{ type: "context", elements }],
     });
 
     await app.client.files.uploadV2({
       file_uploads: [
-        { filename: `${name}-replay-${game.roundId}.gif`, file: rs },
+        { filename: `${name}-replay-${game.roundId}.png`, file: png },
       ],
       channel_id: channelId,
     });
-    rs.destroy();
   };
 
 export const beginReplay: (

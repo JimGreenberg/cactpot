@@ -12,6 +12,7 @@ import { cactpotMobile } from "../view/cactpotMobile";
 import { roundEndView } from "../view/roundEnd";
 import { gameHasBegun } from "../view/gameHasBegun";
 import { Turn } from "../constants";
+import { makeRoundReplay } from "../replay/round";
 
 export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
   (app: App) =>
@@ -20,7 +21,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
     const channelId = body?.channel?.id as string;
     const userId = body?.user?.id as string;
     const { value, gameId, mobile } = JSON.parse(
-      (action as ButtonAction).value
+      (action as ButtonAction).value,
     );
     if (!gameId) throw new Error();
 
@@ -50,7 +51,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
       games.length - 1
     ) {
       const unfinished = games.find(
-        (game) => game.getCurrentTurn() !== Turn.FINAL
+        (game) => game.getCurrentTurn() !== Turn.FINAL,
       );
       if (unfinished && unfinished.userId !== userId) {
         const users = await service.getUsers(channelId);
@@ -60,7 +61,7 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
           text: `Everyone is done except <@${unfinished.userId}>`,
           blocks: gameHasBegun(
             `Everyone is done except <@${unfinished.userId}>`,
-            `Play (${unfinishedUser?.name || "Losers"} only)`
+            `Play (${unfinishedUser?.name || "Losers"} only)`,
           ),
         });
       }
@@ -83,13 +84,26 @@ export const takeTurn: (app: App) => Middleware<SlackActionMiddlewareArgs> =
             ...g.getSummary(),
           };
         }),
-        streaks
+        streaks,
       );
-      console.log(blocks);
-      console.log(JSON.stringify(blocks));
-      await app.client.chat.postMessage({
+      const roundEndMessage = await app.client.chat.postMessage({
         channel: channelId,
         blocks,
+      });
+
+      const canvas = await makeRoundReplay(
+        games.map((g) => {
+          const { name } = users.find(({ id }) => id === g.userId)!;
+          return [g, name];
+        }),
+      );
+      const png = canvas.toBuffer("image/png");
+      await app.client.files.uploadV2({
+        file_uploads: [
+          { filename: `$replay-${games[0].roundId}.png`, file: png },
+        ],
+        channel_id: channelId,
+        thread_ts: roundEndMessage.ts,
       });
     }
   };
