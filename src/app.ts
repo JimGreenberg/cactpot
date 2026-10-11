@@ -41,6 +41,11 @@ const main = (app: App) => {
     await API.uploadReplayGif(app)(args);
   });
 
+  app.action<BlockStaticSelectAction>("send-notation-message", async (args) => {
+    await args.ack();
+    await API.sendNotationMessage(app)(args);
+  });
+
   // button on the replay message to kick off the animation
   app.action<BlockButtonAction>("begin-replay", async (args) => {
     await args.ack();
