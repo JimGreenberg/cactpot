@@ -8,7 +8,7 @@ import {
 import * as DB from "../mongo";
 import { Cactpot } from "../cactpot";
 import { Board } from "../board";
-import { replayView } from "../view/replay";
+import { replayView, notationView } from "../view/replay";
 import { SlackService } from "../slackService";
 
 import type { Readable } from "stream";
@@ -97,4 +97,26 @@ export const beginReplay: (
       });
       await delay(700);
     }
+  };
+
+export const sendNotationMessage: (
+  app: App,
+) => Middleware<SlackActionMiddlewareArgs<BlockStaticSelectAction>> =
+  (app: App) =>
+  async ({ action, body, respond }) => {
+    const channelId = body?.channel?.id!;
+    const { gameId, userId } = JSON.parse(action.selected_option.value);
+    const game = await DB.getGameById(gameId);
+    if (!game) throw new Error();
+    const user = (await new SlackService(app).getUsers(channelId)).find(
+      ({ id }) => id === userId,
+    );
+    if (!user) throw new Error();
+    const { name, image } = user;
+
+    await respond({
+      text: "",
+      blocks: notationView({ ...game.getSummary(), name, image }),
+      replace_original: false,
+    });
   };

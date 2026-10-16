@@ -81,6 +81,13 @@ export function roundEndView(
         action_id: "send-replay-message",
       }),
     }),
+    S.Section(S.Markdown("See the notation"), {
+      accessory: S.StaticSelect({
+        placeholder: S.PlainText("Select a player"),
+        options: games.map(getPlayerOption),
+        action_id: "send-notation-message",
+      }),
+    }),
     S.Context(S.PlainText(`Round ID: ${games[0].roundId}`)),
   ];
   return blocks;
