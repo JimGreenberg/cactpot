@@ -8,8 +8,8 @@ import { Cactpot } from "../cactpot";
 import { makeGameReplay } from "../replay/game";
 
 const FONT_FAMILY = "Lato, Ubuntu, sans-serif";
-const NAME_FONT_SIZE = 18;
-const NAME_PADDING = 2;
+const NAME_FONT_SIZE = 28;
+const NAME_PADDING = 8;
 const NAME_TOTAL_HEIGHT = NAME_FONT_SIZE + NAME_PADDING * 2;
 
 const MARGIN_BETWEEN_GAMES = 32;
@@ -50,6 +50,13 @@ export async function makeRoundReplay(gameWithNameTuples: [Cactpot, string][]) {
   if (!ctx) {
     throw new Error("error getting canvas");
   }
+  ctx.fillStyle = "#f6f6f6";
+  ctx.fillRect(
+    0,
+    0,
+    2 * gameCanvasWidth + MARGIN_BETWEEN_GAMES,
+    2 * gameCanvasHeight + MARGIN_BETWEEN_GAMES,
+  );
 
   origins.forEach(([x, y], i) => {
     const [canvas, name] = canvases[i] ?? canvases[0]; // fallback to first (mostly for debug)
